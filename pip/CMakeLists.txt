@@ -1,8 +1,15 @@
-add_library(pip
+add_library(libpip
   type.cpp
   expr.cpp
   action.cpp
-  sexpr.cpp)
+  context.cpp
+  sexpr.cpp
+  evaluator.cpp
+  pcap.cpp)
 
-add_executable(pip-run pip.cpp)
-target_link_libraries(pip-run pip ${CC_LIBRARY} ${SEXPR_LIBRARY})
+add_executable(pip pip.cpp)
+target_link_libraries(pip
+  libpip 
+  ${CC_LIBRARY} 
+  ${SEXPR_LIBRARY} 
+  ${PCAP_LIBRARY})

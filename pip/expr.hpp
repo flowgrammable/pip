@@ -2,6 +2,11 @@
 
 #include <pip/syntax.hpp>
 
+// TODO: We can defined a minimal language without matching expressions.
+// Simply listing the kind of table and its values is sufficient. We could
+// choose to provide a matching table that can be compiled into a sequence
+// of sub-tables based on its expressions.
+
 namespace pip
 {
   // The kinds of expressions.
@@ -11,10 +16,10 @@ namespace pip
     ek_int,   // Integer literals
     ek_range, // Range literals
     ek_wild,  // Wildcard literals
+    ek_miss,  // Miss literal.
     ek_rel,   // Relational operations
     ek_in,    // Range inclusion
     ek_match, // Wildcard match
-    ek_miss,  // Miss expression
   };
 
   enum rel_op 
@@ -93,6 +98,14 @@ namespace pip
     
     int val;
     int mask;
+  };
+
+  /// The 'miss' literal.
+  struct miss_expr : expr
+  {
+    miss_expr(type* t)
+      : expr(ek_miss, t)
+    { }
   };
 
   /// A relational operation.
