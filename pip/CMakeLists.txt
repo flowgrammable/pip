@@ -1,6 +1,7 @@
 add_library(libpip
   type.cpp
   expr.cpp
+  decl.cpp
   action.cpp
   context.cpp
   sexpr.cpp

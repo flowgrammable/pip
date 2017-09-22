@@ -49,10 +49,6 @@ namespace pip
   struct output_action;
   using action_seq = std::vector<action*>;
 
-  // Matches
-  struct match;
-  using match_seq = std::vector<action*>;
-
   // Tables
   struct table;
   using table_seq = std::vector<table*>;
