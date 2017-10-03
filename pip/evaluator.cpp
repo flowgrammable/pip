@@ -4,9 +4,16 @@
 namespace pip
 {
 
-  evaluator::evaluator(context& cxt, program* prog, cap::packet& pkt)
-    : cxt(cxt), prog(prog), data(pkt), arrival(pkt.timestamp()),
-      ingress_port(), physical_port(), metadata(), keyreg(), decode()
+  evaluator::evaluator(context& cxt, decl* prog, cap::packet& pkt)
+    : cxt(cxt), 
+      prog(prog), 
+      data(pkt), 
+      arrival(pkt.timestamp()),
+      ingress_port(), 
+      physical_port(), 
+      metadata(), 
+      keyreg(), 
+      decode()
   {
     // TOOD: Perform static initialization. We need to evaluate all of
     // the table definitions to load them with their static rules.
@@ -38,7 +45,7 @@ namespace pip
     }
     
     const action* a = fetch();
-    switch (get_action_kind(a)) {
+    switch (get_kind(a)) {
       ak_advance:
         return eval_advance(cast<advance_action>(a));
       ak_copy:

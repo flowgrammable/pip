@@ -23,17 +23,17 @@ namespace pip
   struct int_type;
   struct range_type;
   struct wild_type;
+  struct table_type;
+  struct port_type;
   using type_seq = std::vector<type*>;
 
   // Expressions
   struct expr;
-  struct field_expr;
   struct int_expr;
   struct wild_expr;
   struct range_expr;
-  struct rel_expr;
-  struct set_expr;
-  struct match_expr;
+  struct ref_expr;
+  struct field_expr;
   using expr_seq = std::vector<expr*>;
 
   // Actions
@@ -49,21 +49,16 @@ namespace pip
   struct output_action;
   using action_seq = std::vector<action*>;
 
-  // Tables
-  struct table;
-  using table_seq = std::vector<table*>;
+  // Declarations and program structure
+  struct decl;
+  struct program_decl;
+  struct table_decl;
+  struct meter_decl;
+  using decl_seq = std::vector<decl*>;
 
-
-  /// A Pip program.
-  ///
-  /// \todo This needs a list of declarations. Examples are tables, groups,
-  /// meters and ports. So perhaps we need declarations too.
-  struct program : cc::node
-  {
-    program()
-      : cc::node(0, {})
-    { }
-  };
+  // Table matching.
+  struct match;
+  using match_seq = std::vector<match*>;
 
   // Miscellaneous classes.
   class context;

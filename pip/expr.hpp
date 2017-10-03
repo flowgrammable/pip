@@ -2,46 +2,23 @@
 
 #include <pip/syntax.hpp>
 
-// TODO: We can defined a minimal language without matching expressions.
-// Simply listing the kind of table and its values is sufficient. We could
-// choose to provide a matching table that can be compiled into a sequence
-// of sub-tables based on its expressions.
+// Expressions are operands of match criteria and actions. Currently, we
+// only support literal values and references to declarations in these
+// positions. In the future, we might extend this to support a broader
+// range of constant or even runtime-computable expressions (depending
+// the target architecture).
 
 namespace pip
 {
   // The kinds of expressions.
   enum expr_kind
   {
-    ek_field, // Field references
     ek_int,   // Integer literals
     ek_range, // Range literals
     ek_wild,  // Wildcard literals
     ek_miss,  // Miss literal.
-    ek_rel,   // Relational operations
-    ek_in,    // Range inclusion
-    ek_match, // Wildcard match
-  };
-
-  enum rel_op 
-  {
-    op_eq,
-    op_ne,
-    op_lt,
-    op_gt,
-    op_le,
-    op_ge,
-  };
-
-  enum set_op
-  {
-    op_in,
-    op_out,
-  };
-
-  enum match_op
-  {
-    op_match,
-    op_miss,
+    ek_ref,   // Declaration reference
+    ek_field, // Field references
   };
 
   /// The base class of all expressions.
@@ -52,17 +29,6 @@ namespace pip
 
     /// The type of the expression.
     type* ty;
-  };
-
-  /// A reference to a packet header.
-  ///
-  /// \todo These probably resolve to a function that can load the value
-  /// from a packet.
-  struct field_expr : expr
-  {
-    field_expr(expr_kind k, type* t)
-      : expr(k, t)
-    { }
   };
 
   /// An integer literal.
@@ -108,40 +74,30 @@ namespace pip
     { }
   };
 
-  /// A relational operation.
-  struct rel_expr : expr
+  /// A reference to a declared value. Note that references are resolved
+  /// in a second pass.
+  struct ref_expr : expr
   {
-    rel_expr(type* t, rel_op op, expr* e1, expr* e2)
-      : expr(ek_rel, t), op(op), e1(e1), e2(e2)
+    ref_expr(type* t, symbol* id)
+      : expr(ek_ref, t), id(id)
     { }
-    
-    rel_op op;
-    expr* e1;
-    expr* e2;
+
+    /// The identifier naming the table.
+    symbol* id;
+
+    /// The referenced declaration.
+    decl* ref;
   };
 
-  /// A set membership expression (in, not in).
-  struct set_expr : expr
+  /// A reference to a packet header.
+  ///
+  /// \todo These probably resolve to a function that can load the value
+  /// from a packet.
+  struct field_expr : expr
   {
-    set_expr(type* t, set_op op, expr* e1, expr* e2)
-      : expr(ek_rel, t), op(op), e1(e1), e2(e2)
+    field_expr(expr_kind k, type* t)
+      : expr(k, t)
     { }
-
-    set_op op;
-    expr* e1;
-    expr* e2;
-  };
-
-  /// A wildcard matching pattern.
-  struct match_expr : expr
-  {
-    match_expr(type* t, match_op op, expr* e1, expr* e2)
-      : expr(ek_rel, t), op(op), e1(e1), e2(e2)
-    { }
-
-    match_op op;
-    expr* e1;
-    expr* e2;
   };
 
 // -------------------------------------------------------------------------- //
@@ -152,17 +108,65 @@ namespace pip
 
   // Returns the kind of a type.
   inline expr_kind
-  get_expr_kind(const expr* e)
+  get_kind(const expr* e)
   {
     return static_cast<expr_kind>(e->kind);
   }
-
 
   /// Returns the node name of a program.
   inline const char* 
   get_node_name(const expr* e)
   {
-    return get_node_name(get_expr_kind(e));
+    return get_node_name(get_kind(e));
   }
 
 } // namespace pip
+
+// -------------------------------------------------------------------------- //
+// Casting
+
+namespace cc 
+{
+  template<>
+  struct node_info<pip::int_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_int; }
+  };
+
+  template<>
+  struct node_info<pip::range_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_range; }
+  };
+
+  template<>
+  struct node_info<pip::wild_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_wild; }
+  };
+
+  template<>
+  struct node_info<pip::miss_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_miss; }
+  };
+
+  template<>
+  struct node_info<pip::ref_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_ref; }
+  };
+
+  template<>
+  struct node_info<pip::field_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_field; }
+  };
+
+} // namespace cc

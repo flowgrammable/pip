@@ -25,7 +25,7 @@ namespace pip
   class evaluator
   {
   public:
-    evaluator(context& cxt, program* prog, cap::packet& pkt);
+    evaluator(context& cxt, decl* prog, cap::packet& pkt);
 
     /// Returns true if the program is finished.
     bool done() const { return eval.empty(); }
@@ -55,7 +55,7 @@ namespace pip
     context& cxt;
 
     /// The pip program to execute.
-    program* prog;
+    decl* prog;
 
     /// The packet to execute the program on.
     cap::packet& data;

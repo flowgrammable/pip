@@ -4,7 +4,8 @@ add_library(libpip
   decl.cpp
   action.cpp
   context.cpp
-  sexpr.cpp
+  translator.cpp
+  resolver.cpp
   evaluator.cpp
   pcap.cpp)
 

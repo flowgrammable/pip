@@ -89,7 +89,8 @@ namespace pip
   };
 
   /// Perform a lookup in the given table and execute its associated 
-  /// action list.
+  /// action list. This is the terminator for the key reading stage
+  /// of table lookup.
   struct match_action : action
   {
     match_action()
@@ -100,17 +101,22 @@ namespace pip
   /// Transition to the next processor (table, meter, group?).
   struct goto_action : action
   {
-    goto_action()
+    goto_action(expr* e)
       : action(ak_copy)
     { }
+
+    /// The destination expression.
+    expr* dest;
   };
 
   /// Send the packet to a destination port.
   struct output_action : action
   {
-    output_action()
-      : action(ak_copy)
+    output_action(expr* p)
+      : action(ak_copy), port(p)
     { }
+
+    expr* port;
   };
 
 
@@ -119,19 +125,19 @@ namespace pip
 
   /// Returns the kind of an action.
   inline action_kind 
-  get_action_kind(const action* a)
+  get_kind(const action* a)
   {
     return static_cast<action_kind>(a->kind);
   }
 
 } // namespace pip
 
-namespace cc 
-{
 
 // -------------------------------------------------------------------------- //
 // Casting
 
+namespace cc 
+{
   template<>
   struct node_info<pip::advance_action>
   {
@@ -194,6 +200,5 @@ namespace cc
     static bool
     has_kind(const node* n) { return get_node_kind(n) == pip::ak_output; }
   };
-
 
 } // namespace cc
