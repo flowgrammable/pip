@@ -1,4 +1,5 @@
 #include <pip/context.hpp>
+#include <pip/decl.hpp>
 #include <pip/translator.hpp>
 #include <pip/resolver.hpp>
 #include <pip/evaluator.hpp>
@@ -54,6 +55,7 @@ main(int argc, char* argv[])
     // Stage 3: Match the s-expression into a pip program.
     pip::translator trans(cxt);
     prog = trans(e);
+    prog->dump();
 
     // Stage 4: Name lookup. Match identifiers to declarations.
     pip::resolver resolve(cxt);

@@ -2,8 +2,10 @@ add_library(libpip
   type.cpp
   expr.cpp
   decl.cpp
+  type.cpp
   action.cpp
   context.cpp
+  dumper.cpp
   translator.cpp
   resolver.cpp
   evaluator.cpp

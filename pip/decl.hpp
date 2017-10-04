@@ -30,6 +30,8 @@ namespace pip
       : cc::node(k, {}), id(id)
     { }
 
+    void dump();
+
     symbol* id;
   };
 

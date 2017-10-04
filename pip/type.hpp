@@ -5,7 +5,7 @@
 namespace pip
 {
   // The kinds of types.
-  enum type_kind
+  enum type_kind : int
   {
     tk_int,
     tk_range,
