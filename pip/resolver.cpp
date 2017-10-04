@@ -12,9 +12,9 @@ namespace pip
   resolver::resolve_decl(decl* d)
   {
     switch (get_kind(d)) {
-      dk_program:
+      case dk_program:
         return resolve_decl(cast<program_decl>(d));
-      dk_table:
+      case dk_table:
         return resolve_decl(cast<table_decl>(d));
       default:
         break;
