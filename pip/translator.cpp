@@ -3,6 +3,9 @@
 
 namespace pip
 {
+  translator::translator(context& cxt)
+    : cxt(cxt)
+  { }
 
   /// program ::= (pip <decl-seq>)
   decl*
@@ -39,7 +42,7 @@ namespace pip
       symbol* sym;
       match_list(list, &sym);
       if (*sym == "table")
-        trans_table(list);
+        return trans_table(list);
       sexpr::throw_unexpected_id(cast<sexpr::id_expr>(list->exprs[0]));
     }
     sexpr::throw_unexpected_term(e);
@@ -48,6 +51,10 @@ namespace pip
   /// table-decl ::= (table id <match-kind> <match-seq>)
   ///
   /// match-kind ::= exact | prefix | wildcard | range
+  ///
+  /// FIXME: We actually need parse the key extraction program. This
+  /// would be a sequence of actions that bits from the current offset
+  /// into a "key register".
   decl*
   translator::trans_table(const sexpr::list_expr* e)
   {

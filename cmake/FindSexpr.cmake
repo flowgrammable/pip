@@ -13,11 +13,11 @@
 
 
 find_path(SEXPR_INCLUDE_DIR 
-  cc/node.hpp
+  sexpr/context.hpp
 )
 
 find_library(SEXPR_LIBRARY 
-  cc
+  sexpr
 )
 
 get_filename_component(SEXPR_LIBRARY_DIR 
