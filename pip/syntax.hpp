@@ -19,6 +19,7 @@ namespace pip
   using cc::cast;
 
   // Types
+  enum type_kind : int;
   struct type;
   struct int_type;
   struct range_type;
@@ -28,6 +29,7 @@ namespace pip
   using type_seq = std::vector<type*>;
 
   // Expressions
+  enum expr_kind : int;
   struct expr;
   struct int_expr;
   struct wild_expr;
@@ -37,6 +39,7 @@ namespace pip
   using expr_seq = std::vector<expr*>;
 
   // Actions
+  enum action_kind : int;
   struct action;
   struct advance_action;
   struct copy_action;
@@ -50,6 +53,7 @@ namespace pip
   using action_seq = std::vector<action*>;
 
   // Declarations and program structure
+  enum decl_kind : int;
   struct decl;
   struct program_decl;
   struct table_decl;
@@ -57,6 +61,7 @@ namespace pip
   using decl_seq = std::vector<decl*>;
 
   // Table matching.
+  enum match_kind : int;
   struct match;
   using match_seq = std::vector<match*>;
 

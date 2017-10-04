@@ -88,8 +88,12 @@ namespace pip
   /// generalize this so much.
   struct table_decl : decl
   {
-    table_decl(symbol* id, match_kind k)
-      : decl(dk_table, id), match(k)
+    table_decl(symbol* id, match_kind k, const match_seq& ms)
+      : decl(dk_table, id), match(k), rules(ms)
+    { }
+
+    table_decl(symbol* id, match_kind k, match_seq&& ms)
+      : decl(dk_table, id), match(k), rules(std::move(ms))
     { }
 
     /// The kind of table.

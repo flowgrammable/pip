@@ -5,7 +5,7 @@
 namespace pip
 {
   // The kinds of actions.
-  enum action_kind
+  enum action_kind : int
   {
     // Decoding
     ak_advance,

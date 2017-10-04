@@ -1,10 +1,41 @@
 #pragma once
 
-// TODO: This module will define the sexpr translation.
+#include <pip/syntax.hpp>
+
+#include <sexpr/translation.hpp>
 
 namespace pip
 {
 
+  // Performs a first-pass translation of an s-expression program into a
+  // StackVM program.
+  class translator : public sexpr::translator<translator>
+  {
+    friend class sexpr::translator<translator>;
+  public:
+    translator(context& cxt);
+
+    decl* operator()(const sexpr::expr* e) { return trans_program(e); }
+
+  private:
+    decl* trans_program(const sexpr::expr* e);
+    decl_seq trans_decls(const sexpr::expr* e);
+    decl* trans_decl(const sexpr::expr* e);
+    decl* trans_table(const sexpr::list_expr* e);
+
+    match_seq trans_matches(const sexpr::expr* e);
+    match_seq trans_matches(const sexpr::list_expr* e);
+
+  private:
+    // Matching extensions
+    using sexpr::translator<translator>::match;
+
+    void match(const sexpr::list_expr* list, int n, decl_seq* decls);
+    void match(const sexpr::list_expr* list, int n, match_seq* matches);
+
+  private:
+    context& cxt;
+  };
 
 
 } // namespace pip

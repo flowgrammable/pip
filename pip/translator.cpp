@@ -1,1 +1,95 @@
 #include "translator.hpp"
+#include "decl.hpp"
+
+namespace pip
+{
+
+  /// program ::= (pip <decl-seq>)
+  decl*
+  translator::trans_program(const sexpr::expr* e)
+  {
+    if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+      decl_seq decls;
+      match_list(list, "pip", &decls);
+      return new program_decl(std::move(decls));
+    }
+    sexpr::throw_unexpected_term(e);
+  }
+
+  /// decl-seq ::= (<decl*>)
+  decl_seq
+  translator::trans_decls(const sexpr::expr* e)
+  {
+    if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+      decl_seq decls;
+      for (const sexpr::expr* elem : list->exprs) {
+        decl* d = trans_decl(elem);
+        decls.push_back(d);
+      }
+      return decls;
+    }
+    sexpr::throw_unexpected_term(e);
+  }
+
+  /// decl ::= table-decl | meter-decl
+  decl*
+  translator::trans_decl(const sexpr::expr* e)
+  {
+    if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+      symbol* sym;
+      match_list(list, &sym);
+      if (*sym == "table")
+        trans_table(list);
+      sexpr::throw_unexpected_id(cast<sexpr::id_expr>(list->exprs[0]));
+    }
+    sexpr::throw_unexpected_term(e);
+  }
+
+  /// table-decl ::= (table id <match-kind> <match-seq>)
+  ///
+  /// match-kind ::= exact | prefix | wildcard | range
+  decl*
+  translator::trans_table(const sexpr::list_expr* e)
+  {
+    symbol* id;
+    symbol* kind;
+    match_seq matches;
+    match_list(e, "table", &id, &kind, &matches);
+
+    // TODO: Actually parse the kind of match. For now, we can simply
+    // assume that all tables are exact. Hint: use the match_list framework
+    // to return a match kind.
+
+    return new table_decl(id, mk_exact, std::move(matches));
+  }
+
+  /// match-seq ::= (<match*>)
+  match_seq
+  translator::trans_matches(const sexpr::expr* e)
+  {
+    if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+      match_seq matches;
+      
+      // TODO: Match each element in turn.
+      
+      return matches;
+    }
+    sexpr::throw_unexpected_term(e);    
+  }
+
+// -------------------------------------------------------------------------- //
+// Matching
+
+  void 
+  translator::match(const sexpr::list_expr* list, int n, decl_seq* decls)
+  {
+    *decls = trans_decls(get(list, n));
+  }
+
+  void 
+  translator::match(const sexpr::list_expr* list, int n, match_seq* matches)
+  {
+    *matches = trans_matches(get(list, n));
+  }
+
+} // namespace pip

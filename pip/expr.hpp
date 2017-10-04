@@ -11,7 +11,7 @@
 namespace pip
 {
   // The kinds of expressions.
-  enum expr_kind
+  enum expr_kind : int
   {
     ek_int,   // Integer literals
     ek_range, // Range literals
