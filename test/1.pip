@@ -1,0 +1,11 @@
+(pip (
+  (table t0 exact 
+    (key (
+      (copy (header 96 16) (key 0 16)) ; eth.type -> key
+    ))
+    (rules (
+      (100 (drop))
+      (200 (drop))
+    ))
+  )
+))
