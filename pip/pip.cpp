@@ -38,7 +38,6 @@ main(int argc, char* argv[])
     return 1;
   }
 
-
   // Parse the input file as a pip program. There are a number of
   // stages of translation:
   pip::decl* prog;

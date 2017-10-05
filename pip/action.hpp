@@ -124,11 +124,13 @@ namespace pip
 // Operations
 
   /// Returns the kind of an action.
-  inline action_kind 
-  get_kind(const action* a)
-  {
-    return static_cast<action_kind>(a->kind);
-  }
+  action_kind get_kind(const action* a);
+
+  /// Returns a string representation for the action kind.
+  const char* get_phrase_name(action_kind k);
+
+  /// Returns a string representation of an action's name.
+  const char* get_phrase_name(const action* a);
 
 } // namespace pip
 

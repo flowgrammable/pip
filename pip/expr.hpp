@@ -103,22 +103,14 @@ namespace pip
 // -------------------------------------------------------------------------- //
 // Operations
 
-  /// Returns the name of a type node.
-  const char* get_node_name(expr_kind k);
+  /// Returns the kind of an expression.
+  expr_kind get_kind(const expr* e);
 
-  // Returns the kind of a type.
-  inline expr_kind
-  get_kind(const expr* e)
-  {
-    return static_cast<expr_kind>(e->kind);
-  }
+  /// Returns a string representation of an expression kind.
+  const char* get_phrase_name(expr_kind k);
 
-  /// Returns the node name of a program.
-  inline const char* 
-  get_node_name(const expr* e)
-  {
-    return get_node_name(get_kind(e));
-  }
+  /// Returns a string representation of an expression's name.
+  const char* get_phrase_name(const expr* e);
 
 } // namespace pip
 

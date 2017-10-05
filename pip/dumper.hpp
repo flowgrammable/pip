@@ -23,7 +23,20 @@ namespace pip
     void dump_decl(const program_decl* d);
     void dump_decl(const table_decl* d);
 
+    void dump_actions(const char* name, const action_seq& as);
     void dump_action(const action* a);
+    void dump_action(const advance_action* a);
+    void dump_action(const copy_action* a);
+    void dump_action(const set_action* a);
+    void dump_action(const write_action* a);
+    void dump_action(const clear_action* a);
+    void dump_action(const drop_action* a);
+    void dump_action(const match_action* a);
+    void dump_action(const goto_action* a);
+    void dump_action(const output_action* a);
+
+    void dump_matches(const char* name, const match_seq& ms);
+    void dump_match(const match* m);
 
     void dump_expr(const expr* e);
 

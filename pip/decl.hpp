@@ -60,14 +60,14 @@ namespace pip
   /// is a literal expression, and the value is an action list expression.
   /// The matching kind of this object must match that of the table it 
   /// appears in.
-  struct match
+  struct match : cc::node
   {
     match(match_kind k, expr* key, const action_seq& val)
-      : kind(k), key(key), acts(val)
+      : cc::node(0, {}), kind(k), key(key), acts(val)
     { }
 
     match(match_kind k, expr* key, action_seq&& val)
-      : kind(k), key(key), acts(std::move(val))
+      : cc::node(0, {}), kind(k), key(key), acts(std::move(val))
     { }
 
     /// The kind of matching operation.
