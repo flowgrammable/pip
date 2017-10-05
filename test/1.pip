@@ -2,10 +2,15 @@
   (table t0 exact 
     (key (
       (copy (header 96 16) (key 0 16)) ; eth.type -> key
+      (match)
     ))
     (rules (
-      (100 (drop))
-      (200 (drop))
+      (100 (
+        (output 1))) ; if eth.type == 100: output to 1
+      (100 (
+        (output 2))) ; if eth.type == 101: output to 2
+      (miss (
+        (drop))) ; else drop
     ))
   )
 ))
