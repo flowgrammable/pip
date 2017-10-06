@@ -92,6 +92,24 @@ namespace pip
 		// Match bare integer literals.
     if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
       return trans_int_expr(num);
+
+		// Match bare keyword literals.
+    if (const sexpr::id_expr* id = as<sexpr::id_expr>(e)) {
+      if (*id->id == "miss")
+				return trans_miss_expr(id);
+		}
+
+		// Match phrases.
+    //
+    // FIXME: Use a lookup table + switch.
+    if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+      symbol* sym;
+      match_list(list, &sym);
+			if (*sym == "wildcard")
+        return trans_wild_expr(list);
+			if (*sym == "range")
+				return trans_range_expr(list);			
+		}
 	}
 	
 	expr*
@@ -105,7 +123,7 @@ namespace pip
 	}
 	
 	expr*
-	translator::trans_miss_expr(const sexpr::list_expr* e)
+	translator::trans_miss_expr(const sexpr::id_expr* e)
 	{
 	}
 	
