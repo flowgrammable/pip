@@ -1,5 +1,7 @@
 #include "translator.hpp"
 #include "decl.hpp"
+#include "type.hpp"
+#include "context.hpp"
 
 namespace pip
 {
@@ -83,6 +85,43 @@ namespace pip
     }
     sexpr::throw_unexpected_term(e);    
   }
+
+	expr*
+	translator::trans_expr(const sexpr::expr* e)
+	{
+	}
+	
+	expr*
+	translator::trans_range_expr(const sexpr::expr* e)
+	{
+	}
+	
+	expr*
+	translator::trans_wild_expr(const sexpr::expr* e)
+	{
+	}
+	
+	expr*
+	translator::trans_miss_expr(const sexpr::expr* e)
+	{
+	}
+	
+	expr*
+	translator::trans_ref_expr(const sexpr::expr* e)
+	{
+	}
+	
+	expr*
+	translator::trans_field_expr(const sexpr::expr* e)
+	{
+	}
+	
+	expr*
+	translator::trans_int_expr(const sexpr::int_expr* e)
+	{
+		return cxt.make_int_expr( new int_type(32), e->val );
+	}
+	
 
 // -------------------------------------------------------------------------- //
 // Matching
