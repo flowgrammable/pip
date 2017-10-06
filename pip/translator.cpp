@@ -89,30 +89,33 @@ namespace pip
 	expr*
 	translator::trans_expr(const sexpr::expr* e)
 	{
+		// Match bare integer literals.
+    if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
+      return translate_int_lit(num);
 	}
 	
 	expr*
-	translator::trans_range_expr(const sexpr::expr* e)
+	translator::trans_range_expr(const sexpr::listexpr* e)
 	{
 	}
 	
 	expr*
-	translator::trans_wild_expr(const sexpr::expr* e)
+	translator::trans_wild_expr(const sexpr::list_expr* e)
 	{
 	}
 	
 	expr*
-	translator::trans_miss_expr(const sexpr::expr* e)
+	translator::trans_miss_expr(const sexpr::list_expr* e)
 	{
 	}
 	
 	expr*
-	translator::trans_ref_expr(const sexpr::expr* e)
+	translator::trans_ref_expr(const sexpr::id_expr* e)
 	{
 	}
 	
 	expr*
-	translator::trans_field_expr(const sexpr::expr* e)
+	translator::trans_field_expr(const sexpr::id_expr* e)
 	{
 	}
 	
