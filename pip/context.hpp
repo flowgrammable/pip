@@ -31,6 +31,13 @@ namespace pip
     symbol* get_symbol(const std::string& str);
 
     // TOOD: Add factories for creating terms, e.g., make_program.
+	private:
+		expr* make_int_expr(type* t, int val);
+		expr* make_range_expr(type* t, int lo, int hi);
+		expr* make_wild_expr(type* t, int val, int mask);
+		expr* make_miss_expr(type* t);
+		expr* make_ref_expr(type* t, symbol* id);
+		expr* make_field_expr(type* t);
 
   private:
     /// The diagnostic manager.
@@ -40,7 +47,7 @@ namespace pip
     cc::input_manager& input;
 
     /// The symbol table.
-    cc::symbol_table& syms;
+    cc::symbol_table& syms;		
   };
 
 } // namesapce pip
