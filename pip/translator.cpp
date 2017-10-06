@@ -2,6 +2,7 @@
 #include "decl.hpp"
 #include "type.hpp"
 #include "context.hpp"
+#include "expr.hpp"
 
 namespace pip
 {
@@ -115,6 +116,15 @@ namespace pip
 	expr*
 	translator::trans_range_expr(const sexpr::list_expr* e)
 	{
+		// TODO: find proper way to match type??
+		// TODO: figure out how match_list is supposed to work
+		
+		// type* t;
+    // int_expr* lo;
+    // int_expr* hi;
+    // match_list(e, &t, &lo, &hi);
+		
+    // return cxt.make_range_expr( new range_type(t), lo->val, hi->val );
 	}
 	
 	expr*
