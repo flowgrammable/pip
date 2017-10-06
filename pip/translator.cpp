@@ -91,11 +91,11 @@ namespace pip
 	{
 		// Match bare integer literals.
     if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
-      return translate_int_lit(num);
+      return trans_int_expr(num);
 	}
 	
 	expr*
-	translator::trans_range_expr(const sexpr::listexpr* e)
+	translator::trans_range_expr(const sexpr::list_expr* e)
 	{
 	}
 	
