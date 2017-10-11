@@ -4,6 +4,9 @@
 #include "context.hpp"
 #include "expr.hpp"
 
+// for testing only
+#include <iostream>
+
 namespace pip
 {
   translator::translator(context& cxt)
@@ -79,13 +82,23 @@ namespace pip
   {
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       match_seq matches;
+			for (const sexpr::expr* elem : list->exprs) {
+				// matches.push_back();
+			}
       
       // TODO: Match each element in turn.
+			// match_list(e, &matches);
+			// trans_expr( e );
       
       return matches;
     }
     sexpr::throw_unexpected_term(e);    
   }
+
+	// match*
+	// translator::trans_match(const sexpr::expr* e)
+	// {
+	// }
 
 	expr*
 	translator::trans_expr(const sexpr::expr* e)
@@ -109,7 +122,9 @@ namespace pip
 			if (*sym == "wildcard")
         return trans_wild_expr(list);
 			if (*sym == "range")
-				return trans_range_expr(list);			
+				return trans_range_expr(list);
+			if (*sym == "port");
+				// return trans_port_expr(list);
 		}
 	}
 	
@@ -122,9 +137,18 @@ namespace pip
 		// type* t;
     // int_expr* lo;
     // int_expr* hi;
-    // match_list(e, &t, &lo, &hi);
+		symbol* range_kw;
+		symbol* lo_type;
+		symbol* lo;
+		symbol* hi_type;
+		symbol* hi;
+    match_list(e, &range_kw, &lo_type, &lo, &hi_type, &hi);
+
+		std::cout << *range_kw << ' ' << *lo_type << ' ' << *lo <<
+			' ' << *hi_type << *hi << '\n';
 		
-    // return cxt.make_range_expr( new range_type(t), lo->val, hi->val );
+    // return cxt.make_range_expr( new range_type(nullptr), lo->val, hi->val );
+		return nullptr;
 	}
 	
 	expr*
