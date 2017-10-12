@@ -27,9 +27,14 @@ namespace pip
 
     rule_seq trans_rules(const sexpr::expr* e);
     rule_seq trans_rules(const sexpr::list_expr* e);
+		rule* trans_rule(const sexpr::expr* e);
+
+		action_seq trans_actions(const sexpr::expr* e);
+		action* trans_action(const sexpr::expr* e);
 
 		// TODO: ensure that these use the correct sexpr types
 		expr* trans_expr(const sexpr::expr* e);
+		expr_seq trans_exprs(const sexpr::expr* e);
 		expr* trans_range_expr(const sexpr::list_expr* e);
 		expr* trans_wild_expr(const sexpr::list_expr* e);
 		expr* trans_miss_expr(const sexpr::id_expr* e);
@@ -43,6 +48,8 @@ namespace pip
 
     void match(const sexpr::list_expr* list, int n, decl_seq* decls);
     void match(const sexpr::list_expr* list, int n, rule_seq* rules);
+		void match(const sexpr::list_expr* list, int n, expr_seq* exprs);
+		void match(const sexpr::list_expr* list, int n, action_seq* actions);
 
   private:
     context& cxt;
