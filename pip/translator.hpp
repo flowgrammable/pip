@@ -27,7 +27,6 @@ namespace pip
 
     match_seq trans_matches(const sexpr::expr* e);
     match_seq trans_matches(const sexpr::list_expr* e);
-		std::vector<match*> m;
 		// match* trans_match(const sexpr::expr* e);
 
 		// TODO: ensure that these use the correct sexpr types
