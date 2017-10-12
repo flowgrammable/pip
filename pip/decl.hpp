@@ -13,13 +13,13 @@ namespace pip
   };
 
   // Kinds of matching strategies.
-  enum match_kind : int
+  enum rule_kind : int
   {
-    mk_exact,
-    mk_prefix,
-    mk_wildcard,
-    mk_range,
-    mk_expr,
+    rk_exact,
+    rk_prefix,
+    rk_wildcard,
+    rk_range,
+    rk_expr,
   };
 
   /// The base class of all declarations. A declaration introduces a named
@@ -60,18 +60,18 @@ namespace pip
   /// is a literal expression, and the value is an action list expression.
   /// The matching kind of this object must match that of the table it 
   /// appears in.
-  struct match : cc::node
+  struct rule : cc::node
   {
-    match(match_kind k, expr* key, const action_seq& val)
+    rule(rule_kind k, expr* key, const action_seq& val)
       : cc::node(0, {}), kind(k), key(key), acts(val)
     { }
 
-    match(match_kind k, expr* key, action_seq&& val)
+    rule(rule_kind k, expr* key, action_seq&& val)
       : cc::node(0, {}), kind(k), key(key), acts(std::move(val))
     { }
 
     /// The kind of matching operation.
-    match_kind kind;
+    rule_kind kind;
 
     /// The matched key -- a literal.
     expr* key;
@@ -90,22 +90,22 @@ namespace pip
   /// generalize this so much.
   struct table_decl : decl
   {
-    table_decl(symbol* id, match_kind k, const match_seq& ms)
-      : decl(dk_table, id), match(k), rules(ms)
+    table_decl(symbol* id, rule_kind k, const rule_seq& ms)
+      : decl(dk_table, id), rule(k), rules(ms)
     { }
 
-    table_decl(symbol* id, match_kind k, match_seq&& ms)
-      : decl(dk_table, id), match(k), rules(std::move(ms))
+    table_decl(symbol* id, rule_kind k, rule_seq&& ms)
+      : decl(dk_table, id), rule(k), rules(std::move(ms))
     { }
 
     /// The kind of table.
-    match_kind match;
+    rule_kind rule;
 
     /// The sequence of actions used to form the key for lookup.
     action_seq prep;
 
     /// The content of the action table.
-    match_seq rules;
+    rule_seq rules;
   };
 
   /// A flow metering device.

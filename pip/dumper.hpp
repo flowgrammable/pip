@@ -35,8 +35,8 @@ namespace pip
     void dump_action(const goto_action* a);
     void dump_action(const output_action* a);
 
-    void dump_matches(const char* name, const match_seq& ms);
-    void dump_match(const match* m);
+    void dump_matches(const char* name, const rule_seq& rs);
+    void dump_match(const rule* r);
 
     void dump_expr(const expr* e);
 

@@ -59,7 +59,7 @@ namespace pip
   }
 
   void
-  dumper::dump_matches(const char* name, const match_seq& ms)
+  dumper::dump_matches(const char* name, const rule_seq& rs)
   {
     print_indentation();
     print("\033[1;32m");
@@ -67,15 +67,15 @@ namespace pip
     print("\033[0m");
     indent();
     print_newline();
-    for (const match* m : ms)
-      dump_match(m);
+    for (const rule* r : rs)
+      dump_match(r);
     undent();
   }
 
   void
-  dumper::dump_match(const match* m)
+  dumper::dump_match(const rule* r)
   {
-    dump_guard g(*this, m, "match");
+    dump_guard g(*this, r, "rule");
   }
 
   void

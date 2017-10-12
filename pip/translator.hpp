@@ -25,9 +25,8 @@ namespace pip
     decl* trans_decl(const sexpr::expr* e);
     decl* trans_table(const sexpr::list_expr* e);
 
-    match_seq trans_matches(const sexpr::expr* e);
-    match_seq trans_matches(const sexpr::list_expr* e);
-		// match* trans_match(const sexpr::expr* e);
+    rule_seq trans_rules(const sexpr::expr* e);
+    rule_seq trans_rules(const sexpr::list_expr* e);
 
 		// TODO: ensure that these use the correct sexpr types
 		expr* trans_expr(const sexpr::expr* e);
@@ -43,7 +42,7 @@ namespace pip
     using sexpr::translator<translator>::match;
 
     void match(const sexpr::list_expr* list, int n, decl_seq* decls);
-    void match(const sexpr::list_expr* list, int n, match_seq* matches);
+    void match(const sexpr::list_expr* list, int n, rule_seq* rules);
 
   private:
     context& cxt;

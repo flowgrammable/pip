@@ -66,22 +66,22 @@ namespace pip
   {
     symbol* id;
     symbol* kind;
-    match_seq matches;
-    match_list(e, "table", &id, &kind, &matches);
+    rule_seq rules;
+    match_list(e, "table", &id, &kind, &rules);
 
     // TODO: Actually parse the kind of match. For now, we can simply
     // assume that all tables are exact. Hint: use the match_list framework
     // to return a match kind.
 
-    return new table_decl(id, mk_exact, std::move(matches));
+    return new table_decl(id, rk_exact, std::move(rules));
   }
 
-  /// match-seq ::= (<match*>)
-  match_seq
-  translator::trans_matches(const sexpr::expr* e)
+  /// rule_seq ::= (<rule*>)
+  rule_seq
+  translator::trans_rules(const sexpr::expr* e)
   {
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
-      match_seq matches;
+      rule_seq rules;
 			for (const sexpr::expr* elem : list->exprs) {
 				// matches.push_back();
 			}
@@ -90,7 +90,7 @@ namespace pip
 			// match_list(e, &matches);
 			// trans_expr( e );
       
-      return matches;
+      return rules;
     }
     sexpr::throw_unexpected_term(e);    
   }
@@ -188,9 +188,9 @@ namespace pip
   }
 
   void 
-  translator::match(const sexpr::list_expr* list, int n, match_seq* matches)
+  translator::match(const sexpr::list_expr* list, int n, rule_seq* rules)
   {
-    *matches = trans_matches(get(list, n));
+    *rules = trans_rules(get(list, n));
   }
 
 } // namespace pip

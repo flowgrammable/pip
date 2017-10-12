@@ -41,9 +41,9 @@ namespace pip
   {
     resolve_actions(t->prep);
     
-    for (match* m : t->rules) {
-      resolve_expr(m->key);
-      resolve_actions(m->acts);
+    for (rule* r : t->rules) {
+      resolve_expr(r->key);
+      resolve_actions(r->acts);
     }
   }
 
