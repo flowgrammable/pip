@@ -40,7 +40,9 @@ namespace pip
 		expr* trans_miss_expr(const sexpr::id_expr* e);
 		expr* trans_ref_expr(const sexpr::id_expr* e);
 		expr* trans_field_expr(const sexpr::id_expr* e);
-		expr* trans_int_expr(const sexpr::int_expr* e);
+		expr* trans_int_expr(const sexpr::int_expr* e, int width);
+
+		int deduce_int_type_width(const symbol* ty) const;
 
   private:
     // Matching extensions

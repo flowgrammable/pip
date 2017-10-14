@@ -160,8 +160,9 @@ namespace pip
 	translator::trans_expr(const sexpr::expr* e)
 	{
 		// Match bare integer literals.
+		// TODO: match int width
     if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
-      return trans_int_expr(num);
+      return trans_int_expr(num, 32);
 
 		// Match bare keyword literals.
     if (const sexpr::id_expr* id = as<sexpr::id_expr>(e)) {
@@ -205,9 +206,13 @@ namespace pip
 		symbol* lo_type, * hi_type;
     match_list(e, "range", &lo_type, &lo, &hi_type, &hi);
 
-		// TODO: ensure lo_type == hi_type and construct the range_type
-		// with that type if so.
-		return cxt.make_range_expr( new range_type(nullptr), lo, hi );
+		// TODO: proper error handling
+		int lo_width, hi_width;
+		if(lo_width = deduce_int_type_width(lo_type))
+			if(hi_width = deduce_int_type_width(hi_type))
+				if(lo_width == hi_width)
+					return cxt.make_range_expr(
+						new range_type(new int_type(lo_width)), lo, hi );
 	}
 	
 	expr*
@@ -231,9 +236,22 @@ namespace pip
 	}
 	
 	expr*
-	translator::trans_int_expr(const sexpr::int_expr* e)
+	translator::trans_int_expr(const sexpr::int_expr* e, int width)
 	{
 		return cxt.make_int_expr( new int_type(32), e->val );
+	}
+
+	// TODO: add these to a keyword table
+	int
+	translator::deduce_int_type_width(const symbol* ty) const
+	{
+		if(*ty == "i16")
+			return 16;
+		if(*ty == "i32")
+			return 32;
+		else if(*ty == "i64")
+			return 64;
+		else return 0;
 	}
 	
 
