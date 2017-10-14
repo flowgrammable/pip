@@ -4,6 +4,7 @@
 #include "context.hpp"
 #include "expr.hpp"
 #include "action.hpp"
+#include "dumper.hpp"
 
 // for testing only
 #include <iostream>
@@ -83,14 +84,14 @@ namespace pip
   rule_seq
   translator::trans_rules(const sexpr::expr* e)
   {
+		std::cout << "hello\n";
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+			std::cout << "jello\n";
       rule_seq rules;
 
 			// IN PROGRESS: Match each element in turn.
-			for (const sexpr::expr* elem : list->exprs) {
-				rule* r = trans_rule(elem);
-				rules.push_back(r);
-			}     
+			rule* r = trans_rule(e);
+			rules.push_back(r);
       
       return rules;
     }
@@ -100,11 +101,14 @@ namespace pip
 	rule*
 	translator::trans_rule(const sexpr::expr* e)
 	{
+		std::cout << "yello\n";
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+			std::cout << "fello\n";
 			expr_seq exprs;
 			expr* key;
 			action_seq actions;
 
+			std::cout << "smello\n";
 			match_list(list, "rule", key, &actions);
 
 
@@ -113,6 +117,7 @@ namespace pip
 			// return new rule(rk_exact, exprs, std::move(actions));
 			return new rule(rk_exact, key, std::move(actions));
 		}
+		std::cout << "bello\n";
 		
 		sexpr::throw_unexpected_term(e);
 	}
@@ -131,7 +136,7 @@ namespace pip
     sexpr::throw_unexpected_term(e);
 	}
 
-	// TODO: Implement me.
+	// TODO: parse extra information (i.e. expr to output for output_action).
 	action*
 	translator::trans_action(const sexpr::expr* e)
 	{
