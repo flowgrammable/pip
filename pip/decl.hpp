@@ -58,7 +58,7 @@ namespace pip
 
   /// Represents a match in a table. This is a key/value pair where the key
   /// is a literal expression, and the value is an action list expression.
-  /// The matching kind of this object must match that of the table it 
+  /// The rule kind of this object must match that of the table it 
   /// appears in.
   struct rule : cc::node
   {
@@ -90,12 +90,12 @@ namespace pip
   /// generalize this so much.
   struct table_decl : decl
   {
-    table_decl(symbol* id, rule_kind k, const rule_seq& ms)
-      : decl(dk_table, id), rule(k), rules(ms)
+    table_decl(symbol* id, rule_kind k, const action_seq& as, const rule_seq& ms)
+      : decl(dk_table, id), rule(k), prep(as), rules(ms)
     { }
 
-    table_decl(symbol* id, rule_kind k, rule_seq&& ms)
-      : decl(dk_table, id), rule(k), rules(std::move(ms))
+    table_decl(symbol* id, rule_kind k, action_seq&& as, rule_seq&& ms)
+      : decl(dk_table, id), rule(k), prep(std::move(as)), rules(std::move(ms))
     { }
 
     /// The kind of table.

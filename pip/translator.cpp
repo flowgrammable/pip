@@ -77,7 +77,7 @@ namespace pip
     // assume that all tables are exact. Hint: use the match_list framework
     // to return a match kind.
 
-    return new table_decl(id, rk_exact, std::move(rules));
+    return new table_decl(id, rk_exact, std::move(actions), std::move(rules));
   }
 
   /// rule_seq ::= (<rule*>)
