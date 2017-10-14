@@ -201,24 +201,13 @@ namespace pip
 	expr*
 	translator::trans_range_expr(const sexpr::list_expr* e)
 	{
-		// TODO: find proper way to match type??
-		// TODO: figure out how match_list is supposed to work
-		
-		// type* t;
-    // int_expr* lo;
-    // int_expr* hi;
-		symbol* range_kw;
-		symbol* lo_type;
-		symbol* lo;
-		symbol* hi_type;
-		symbol* hi;
-    match_list(e, &range_kw, &lo_type, &lo, &hi_type, &hi);
+		int lo, hi;
+		symbol* lo_type, * hi_type;
+    match_list(e, "range", &lo_type, &lo, &hi_type, &hi);
 
-		std::cout << *range_kw << ' ' << *lo_type << ' ' << *lo <<
-			' ' << *hi_type << *hi << '\n';
-		
-    // return cxt.make_range_expr( new range_type(nullptr), lo->val, hi->val );
-		return nullptr;
+		// TODO: ensure lo_type == hi_type and construct the range_type
+		// with that type if so.
+		return cxt.make_range_expr( new range_type(nullptr), lo, hi );
 	}
 	
 	expr*
