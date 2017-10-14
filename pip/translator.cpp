@@ -84,9 +84,7 @@ namespace pip
   rule_seq
   translator::trans_rules(const sexpr::expr* e)
   {
-		std::cout << "hello\n";
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
-			std::cout << "jello\n";
       rule_seq rules;
 
 			// IN PROGRESS: Match each element in turn.
@@ -101,23 +99,15 @@ namespace pip
 	rule*
 	translator::trans_rule(const sexpr::expr* e)
 	{
-		std::cout << "yello\n";
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
-			std::cout << "fello\n";
 			expr_seq exprs;
 			expr* key;
 			action_seq actions;
 
-			std::cout << "smello\n";
 			match_list(list, "rule", key, &actions);
 
-
-			// TODO: match_list matches an expr_seq, but rule is constructed
-			// with a single expr*. Resolve this issue.
-			// return new rule(rk_exact, exprs, std::move(actions));
 			return new rule(rk_exact, key, std::move(actions));
 		}
-		std::cout << "bello\n";
 		
 		sexpr::throw_unexpected_term(e);
 	}
