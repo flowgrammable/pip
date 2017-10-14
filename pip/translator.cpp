@@ -101,19 +101,17 @@ namespace pip
 	translator::trans_rule(const sexpr::expr* e)
 	{
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
-		
-			symbol* kind;
 			expr_seq exprs;
+			expr* key;
 			action_seq actions;
 
-			// match_list(list, "rule", &kind, &exprs, &actions);
-			match_list(list, "rule", &kind, &exprs, &actions);
+			match_list(list, "rule", key, &actions);
 
 
 			// TODO: match_list matches an expr_seq, but rule is constructed
 			// with a single expr*. Resolve this issue.
 			// return new rule(rk_exact, exprs, std::move(actions));
-			return nullptr;
+			return new rule(rk_exact, key, std::move(actions));
 		}
 		
 		sexpr::throw_unexpected_term(e);
@@ -276,6 +274,12 @@ namespace pip
     *exprs = trans_exprs(get(list, n));
   }
 
+	void
+	translator::match(const sexpr::list_expr* list, int n, expr* out)
+	{
+		out = trans_expr(get(list, n));
+	}
+	
 	void 
   translator::match(const sexpr::list_expr* list, int n, action_seq* actions)
   {

@@ -49,6 +49,7 @@ namespace pip
     void match(const sexpr::list_expr* list, int n, decl_seq* decls);
     void match(const sexpr::list_expr* list, int n, rule_seq* rules);
 		void match(const sexpr::list_expr* list, int n, expr_seq* exprs);
+		void match(const sexpr::list_expr* list, int n, expr* out);
 		void match(const sexpr::list_expr* list, int n, action_seq* actions);
 
   private:
