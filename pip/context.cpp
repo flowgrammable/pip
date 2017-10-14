@@ -1,5 +1,6 @@
 #include "context.hpp"
 #include "expr.hpp"
+#include "action.hpp"
 
 namespace pip
 {
@@ -55,6 +56,12 @@ namespace pip
 	context::make_field_expr(type* t, expr_kind kind)
 	{
 		return new field_expr(kind, t);
+	}
+
+	action*
+	context::make_action(action_kind k)
+	{
+		return new action(k);
 	}
 	
 

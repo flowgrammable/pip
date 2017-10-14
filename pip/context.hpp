@@ -39,6 +39,8 @@ namespace pip
 		expr* make_ref_expr(type* t, symbol* id);
 		expr* make_field_expr(type* t, expr_kind kind);
 
+		action* make_action(action_kind k);
+
   private:
     /// The diagnostic manager.
     cc::diagnostic_manager& diags;

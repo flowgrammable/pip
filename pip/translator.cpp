@@ -3,6 +3,7 @@
 #include "type.hpp"
 #include "context.hpp"
 #include "expr.hpp"
+#include "action.hpp"
 
 // for testing only
 #include <iostream>
@@ -20,6 +21,7 @@ namespace pip
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       decl_seq decls;
       match_list(list, "pip", &decls);
+			
       return new program_decl(std::move(decls));
     }
     sexpr::throw_unexpected_term(e);
@@ -31,10 +33,10 @@ namespace pip
   {
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       decl_seq decls;
-      for (const sexpr::expr* elem : list->exprs) {
-        decl* d = trans_decl(elem);
+      // for (const sexpr::expr* elem : list->exprs) {
+        decl* d = trans_decl(list);
         decls.push_back(d);
-      }
+      // }
       return decls;
     }
     sexpr::throw_unexpected_term(e);
@@ -51,7 +53,7 @@ namespace pip
         return trans_table(list);
       sexpr::throw_unexpected_id(cast<sexpr::id_expr>(list->exprs[0]));
     }
-    sexpr::throw_unexpected_term(e);
+		sexpr::throw_unexpected_term(e);
   }
 
   /// table-decl ::= (table id <match-kind> <match-seq>)
@@ -66,8 +68,9 @@ namespace pip
   {
     symbol* id;
     symbol* kind;
+		action_seq actions;
     rule_seq rules;
-    match_list(e, "table", &id, &kind, &rules);
+    match_list(e, "table", &id, &kind, &actions, &rules);
 
     // TODO: Actually parse the kind of match. For now, we can simply
     // assume that all tables are exact. Hint: use the match_list framework
@@ -134,7 +137,30 @@ namespace pip
 	action*
 	translator::trans_action(const sexpr::expr* e)
 	{
-		return nullptr;
+    if (const sexpr::id_expr* name = as<sexpr::id_expr>(e)) {
+			if(*(name->id) == "advance")
+				return new action(ak_advance);
+
+			if(*(name->id) == "copy")
+				return new action(ak_copy);
+			if(*(name->id) == "set")
+				return new action(ak_set);
+
+			if(*(name->id) == "write")
+				return new action(ak_write);
+			if(*(name->id) == "clear")
+				return new action(ak_clear);
+
+			if( *(name->id) == "drop" )
+				return cxt.make_action(ak_drop);
+			if( *(name->id) == "match" )
+				return new action(ak_match);
+			if( *(name->id) == "goto" )
+				return new action(ak_goto);
+			if( *(name->id) == "output" )
+				return new action(ak_output);
+		}
+		sexpr::throw_unexpected_term(e);
 	}
 
 	expr*
