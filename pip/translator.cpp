@@ -132,26 +132,26 @@ namespace pip
 	{
     if (const sexpr::id_expr* name = as<sexpr::id_expr>(e)) {
 			if(*(name->id) == "advance")
-				return new action(ak_advance);
+				return cxt.make_action(ak_advance);
 
 			if(*(name->id) == "copy")
-				return new action(ak_copy);
+				return cxt.make_action(ak_copy);
 			if(*(name->id) == "set")
-				return new action(ak_set);
+				return cxt.make_action(ak_set);
 
 			if(*(name->id) == "write")
-				return new action(ak_write);
+				return cxt.make_action(ak_write);
 			if(*(name->id) == "clear")
-				return new action(ak_clear);
+				return cxt.make_action(ak_clear);
 
 			if( *(name->id) == "drop" )
 				return cxt.make_action(ak_drop);
 			if( *(name->id) == "match" )
-				return new action(ak_match);
+				return cxt.make_action(ak_match);
 			if( *(name->id) == "goto" )
-				return new action(ak_goto);
+				return cxt.make_action(ak_goto);
 			if( *(name->id) == "output" )
-				return new action(ak_output);
+				return cxt.make_action(ak_output);
 		}
 		sexpr::throw_unexpected_term(e);
 	}
