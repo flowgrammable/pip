@@ -60,10 +60,10 @@ namespace pip
   struct meter_decl;
   using decl_seq = std::vector<decl*>;
 
-  // Table matching.
-  enum match_kind : int;
-  struct match;
-  using match_seq = std::vector<match*>;
+  // Table rules.
+  enum rule_kind : int;
+  struct rule;
+  using rule_seq = std::vector<rule*>;
 
   // Miscellaneous classes.
   class context;
