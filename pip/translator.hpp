@@ -30,7 +30,7 @@ namespace pip
 		rule* trans_rule(const sexpr::expr* e);
 
 		action_seq trans_actions(const sexpr::expr* e);
-		action* trans_action(const sexpr::expr* e);
+		action* trans_action(const sexpr::list_expr* e);
 
 		// TODO: ensure that these use the correct sexpr types
 		expr* trans_expr(const sexpr::expr* e);

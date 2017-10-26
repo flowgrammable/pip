@@ -117,10 +117,8 @@ namespace pip
 	{
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       action_seq actions;
-      for (const sexpr::expr* elem : list->exprs) {
-        action* a = trans_action(elem);
-        actions.push_back(a);
-      }
+			action* a = trans_action(list);
+			actions.push_back(a);
       return actions;
     }
     sexpr::throw_unexpected_term(e);
@@ -128,31 +126,35 @@ namespace pip
 
 	// TODO: parse extra information (i.e. expr to output for output_action).
 	action*
-	translator::trans_action(const sexpr::expr* e)
+	translator::trans_action(const sexpr::list_expr* e)
 	{
-    if (const sexpr::id_expr* name = as<sexpr::id_expr>(e)) {
-			if(*(name->id) == "advance")
-				return cxt.make_action(ak_advance);
+		symbol* action_name;
+		expr_seq exprs;
 
-			if(*(name->id) == "copy")
-				return cxt.make_action(ak_copy);
-			if(*(name->id) == "set")
-				return cxt.make_action(ak_set);
+		match_list(e, &action_name);
+		
+		if(*action_name == "advance")
+			return cxt.make_action(ak_advance);
 
-			if(*(name->id) == "write")
-				return cxt.make_action(ak_write);
-			if(*(name->id) == "clear")
-				return cxt.make_action(ak_clear);
+		if(*action_name == "copy")
+			return cxt.make_action(ak_copy);
+		if(*action_name == "set")
+			return cxt.make_action(ak_set);
 
-			if( *(name->id) == "drop" )
-				return cxt.make_action(ak_drop);
-			if( *(name->id) == "match" )
-				return cxt.make_action(ak_match);
-			if( *(name->id) == "goto" )
-				return cxt.make_action(ak_goto);
-			if( *(name->id) == "output" )
-				return cxt.make_action(ak_output);
-		}
+		if(*action_name == "write")
+			return cxt.make_action(ak_write);
+		if(*action_name == "clear")
+			return cxt.make_action(ak_clear);
+
+		if( *action_name == "drop" )
+			return cxt.make_action(ak_drop);
+		if( *action_name == "match" )
+			return cxt.make_action(ak_match);
+		if( *action_name == "goto" )
+			return cxt.make_action(ak_goto);
+		if( *action_name == "output" )
+			return cxt.make_action(ak_output);
+			
 		sexpr::throw_unexpected_term(e);
 	}
 
