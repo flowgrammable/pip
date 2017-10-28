@@ -25,3 +25,4 @@ link_directories(
 )
 
 add_subdirectory(pip)
+add_subdirectory(test)
