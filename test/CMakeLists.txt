@@ -1,17 +1,17 @@
-# create the testing file and list of tests 
-
+# Create the testing file and list of tests 
 create_test_sourcelist(Tests 
   main.cpp 
   1.pip
   2.pip 
   )
 
-
+# Include pip directory 
 include_directories("${CMAKE_SOURCE_DIR}/pip")
-# add the executable 
+
+# Add the executable 
 add_executable(main.cpp ${Tests})
 
-# remove the test driver source file 
+# Remove the test driver source file 
 set(tests_to_run ${Tests})
 remove(tests_to_run test.cpp)
 
