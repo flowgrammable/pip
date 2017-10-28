@@ -19,6 +19,7 @@ namespace pip
     ek_miss,  // Miss literal.
     ek_ref,   // Declaration reference
     ek_field, // Field references
+		ek_port, // Port number
   };
 
   /// The base class of all expressions.
@@ -51,6 +52,16 @@ namespace pip
     int lo;
     int hi;
   };
+
+	// A numbered port.
+	struct port_expr : expr
+	{
+		port_expr(type* t, int p)
+			:expr(ek_port, t), port_num(p)
+		{ }
+
+		int port_num;
+	};
 
   /// A wildcard literal denoting all values k satisfying
   /// `k & ~mask == val`.

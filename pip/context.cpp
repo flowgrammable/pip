@@ -58,6 +58,12 @@ namespace pip
 		return new field_expr(kind, t);
 	}
 
+	expr*
+	context::make_port_expr(type* t, int port_num)
+	{
+		return new port_expr(t, port_num);
+	}
+
 	action*
 	context::make_action(action_kind k)
 	{

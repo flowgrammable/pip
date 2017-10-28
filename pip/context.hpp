@@ -38,6 +38,7 @@ namespace pip
 		expr* make_miss_expr(type* t);
 		expr* make_ref_expr(type* t, symbol* id);
 		expr* make_field_expr(type* t, expr_kind kind);
+		expr* make_port_expr(type* t, int port_num);
 
 		action* make_action(action_kind k);
 
