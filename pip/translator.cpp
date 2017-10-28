@@ -6,8 +6,11 @@
 #include "action.hpp"
 #include "dumper.hpp"
 
+#include <string>
+
 // for testing only
 #include <iostream>
+#include <sstream>
 
 namespace pip
 {
@@ -104,7 +107,7 @@ namespace pip
 			expr* key;
 			action_seq actions;
 
-			match_list(list, "rule", key, &actions);
+			match_list(list, "rule", &key, &actions);
 
 			return new rule(rk_exact, key, std::move(actions));
 		}
@@ -130,6 +133,7 @@ namespace pip
 	{
 		symbol* action_name;
 		expr_seq exprs;
+		int i;
 
 		match_list(e, &action_name);
 		
@@ -163,8 +167,8 @@ namespace pip
 	{
 		// Match bare integer literals.
 		// TODO: match int width
-    if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
-      return trans_int_expr(num, 32);
+    // if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
+    //   return trans_int_expr(num, 32);
 
 		// Match bare keyword literals.
     if (const sexpr::id_expr* id = as<sexpr::id_expr>(e)) {
@@ -178,6 +182,9 @@ namespace pip
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       symbol* sym;
       match_list(list, &sym);
+			if (*sym == "int")
+				return trans_int_expr(list);
+			
 			if (*sym == "wildcard")
         return trans_wild_expr(list);
 			if (*sym == "range")
@@ -204,17 +211,40 @@ namespace pip
 	expr*
 	translator::trans_range_expr(const sexpr::list_expr* e)
 	{
-		int lo, hi;
-		symbol* lo_type, * hi_type;
-    match_list(e, "range", &lo_type, &lo, &hi_type, &hi);
+		// int lo, hi;
+		// symbol* lo_type, * hi_type;
+		expr* lo;
+		expr* hi;
+    match_list(e, "range", &lo, &hi);
 
 		// TODO: proper error handling
-		int lo_width, hi_width;
-		if(lo_width = deduce_int_type_width(lo_type))
-			if(hi_width = deduce_int_type_width(hi_type))
-				if(lo_width == hi_width)
-					return cxt.make_range_expr(
-						new range_type(new int_type(lo_width)), lo, hi );
+		// int lo_width, hi_width;
+		// if(lo_width = deduce_int_type_width(lo_type))
+		// 	if(hi_width = deduce_int_type_width(hi_type))
+		// 		if(lo_width == hi_width)
+		// 			return cxt.make_range_expr(
+		// 				new range_type(new int_type(lo_width)), lo, hi );
+
+		// auto lo_ty = as<int_type>(lo->ty);
+		// auto hi_ty = as<int_type>(hi->ty);
+
+		auto lo_expr = as<int_expr>(lo);
+		auto hi_expr = as<int_expr>(hi);
+
+		auto lo_val = lo_expr->val;
+		auto hi_val = hi_expr->val;
+
+		auto lo_ty = static_cast<int_type*>(lo_expr->ty);
+		auto hi_ty = static_cast<int_type*>(hi_expr->ty);
+
+		if(lo_ty->width == hi_ty->width)
+			return cxt.make_range_expr(new range_type(
+																	 new int_type(lo_ty->width)), lo_val, hi_val);
+		//TODO: proper diagnostic
+		std::stringstream ss;
+		ss << "Width of range arguments not equal: " << lo_ty->width << ", and "
+			 << hi_ty->width << "\n";
+		throw std::runtime_error(ss.str().c_str());
 	}
 	
 	expr*
@@ -236,24 +266,40 @@ namespace pip
 	translator::trans_field_expr(const sexpr::id_expr* e)
 	{
 	}
+
+	// When given an integer width specifier, such as i32,
+	// return the integer after the i. In this case, 32.
+	static int
+	deduce_int_type_width(const symbol* ty)
+	{
+		std::string spec = *ty;
+		
+		if(spec.front() == 'i') {
+			spec.erase(0, 1);
+
+			std::size_t it;
+			auto width = std::stoi(spec.c_str(), &it);
+
+			if(spec.size() == it)
+				return width;
+		}
+
+		std::stringstream ss;
+		ss << "Invalid integer width specifier: " << *ty <<
+			". Specifier should be of form i[integer].\n";
+		throw std::runtime_error(ss.str().c_str());
+	}
 	
 	expr*
-	translator::trans_int_expr(const sexpr::int_expr* e, int width)
+	translator::trans_int_expr(const sexpr::list_expr* e)
 	{
-		return cxt.make_int_expr( new int_type(32), e->val );
-	}
+		symbol* width_specifier;
+		int value;
+		match_list(e, "int", &width_specifier, &value);
 
-	// TODO: add these to a keyword table
-	int
-	translator::deduce_int_type_width(const symbol* ty) const
-	{
-		if(*ty == "i16")
-			return 16;
-		if(*ty == "i32")
-			return 32;
-		else if(*ty == "i64")
-			return 64;
-		else return 0;
+		int w = deduce_int_type_width(width_specifier);
+
+		return cxt.make_int_expr( new int_type(w), value );
 	}
 	
 
@@ -279,9 +325,9 @@ namespace pip
   }
 
 	void
-	translator::match(const sexpr::list_expr* list, int n, expr* out)
+	translator::match(const sexpr::list_expr* list, int n, expr** out)
 	{
-		out = trans_expr(get(list, n));
+		*out = trans_expr(get(list, n));
 	}
 	
 	void 

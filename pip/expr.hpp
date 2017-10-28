@@ -25,7 +25,7 @@ namespace pip
   struct expr : cc::node
   {
     expr(expr_kind k, type* t)
-      : cc::node(k, {}) { }
+      : cc::node(k, {}), ty(t) { }
 
     /// The type of the expression.
     type* ty;
@@ -34,7 +34,7 @@ namespace pip
   /// An integer literal.
   struct int_expr : expr
   {
-    int_expr(type* t, int n)
+	 int_expr(type* t, int n)
       : expr(ek_int, t), val(n)
     { }
     
