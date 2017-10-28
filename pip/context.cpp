@@ -65,7 +65,7 @@ namespace pip
 	}
 
 	action*
-	context::make_action(action_kind k)
+	context::make_action(action_kind k, expr* parm, action* a)
 	{
 		switch(k) {
 		case ak_advance:
@@ -75,7 +75,7 @@ namespace pip
 		case ak_set:
 			return new set_action;
 		case ak_write:
-			return new write_action(nullptr);
+			return new write_action(a);
 		case ak_clear:
 			return new clear_action;
 		case ak_drop:
@@ -83,9 +83,9 @@ namespace pip
 		case ak_match:
 			return new match_action;
 		case ak_goto:
-			return new goto_action(nullptr);
+			return new goto_action(parm);
 		case ak_output:
-			return new output_action(nullptr);
+			return new output_action(parm);
 		default:
 			throw std::runtime_error( "Unexpected action\n" );
 		}

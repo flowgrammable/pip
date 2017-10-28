@@ -154,8 +154,12 @@ namespace pip
 			return cxt.make_action(ak_drop);
 		if( *action_name == "match" )
 			return cxt.make_action(ak_match);
-		if( *action_name == "goto" )
-			return cxt.make_action(ak_goto);
+		if( *action_name == "goto" ) {
+			expr* dst;
+			match_list(e, "goto", &dst);
+			
+			return cxt.make_action(ak_goto, dst);
+		}
 		if( *action_name == "output" )
 			return cxt.make_action(ak_output);
 			
@@ -189,8 +193,8 @@ namespace pip
         return trans_wild_expr(list);
 			if (*sym == "range")
 				return trans_range_expr(list);
-			if (*sym == "port");
-			// return trans_port_expr(list);
+			if (*sym == "port")
+				return trans_port_expr(list);
 		}
 	}
 
@@ -265,6 +269,16 @@ namespace pip
 	expr*
 	translator::trans_field_expr(const sexpr::id_expr* e)
 	{
+	}
+
+	expr*
+	translator::trans_port_expr(const sexpr::list_expr* e)
+	{
+		int port;
+		match_list(e, "port", &port);
+
+		// TODO: define a type for this kind of expression
+		return cxt.make_port_expr(nullptr, port);
 	}
 
 	// When given an integer width specifier, such as i32,
