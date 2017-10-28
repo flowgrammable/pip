@@ -40,6 +40,7 @@ namespace pip
 		expr* trans_miss_expr(const sexpr::id_expr* e);
 		expr* trans_ref_expr(const sexpr::id_expr* e);
 		expr* trans_field_expr(const sexpr::id_expr* e);
+		expr* trans_port_expr(const sexpr::list_expr* e);
 		expr* trans_int_expr(const sexpr::list_expr* e);
 
   private:
@@ -51,6 +52,7 @@ namespace pip
 		void match(const sexpr::list_expr* list, int n, expr_seq* exprs);
 		void match(const sexpr::list_expr* list, int n, expr** out);
 		void match(const sexpr::list_expr* list, int n, action_seq* actions);
+		void match(const sexpr::list_expr* list, int n, action** a);
 
   private:
     context& cxt;
