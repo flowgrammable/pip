@@ -145,8 +145,12 @@ namespace pip
 		if(*action_name == "set")
 			return cxt.make_action(ak_set);
 
-		if(*action_name == "write")
-			return cxt.make_action(ak_write);
+		if(*action_name == "write") {
+			action* a;
+			match_list(e, "goto", &a);
+			
+			return cxt.make_action(ak_write, nullptr, a);
+		}
 		if(*action_name == "clear")
 			return cxt.make_action(ak_clear);
 
@@ -160,8 +164,12 @@ namespace pip
 			
 			return cxt.make_action(ak_goto, dst);
 		}
-		if( *action_name == "output" )
-			return cxt.make_action(ak_output);
+		if( *action_name == "output" ) {
+			expr* dst;
+			match_list(e, "goto", &dst);
+			
+			return cxt.make_action(ak_output, dst);
+		}
 			
 		sexpr::throw_unexpected_term(e);
 	}
@@ -348,6 +356,12 @@ namespace pip
   translator::match(const sexpr::list_expr* list, int n, action_seq* actions)
   {
     *actions = trans_actions(get(list, n));
+  }
+
+	void 
+  translator::match(const sexpr::list_expr* list, int n, action** a)
+  {
+    *a = trans_action(list);
   }
 
 } // namespace pip
