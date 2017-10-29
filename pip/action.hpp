@@ -66,7 +66,7 @@ namespace pip
   struct write_action : action
   {
     write_action(action* a)
-      : action(ak_write)
+      : action(ak_write), act(a)
     { }
 
     action* act;
@@ -102,7 +102,7 @@ namespace pip
   struct goto_action : action
   {
     goto_action(expr* e)
-      : action(ak_goto)
+      : action(ak_goto), dest(e)
     { }
 
     /// The destination expression.
