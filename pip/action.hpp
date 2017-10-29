@@ -84,7 +84,7 @@ namespace pip
   struct drop_action : action
   {
     drop_action()
-      : action(ak_copy)
+      : action(ak_drop)
     { }
   };
 
@@ -94,7 +94,7 @@ namespace pip
   struct match_action : action
   {
     match_action()
-      : action(ak_copy)
+      : action(ak_match)
     { }
   };
 
@@ -102,7 +102,7 @@ namespace pip
   struct goto_action : action
   {
     goto_action(expr* e)
-      : action(ak_copy)
+      : action(ak_goto)
     { }
 
     /// The destination expression.
@@ -113,7 +113,7 @@ namespace pip
   struct output_action : action
   {
     output_action(expr* p)
-      : action(ak_copy), port(p)
+      : action(ak_output), port(p)
     { }
 
     expr* port;
