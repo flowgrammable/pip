@@ -167,7 +167,7 @@ namespace pip
 
 		if(*action_name == "write") {
 			action* a;
-			match_list(e, "goto", &a);
+			match_list(e, "write", &a);
 			
 			return cxt.make_action(ak_write, nullptr, a);
 		}
@@ -186,7 +186,7 @@ namespace pip
 		}
 		if( *action_name == "output" ) {
 			expr* dst;
-			match_list(e, "goto", &dst);
+			match_list(e, "output", &dst);
 			
 			return cxt.make_action(ak_output, dst);
 		}
