@@ -17,6 +17,7 @@ namespace pip
     void operator()(const action* a) { return dump_action(a); }
     void operator()(const expr* e) { return dump_expr(e); }
     void operator()(const type* t) { return dump_type(t); }
+		void operator()(const rule* r) { return dump_match(r); }
 
   private:
     void dump_decl(const decl* d);
