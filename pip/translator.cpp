@@ -88,11 +88,18 @@ namespace pip
   translator::trans_rules(const sexpr::expr* e)
   {
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
+			match_list(list, "rules");
       rule_seq rules;
 
-			// IN PROGRESS: Match each element in turn.
-			rule* r = trans_rule(e);
-			rules.push_back(r);
+			// Match each element in turn.
+			for(const sexpr::expr* el : list->exprs) {
+				// We are only interested in the entire sublists contained within list,
+				// not its individual expressions.
+				if(const sexpr::list_expr* r = as<sexpr::list_expr>(el)) {
+					rule* r1 = trans_rule(r);
+					rules.push_back(r1);
+				}
+			}
       
       return rules;
     }
@@ -114,6 +121,19 @@ namespace pip
 		
 		sexpr::throw_unexpected_term(e);
 	}
+
+	rule*
+	translator::trans_rule(const sexpr::list_expr* e)
+	{
+		expr_seq exprs;
+		expr* key;
+		action_seq actions;
+
+		match_list(e, &key, &actions);
+
+		return new rule(rk_exact, key, std::move(actions));
+	}
+
 
 	action_seq
 	translator::trans_actions(const sexpr::expr* e)
@@ -223,22 +243,9 @@ namespace pip
 	expr*
 	translator::trans_range_expr(const sexpr::list_expr* e)
 	{
-		// int lo, hi;
-		// symbol* lo_type, * hi_type;
 		expr* lo;
 		expr* hi;
     match_list(e, "range", &lo, &hi);
-
-		// TODO: proper error handling
-		// int lo_width, hi_width;
-		// if(lo_width = deduce_int_type_width(lo_type))
-		// 	if(hi_width = deduce_int_type_width(hi_type))
-		// 		if(lo_width == hi_width)
-		// 			return cxt.make_range_expr(
-		// 				new range_type(new int_type(lo_width)), lo, hi );
-
-		// auto lo_ty = as<int_type>(lo->ty);
-		// auto hi_ty = as<int_type>(hi->ty);
 
 		auto lo_expr = as<int_expr>(lo);
 		auto hi_expr = as<int_expr>(hi);

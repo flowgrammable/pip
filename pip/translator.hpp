@@ -28,6 +28,7 @@ namespace pip
     rule_seq trans_rules(const sexpr::expr* e);
     rule_seq trans_rules(const sexpr::list_expr* e);
 		rule* trans_rule(const sexpr::expr* e);
+		rule* trans_rule(const sexpr::list_expr* e);
 
 		action_seq trans_actions(const sexpr::expr* e);
 		action* trans_action(const sexpr::list_expr* e);
