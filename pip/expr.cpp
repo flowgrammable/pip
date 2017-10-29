@@ -25,6 +25,8 @@ namespace pip
         return "ref";
       case ek_field:
         return "field";
+  		case ek_port:
+	  		return "port";
     }
   }
 
