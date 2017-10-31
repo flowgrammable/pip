@@ -40,7 +40,9 @@ namespace pip
 		expr* make_field_expr(type* t, expr_kind kind);
 		expr* make_port_expr(type* t, int port_num);
 
-		action* make_action(action_kind k, expr* parm = nullptr, action* a = nullptr);
+		action* make_action(action_kind k, expr* parm_a = nullptr,
+												expr* parm_b = nullptr,
+												action* a = nullptr);
 
   private:
     /// The diagnostic manager.
