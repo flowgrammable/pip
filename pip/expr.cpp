@@ -27,6 +27,8 @@ namespace pip
         return "field";
   		case ek_port:
 	  		return "port";
+		  case ek_offset:
+			  return "offset";
     }
   }
 

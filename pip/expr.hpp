@@ -20,6 +20,7 @@ namespace pip
     ek_ref,   // Declaration reference
     ek_field, // Field references
 		ek_port, // Port number
+		ek_offset
   };
 
   /// The base class of all expressions.
@@ -110,6 +111,17 @@ namespace pip
       : expr(k, t)
     { }
   };
+
+	struct offset_expr : expr
+	{
+		offset_expr(type* t, symbol* space, expr* offset, expr* size)
+			: expr(ek_offset, t), space(space), offset(offset), size(size)
+		{ }
+
+		symbol* space;
+		expr* offset;
+		expr* size;
+	};
 
 // -------------------------------------------------------------------------- //
 // Operations
