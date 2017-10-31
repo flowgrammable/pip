@@ -46,7 +46,7 @@ namespace pip
   struct range_expr : expr
   {
     range_expr(type* t, int l, int h)
-      : expr(ek_int, t), lo(l), hi(h)
+      : expr(ek_range, t), lo(l), hi(h)
     { }
   
     int lo;
