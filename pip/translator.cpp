@@ -38,8 +38,8 @@ namespace pip
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       decl_seq decls;
       // for (const sexpr::expr* elem : list->exprs) {
-        decl* d = trans_decl(list);
-        decls.push_back(d);
+			decl* d = trans_decl(list);
+			decls.push_back(d);
       // }
       return decls;
     }
@@ -96,11 +96,17 @@ namespace pip
 				// We are only interested in the entire sublists contained within list,
 				// not its individual expressions.
 				if(const sexpr::list_expr* r = as<sexpr::list_expr>(el)) {
+					dumper dunk(std::cout);
+					std::cout << "list:\n";
+					r->dump();
+					
 					rule* r1 = trans_rule(r);
 					rules.push_back(r1);
+
+					std::cout << "r1:\n";
+					dunk(r1);
 				}
 			}
-      
       return rules;
     }
     sexpr::throw_unexpected_term(e);    
@@ -114,7 +120,7 @@ namespace pip
 			expr* key;
 			action_seq actions;
 
-			match_list(list, "rule", &key, &actions);
+			match_list(list, &key, &actions);
 
 			return new rule(rk_exact, key, std::move(actions));
 		}
@@ -129,7 +135,9 @@ namespace pip
 		expr* key;
 		action_seq actions;
 
-		match_list(e, &key, &actions);
+		std::cout << "1\n";
+		match_list(e, "rule", &key, &actions);
+		std::cout << "2\n";
 
 		return new rule(rk_exact, key, std::move(actions));
 	}
@@ -139,11 +147,21 @@ namespace pip
 	translator::trans_actions(const sexpr::expr* e)
 	{
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
-      action_seq actions;
-			action* a = trans_action(list);
-			actions.push_back(a);
-      return actions;
-    }
+			match_list(list, "actions");
+			action_seq actions;
+			for(const sexpr::expr* el : list->exprs) {
+				// We are only interested in the entire sublists contained within list,
+				// not its individual expressions.
+				if(const sexpr::list_expr* a = as<sexpr::list_expr>(el)) {
+					action* a1 = trans_action(a);
+					actions.push_back(a1);
+				}
+			// action* a = trans_action(list);
+			// actions.push_back(a);
+			}
+				
+			return actions;
+		}
     sexpr::throw_unexpected_term(e);
 	}
 
