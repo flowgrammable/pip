@@ -38,7 +38,7 @@ namespace pip
 		expr_seq trans_exprs(const sexpr::expr* e);
 		expr* trans_range_expr(const sexpr::list_expr* e);
 		expr* trans_wild_expr(const sexpr::list_expr* e);
-		expr* trans_miss_expr(const sexpr::id_expr* e);
+		expr* trans_miss_expr();
 		expr* trans_ref_expr(const sexpr::id_expr* e);
 		expr* trans_field_expr(const sexpr::id_expr* e);
 		expr* trans_port_expr(const sexpr::list_expr* e);

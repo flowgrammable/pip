@@ -212,10 +212,10 @@ namespace pip
     //   return trans_int_expr(num, 32);
 
 		// Match bare keyword literals.
-    if (const sexpr::id_expr* id = as<sexpr::id_expr>(e)) {
-      if (*id->id == "miss")
-				return trans_miss_expr(id);
-		}
+		// if (const sexpr::id_expr* id = as<sexpr::id_expr>(e)) {
+    //   if (*id->id == "miss")
+		// 		return trans_miss_expr(id);
+		// }
 
 		// Match phrases.
     //
@@ -234,7 +234,9 @@ namespace pip
 				return trans_port_expr(list);
 			if (*sym == "offset")
 				return trans_offset_expr(list);
-		}
+			if (*sym == "miss")
+				return trans_miss_expr();
+			}
 	}
 
 	expr_seq
@@ -283,8 +285,9 @@ namespace pip
 	}
 	
 	expr*
-	translator::trans_miss_expr(const sexpr::id_expr* e)
+	translator::trans_miss_expr()
 	{
+		return cxt.make_miss_expr(nullptr);
 	}
 	
 	expr*
