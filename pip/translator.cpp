@@ -95,16 +95,9 @@ namespace pip
 			for(const sexpr::expr* el : list->exprs) {
 				// We are only interested in the entire sublists contained within list,
 				// not its individual expressions.
-				if(const sexpr::list_expr* r = as<sexpr::list_expr>(el)) {
-					dumper dunk(std::cout);
-					std::cout << "list:\n";
-					r->dump();
-					
+				if(const sexpr::list_expr* r = as<sexpr::list_expr>(el)) {					
 					rule* r1 = trans_rule(r);
 					rules.push_back(r1);
-
-					std::cout << "r1:\n";
-					dunk(r1);
 				}
 			}
       return rules;
@@ -135,9 +128,7 @@ namespace pip
 		expr* key;
 		action_seq actions;
 
-		std::cout << "1\n";
 		match_list(e, "rule", &key, &actions);
-		std::cout << "2\n";
 
 		return new rule(rk_exact, key, std::move(actions));
 	}
