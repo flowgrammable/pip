@@ -23,7 +23,7 @@ namespace pip
     decl* trans_program(const sexpr::expr* e);
     decl_seq trans_decls(const sexpr::expr* e);
     decl* trans_decl(const sexpr::expr* e);
-    decl* trans_table(const sexpr::list_expr* e);
+    decl* trans_table(const sexpr::list_expr* e);		
 
     rule_seq trans_rules(const sexpr::expr* e);
     rule_seq trans_rules(const sexpr::list_expr* e);
@@ -42,6 +42,7 @@ namespace pip
 		expr* trans_ref_expr(const sexpr::id_expr* e);
 		expr* trans_field_expr(const sexpr::id_expr* e);
 		expr* trans_port_expr(const sexpr::list_expr* e);
+		expr* trans_offset_expr(const sexpr::list_expr* e);
 		expr* trans_int_expr(const sexpr::list_expr* e);
 
   private:

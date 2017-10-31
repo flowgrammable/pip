@@ -178,7 +178,7 @@ namespace pip
 			action* a;
 			match_list(e, "write", &a);
 			
-			return cxt.make_action(ak_write, nullptr, a);
+			return cxt.make_action(ak_write, nullptr, nullptr, a);
 		}
 		if(*action_name == "clear")
 			return cxt.make_action(ak_clear);
@@ -232,6 +232,8 @@ namespace pip
 				return trans_range_expr(list);
 			if (*sym == "port")
 				return trans_port_expr(list);
+			if (*sym == "offset")
+				return trans_offset_expr(list);
 		}
 	}
 
@@ -303,6 +305,19 @@ namespace pip
 
 		// TODO: define a type for this kind of expression
 		return cxt.make_port_expr(nullptr, port);
+	}
+
+	expr*
+	translator::trans_offset_expr(const sexpr::list_expr* e)
+	{
+		symbol* space;
+		expr* offset;
+		expr* size;
+
+		match_list(e, "offset", &space, &offset, &size);
+
+		// TODO: determine typing of offset expressions
+		return new offset_expr(nullptr, space, offset, size);
 	}
 
 	// When given an integer width specifier, such as i32,
