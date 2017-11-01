@@ -6,6 +6,8 @@ project(pip C CXX)
 
 set(CMAKE_CXX_FLAGS "-std=c++14")
 
+enable_testing()
+
 find_package(CC)
 find_package(Sexpr)
 find_package(PCAP)
@@ -24,4 +26,8 @@ link_directories(
   ${SEXPR_LIBRARY_DIR}
 )
 
+
 add_subdirectory(pip)
+add_subdirectory(test)
+
+

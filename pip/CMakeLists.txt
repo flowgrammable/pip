@@ -17,3 +17,11 @@ target_link_libraries(pip
   ${CC_LIBRARY} 
   ${SEXPR_LIBRARY} 
   ${PCAP_LIBRARY})
+
+
+add_executable(pip-compile compile.cpp)
+target_link_libraries(pip-compile
+  libpip 
+  ${CC_LIBRARY} 
+  ${SEXPR_LIBRARY} 
+  ${PCAP_LIBRARY})
