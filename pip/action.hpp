@@ -47,9 +47,12 @@ namespace pip
   /// variable (e.g., ingress port)?
   struct copy_action : action
   {
-    copy_action()
-      : action(ak_copy)
+    copy_action(expr* src, expr* dst)
+      : action(ak_copy), src(src), dst(dst)
     { }
+
+		expr* src;
+		expr* dst;
   };
 
   /// Set a value of a packet field.
@@ -66,7 +69,7 @@ namespace pip
   struct write_action : action
   {
     write_action(action* a)
-      : action(ak_write)
+      : action(ak_write), act(a)
     { }
 
     action* act;
@@ -84,7 +87,7 @@ namespace pip
   struct drop_action : action
   {
     drop_action()
-      : action(ak_copy)
+      : action(ak_drop)
     { }
   };
 
@@ -94,7 +97,7 @@ namespace pip
   struct match_action : action
   {
     match_action()
-      : action(ak_copy)
+      : action(ak_match)
     { }
   };
 
@@ -102,7 +105,7 @@ namespace pip
   struct goto_action : action
   {
     goto_action(expr* e)
-      : action(ak_copy)
+      : action(ak_goto), dest(e)
     { }
 
     /// The destination expression.
@@ -113,7 +116,7 @@ namespace pip
   struct output_action : action
   {
     output_action(expr* p)
-      : action(ak_copy), port(p)
+      : action(ak_output), port(p)
     { }
 
     expr* port;

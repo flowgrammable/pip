@@ -76,6 +76,11 @@ namespace pip
   dumper::dump_match(const rule* r)
   {
     dump_guard g(*this, r, "rule");
+		indent();
+    print_newline();
+    dump_expr(r->key);
+		dump_actions("actions", r->acts);
+    undent();
   }
 
   void

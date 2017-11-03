@@ -21,4 +21,6 @@ foreach(test ${tests_to_run})
   add_test(${TName} test.cpp ${TName})
 endforeach()
 
+set(compiler ${CMAKE_BINARY_DIR}/pip/pip-compile)
 
+add_test(test1 ${compiler} 1.pip)

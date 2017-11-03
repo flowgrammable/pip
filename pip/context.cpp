@@ -58,18 +58,24 @@ namespace pip
 		return new field_expr(kind, t);
 	}
 
+	expr*
+	context::make_port_expr(type* t, int port_num)
+	{
+		return new port_expr(t, port_num);
+	}
+
 	action*
-	context::make_action(action_kind k)
+	context::make_action(action_kind k, expr* parm_a, expr* parm_b, action* a)
 	{
 		switch(k) {
 		case ak_advance:
 			return new advance_action;
 		case ak_copy:
-			return new copy_action;
+			return new copy_action(parm_a, parm_b);
 		case ak_set:
 			return new set_action;
 		case ak_write:
-			return new write_action(nullptr);
+			return new write_action(a);
 		case ak_clear:
 			return new clear_action;
 		case ak_drop:
@@ -77,11 +83,11 @@ namespace pip
 		case ak_match:
 			return new match_action;
 		case ak_goto:
-			return new goto_action(nullptr);
+			return new goto_action(parm_a);
 		case ak_output:
-			return new output_action(nullptr);
+			return new output_action(parm_a);
 		default:
-			throw std::runtime_error( "Unexpected action\n" );
+			throw std::runtime_error("Unexpected action\n");
 		}
 	}
 	

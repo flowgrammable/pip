@@ -1,10 +1,11 @@
-
 cmake_minimum_required(VERSION 3.4)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
 project(pip C CXX)
 
 set(CMAKE_CXX_FLAGS "-std=c++14")
+
+enable_testing()
 
 find_package(CC)
 find_package(Sexpr)
@@ -23,6 +24,7 @@ link_directories(
   ${CC_LIBRARY_DIR}
   ${SEXPR_LIBRARY_DIR}
 )
+
 
 add_subdirectory(pip)
 add_subdirectory(test)
