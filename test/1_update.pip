@@ -1,0 +1,18 @@
+(pip
+  (table t0 exact 
+    (actions
+			(copy
+				(offset header (int i32 96) (int i32 16))
+				(offset key (int i32 0) (int i32 16))) ; eth.type -> key
+			(match)
+    )
+    (rules
+		  (rule (int i32 100)
+        (actions (output (port 1)))) ; if eth.type == 100: output to 1
+      (rule (int i32 101)
+				(actions (output (port 2)))) ; if eth.type == 101: output to 2
+		  (rule (miss)
+			  (actions (drop)))
+    )
+	)
+)
