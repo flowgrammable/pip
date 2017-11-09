@@ -289,7 +289,7 @@ namespace pip
   expr*
   translator::trans_miss_expr()
   {
-    return cxt.make_miss_expr(nullptr);
+    return cxt.make_miss_expr(new miss_type);
   }
   
   expr*
@@ -308,8 +308,7 @@ namespace pip
     int port;
     match_list(e, "port", &port);
     
-    // TODO: define a type for this kind of expression
-    return cxt.make_port_expr(nullptr, port);
+    return cxt.make_port_expr(new port_type, port);
   }
   
   expr*
@@ -320,9 +319,13 @@ namespace pip
     expr* size;
     
     match_list(e, "offset", &space, &offset, &size);
+
+    // TODO: ensure safety of this operation
+    auto size_int = static_cast<int_expr*>(size);
+    auto size_ty = static_cast<int_type*>(size->ty);
+    auto size_width = size_ty->width;
     
-  // TODO: determine typing of offset expressions
-    return new offset_expr(nullptr, space, offset, size);
+    return new offset_expr(new int_type(size_width), space, offset, size);
   }
   
   // When given an integer width specifier, such as i32,
@@ -360,7 +363,8 @@ namespace pip
     return cxt.make_int_expr( new int_type(w), value );
   }
   
-  // -------------------------------------------------------------------------- //// Matching
+  // -------------------------------------------------------------------------- //
+  // Matching
   
   void 
   translator::match(const sexpr::list_expr* list, int n, decl_seq* decls)
