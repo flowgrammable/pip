@@ -76,38 +76,38 @@ namespace pip
   dumper::dump_match(const rule* r)
   {
     dump_guard g(*this, r, "rule");
-		indent();
+    indent();
     print_newline();
     dump_expr(r->key);
-		dump_actions("actions", r->acts);
+    dump_actions("actions", r->acts);
     undent();
   }
-
+  
   void
   dumper::dump_action(const action* a)
   {
     switch (get_kind(a)) {
-      case ak_advance:
-        return dump_action(cast<advance_action>(a));
-      case ak_copy:
-        return dump_action(cast<copy_action>(a));
-      case ak_set:
-        return dump_action(cast<set_action>(a));
-      case ak_write:
-        return dump_action(cast<write_action>(a));
-      case ak_clear:
-        return dump_action(cast<clear_action>(a));
-      case ak_drop:
-        return dump_action(cast<drop_action>(a));
-      case ak_match:
-        return dump_action(cast<match_action>(a));
-      case ak_goto:
-        return dump_action(cast<goto_action>(a));
-      case ak_output:
-        return dump_action(cast<output_action>(a));
+    case ak_advance:
+      return dump_action(cast<advance_action>(a));
+    case ak_copy:
+      return dump_action(cast<copy_action>(a));
+    case ak_set:
+      return dump_action(cast<set_action>(a));
+    case ak_write:
+      return dump_action(cast<write_action>(a));
+    case ak_clear:
+      return dump_action(cast<clear_action>(a));
+    case ak_drop:
+      return dump_action(cast<drop_action>(a));
+    case ak_match:
+      return dump_action(cast<match_action>(a));
+    case ak_goto:
+      return dump_action(cast<goto_action>(a));
+    case ak_output:
+      return dump_action(cast<output_action>(a));
     }
   }
-
+  
   void
   dumper::dump_action(const advance_action* a)
   {

@@ -19,50 +19,50 @@ namespace pip
     ek_miss,  // Miss literal.
     ek_ref,   // Declaration reference
     ek_field, // Field references
-		ek_port, // Port number
-		ek_offset
+    ek_port, // Port number
+    ek_offset
   };
-
+  
   /// The base class of all expressions.
   struct expr : cc::node
   {
     expr(expr_kind k, type* t)
       : cc::node(k, {}), ty(t) { }
-
+    
     /// The type of the expression.
     type* ty;
   };
-
+  
   /// An integer literal.
   struct int_expr : expr
   {
-	 int_expr(type* t, int n)
+    int_expr(type* t, int n)
       : expr(ek_int, t), val(n)
     { }
     
     int val;
   };
-
+  
   // A range literal denoting values in the range [lo, hi].
   struct range_expr : expr
   {
     range_expr(type* t, int l, int h)
       : expr(ek_range, t), lo(l), hi(h)
     { }
-  
+    
     int lo;
     int hi;
   };
-
-	// A numbered port.
-	struct port_expr : expr
-	{
-		port_expr(type* t, int p)
-			:expr(ek_port, t), port_num(p)
-		{ }
-
-		int port_num;
-	};
+  
+  // A numbered port.
+  struct port_expr : expr
+  {
+    port_expr(type* t, int p)
+      :expr(ek_port, t), port_num(p)
+    { }
+    
+    int port_num;
+  };
 
   /// A wildcard literal denoting all values k satisfying
   /// `k & ~mask == val`.
@@ -77,7 +77,7 @@ namespace pip
     int val;
     int mask;
   };
-
+  
   /// The 'miss' literal.
   struct miss_expr : expr
   {
@@ -85,7 +85,7 @@ namespace pip
       : expr(ek_miss, t)
     { }
   };
-
+  
   /// A reference to a declared value. Note that references are resolved
   /// in a second pass.
   struct ref_expr : expr
@@ -93,14 +93,14 @@ namespace pip
     ref_expr(type* t, symbol* id)
       : expr(ek_ref, t), id(id)
     { }
-
+    
     /// The identifier naming the table.
     symbol* id;
 
     /// The referenced declaration.
     decl* ref;
   };
-
+  
   /// A reference to a packet header.
   ///
   /// \todo These probably resolve to a function that can load the value
@@ -111,17 +111,17 @@ namespace pip
       : expr(k, t)
     { }
   };
-
-	struct offset_expr : expr
-	{
-		offset_expr(type* t, symbol* space, expr* offset, expr* size)
-			: expr(ek_offset, t), space(space), offset(offset), size(size)
-		{ }
-
-		symbol* space;
-		expr* offset;
-		expr* size;
-	};
+  
+  struct offset_expr : expr
+  {
+    offset_expr(type* t, symbol* space, expr* offset, expr* size)
+      : expr(ek_offset, t), space(space), offset(offset), size(size)
+    { }
+    
+    symbol* space;
+    expr* offset;
+    expr* size;
+  };
 
 // -------------------------------------------------------------------------- //
 // Operations
