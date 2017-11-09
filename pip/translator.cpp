@@ -62,7 +62,7 @@ namespace pip
     sexpr::throw_unexpected_term(e);
   }
   
-  /// table-decl ::= (table id <match-kind> <match-seq>)
+  /// table-decl ::= (table id <match-kind> <action-seq> <rule-seq>)
   ///
   /// rule-kind ::= exact | prefix | wildcard | range
   ///
@@ -149,8 +149,6 @@ namespace pip
 	  action* a1 = trans_action(a);
 	  actions.push_back(a1);
 	}
-      // action* a = trans_action(list);
-      // actions.push_back(a);
       }
       
       return actions;
@@ -158,7 +156,6 @@ namespace pip
     sexpr::throw_unexpected_term(e);
   }
   
-  // TODO: parse extra information (i.e. expr to output for output_action).
   action*
   translator::trans_action(const sexpr::list_expr* e)
   {
@@ -168,13 +165,26 @@ namespace pip
     
     match_list(e, &action_name);
     
-    if(*action_name == "advance")
-      return cxt.make_action(ak_advance);
+    if(*action_name == "advance") {
+      expr* amount;
+      match_list(e, "advance", &amount);
+      return cxt.make_action(ak_advance, amount);
+    }
     
-    if(*action_name == "copy")
-      return cxt.make_action(ak_copy);
-    if(*action_name == "set")
-      return cxt.make_action(ak_set);
+    if(*action_name == "copy") {
+      expr* src;
+      expr* dst;
+      match_list(e, "copy", &src, &dst);
+
+      return cxt.make_action(ak_copy, src, dst);
+    }
+    
+    if(*action_name == "set") {
+      expr* f;
+      expr* v;
+      match_list(e, "set", &f, &v);
+      return cxt.make_action(ak_set, f, v);
+    }
     
     if(*action_name == "write") {
       action* a;
@@ -182,6 +192,7 @@ namespace pip
       
       return cxt.make_action(ak_write, nullptr, nullptr, a);
     }
+    
     if(*action_name == "clear")
       return cxt.make_action(ak_clear);
     
@@ -189,12 +200,14 @@ namespace pip
       return cxt.make_action(ak_drop);
     if( *action_name == "match" )
       return cxt.make_action(ak_match);
+    
     if( *action_name == "goto" ) {
       expr* dst;
       match_list(e, "goto", &dst);
       
       return cxt.make_action(ak_goto, dst);
     }
+    
     if( *action_name == "output" ) {
       expr* dst;
       match_list(e, "output", &dst);

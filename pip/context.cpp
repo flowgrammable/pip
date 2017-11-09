@@ -69,11 +69,11 @@ namespace pip
   {
     switch(k) {
     case ak_advance:
-      return new advance_action;
+      return new advance_action(parm_a);
     case ak_copy:
       return new copy_action(parm_a, parm_b);
     case ak_set:
-      return new set_action;
+      return new set_action(parm_a, parm_b);
     case ak_write:
       return new write_action(a);
     case ak_clear:

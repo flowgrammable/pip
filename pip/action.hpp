@@ -36,9 +36,11 @@ namespace pip
   /// Advance the decode buffer by n bytes.
   struct advance_action : action
   {
-    advance_action()
-      : action(ak_advance)
+    advance_action(expr* amount)
+      : action(ak_advance), amount(amount)
     { }
+
+    expr* amount;
   };
 
   /// Copy a field into metadata or the key register.
@@ -50,9 +52,9 @@ namespace pip
     copy_action(expr* src, expr* dst)
       : action(ak_copy), src(src), dst(dst)
     { }
-
-		expr* src;
-		expr* dst;
+    
+    expr* src;
+    expr* dst;
   };
 
   /// Set a value of a packet field.
@@ -60,9 +62,12 @@ namespace pip
   /// \todo Can we set a metadata variable?
   struct set_action : action
   {
-    set_action()
-      : action(ak_set)
+    set_action(expr* f, expr* v)
+      : action(ak_set), f(f), v(v)
     { }
+
+    expr* f;
+    expr* v;
   };
 
   /// Write an action to the action list.
