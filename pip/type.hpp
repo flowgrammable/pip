@@ -43,7 +43,7 @@ namespace pip
       : type(tk_range), value(t) 
     { }
     
-  /// The underlying integer type.
+    /// The underlying integer type.
     type* value;
   };
   
@@ -54,7 +54,7 @@ namespace pip
       : type(tk_wild), width(w) 
     { }
     
-  /// The width (precision) of wildcard values.
+    /// The width (precision) of wildcard values.
     int width;
   };
   
