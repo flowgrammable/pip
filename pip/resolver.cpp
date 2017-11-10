@@ -149,6 +149,10 @@ namespace pip
         return resolve_expr(cast<ref_expr>(e));
       case ek_field:
         return resolve_expr(cast<field_expr>(e));
+      case ek_port:
+        return resolve_expr(cast<port_expr>(e));
+      case ek_offset:
+        return resolve_expr(cast<offset_expr>(e));
     }
   }
 
@@ -191,6 +195,24 @@ namespace pip
     // field -- possibly also a function to actually fetch the value and
     // applying a byte order transformation.
     throw std::logic_error("not implemented");
+  }
+
+  void
+  resolver::resolve_expr(miss_expr* e)
+  {
+    // Nothing to do.
+  }
+
+  void
+  resolver::resolve_expr(port_expr* e)
+  {
+    // TODO: implement me if I need it
+  }
+
+  void
+  resolver::resolve_expr(offset_expr* e)
+  {
+    // TODO: implement me if I need it
   }
 
 } // namespace pip

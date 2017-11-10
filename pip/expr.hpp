@@ -184,4 +184,18 @@ namespace cc
     has_kind(const node* n) { return get_node_kind(n) == pip::ek_field; }
   };
 
+  template<>
+  struct node_info<pip::port_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_port; }
+  };
+
+  template<>
+  struct node_info<pip::offset_expr>
+  {
+    static bool
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_offset; }
+  };
+
 } // namespace cc

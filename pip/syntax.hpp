@@ -36,7 +36,9 @@ namespace pip
   struct range_expr;
   struct ref_expr;
   struct field_expr;
-	struct port_expr;
+  struct port_expr;
+  struct miss_expr;
+  struct offset_expr;
   using expr_seq = std::vector<expr*>;
 
   // Actions
