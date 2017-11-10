@@ -328,17 +328,17 @@ namespace pip
   translator::trans_offset_expr(const sexpr::list_expr* e)
   {
     symbol* space;
-    expr* offset;
-    expr* size;
+    expr* pos;
+    expr* len;
     
-    match_list(e, "offset", &space, &offset, &size);
+    match_list(e, "offset", &space, &pos, &len);
 
     // TODO: ensure safety of this operation
-    auto size_int = static_cast<int_expr*>(size);
-    auto size_ty = static_cast<int_type*>(size->ty);
-    auto size_width = size_ty->width;
+    auto len_int = static_cast<int_expr*>(len);
+    auto len_ty = static_cast<int_type*>(len->ty);
+    auto len_width = len_ty->width;
     
-    return new offset_expr(new int_type(size_width), space, offset, size);
+    return new offset_expr(new int_type(len_width), space, pos, len);
   }
   
   // When given an integer width specifier, such as i32,

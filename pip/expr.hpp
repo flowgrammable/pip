@@ -114,13 +114,13 @@ namespace pip
   
   struct offset_expr : expr
   {
-    offset_expr(type* t, symbol* space, expr* offset, expr* size)
-      : expr(ek_offset, t), space(space), offset(offset), size(size)
+    offset_expr(type* t, symbol* space, expr* pos, expr* len)
+      : expr(ek_offset, t), space(space), pos(pos), len(len)
     { }
     
     symbol* space;
-    expr* offset;
-    expr* size;
+    expr* pos;
+    expr* len;
   };
 
 // -------------------------------------------------------------------------- //
