@@ -82,25 +82,27 @@ namespace pip
   void 
   resolver::resolve_action(advance_action* a)
   {
-    throw std::logic_error("not implemented");
+    throw std::logic_error("advance_action not implemented");
   }
 
   void 
   resolver::resolve_action(copy_action* a)
   {
-    throw std::logic_error("not implemented");
+    resolve_expr(a->src);
+    resolve_expr(a->dst);
   }
 
   void 
   resolver::resolve_action(set_action* a)
   {
-    throw std::logic_error("not implemented");
+    resolve_expr(a->f);
+    resolve_expr(a->v);
   }
 
   void 
   resolver::resolve_action(write_action* a)
   {
-    throw std::logic_error("not implemented");
+    throw std::logic_error("write_action not implemented");
   }
 
   void 
@@ -118,7 +120,8 @@ namespace pip
   void 
   resolver::resolve_action(match_action* a)
   {
-    throw std::logic_error("not implemented");
+    // TODO: this function used to contain an unimplemented exception,
+    // is an implementation necessary?
   }
 
   void 
