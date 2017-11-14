@@ -10,6 +10,7 @@
   port\newline
   unit\newline
   \subsection{Inference Rules}
+  \subsection*{Expressions}
   \begin{mathpar}
     \inferrule* [right=\quad int \qquad (1)]
                {\\}
@@ -39,6 +40,9 @@
                {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
                {\Gamma \vdash \textit{identifier} : unit}
     \newline \newline
-               
+
   \end{mathpar}
+      \textit{Comments:} \newline
+    (6) The miss expression will have the same type as the key of the table its rule is defined within.
+    \newline
 \end{document}
