@@ -45,4 +45,49 @@
       \textit{Comments:} \newline
     (6) The miss expression will have the same type as the key of the table its rule is defined within.
     \newline
+  \subsection*{Actions}
+  \begin{mathpar}
+    \inferrule* [right=\quad write \qquad (8)]
+                {\\}
+                {\Gamma \vdash \textbf{write} \ (action) : unit}
+    \newline \newline
+    \inferrule* [right=\quad clear \qquad (9)]
+                {\\}
+                {\Gamma \vdash \textbf{clear} : unit}
+    \newline \newline
+    \inferrule* [right=\quad drop \qquad (10)]
+                {\\}
+                {\Gamma \vdash \textbf{drop} : unit}
+    \newline \newline
+    \inferrule* [right=\quad match \qquad (11)]
+                {\\}
+                {\Gamma \vdash \textbf{match} : unit}
+    \newline \newline
+    \inferrule* [right=\quad goto \qquad (12)]
+                {\Gamma \vdash e_1 : it}
+                {\Gamma \vdash \textbf{goto} \ e_1 : unit}
+    \newline \newline
+    \inferrule* [right=\quad output \qquad (13)]
+                {\Gamma \vdash e_1 : port}
+                {\Gamma \vdash \textbf{output} \ e_1 : unit}
+    \newline \newline
+    \inferrule* [right=\quad output \qquad (14)]
+                {\Gamma \vdash e_1 : port}
+                {\Gamma \vdash \textbf{output} \ e_1 : unit}
+    \newline \newline
+    \inferrule* [right=\quad advance \qquad (15)]
+                {\Gamma \vdash e_1 : it}
+                {\Gamma \vdash \textbf{advance} \ e_1 : unit}
+    \newline \newline
+    \inferrule* [right=\quad copy \qquad (16)]
+                {\Gamma \vdash e_1 : location \\ e_2 : location \\ e_3 : it}
+                {\Gamma \vdash \textbf{copy} \ e_1 \ e_2 \ e_3 : unit}
+    \newline \newline
+    \inferrule* [right=\quad set \qquad (16)]
+                {\Gamma \vdash e_1 : location \\ e_2 : it \\ e_3 : it}
+                {\Gamma \vdash \textbf{set} \ e_1 \ e_2 \ e_3 : unit}
+    \newline \newline
+  \end{mathpar}
+  \textit{Comments:} \newline
+  (16) e2 does not need to be type it. It can be any value type. TODO: create a system that represents values which have precision.
 \end{document}
