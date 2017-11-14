@@ -93,4 +93,23 @@
   \end{mathpar}
   \textit{Comments:} \newline
   (16) e2 does not need to be type it. It can be any value type. TODO: create a system that represents values which have precision.
+
+  \subsection{Literals}  
+  symbol-literal:\newline
+  \indent \textit{character character*}\newline
+  integer-literal:\newline
+  \indent \textbf{int} \textit{width-prefix decimal-literal}\newline
+  width-prefix:\newline
+  \indent \textbf{i} \textit{decimal-literal}\newline
+  binary-literal:\newline
+  \indent \textit{binary-digit binary-digit*}\newline
+  decimal-literal:\newline
+  \indent \textit{decimal-digit decimal-digit*}\newline
+  binary-digit:\newline
+  \indent 0 1\newline
+  decimal-digit\newline
+  \indent 0 1 2 3 4 5 6 7 8 9\newline
+  character:\newline
+  \indent a-zA-Z \textit{decimal-digit}\newline
+  
 \end{document}
