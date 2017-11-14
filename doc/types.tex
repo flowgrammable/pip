@@ -2,6 +2,7 @@
 \usepackage{mathpartir}
 
 \begin{document}
+\section{Type System}
   \subsection{Types}
   it\newline
   range\newline
@@ -10,32 +11,32 @@
   unit\newline
   \subsection{Inference Rules}
   \begin{mathpar}
-    \inferrule* [right=\quad int]
+    \inferrule* [right=\quad int \qquad (1)]
                {\\}
                {\textbf{int it} \ (decimal-literal) : it}
     \newline \newline
-    \inferrule* [right=\quad range]
+    \inferrule* [right=\quad range \qquad (2)]
                {\Gamma \vdash e_1:it \\ \Gamma \vdash e_2:it}
-               {\Gamma \vdash \textbf{range}\  e1\  e2 : it}
+               {\Gamma \vdash \textbf{range}\  e_1 \  e_2 : it}
     \newline \newline
-    \inferrule* [right=\quad port]
-               {\Gamma \vdash \textbf{port} \ e_1 \\ \Gamma \vdash e1:\textbf{i32}}
+    \inferrule* [right=\quad port \qquad (3)]
+               {\Gamma \vdash \textbf{port} \ e_1 \\ \Gamma \vdash e_1:it}
                {\Gamma \vdash \textbf{port} \ e_1 : port}
     \newline \newline
-    \inferrule* [right=\quad offset]
+    \inferrule* [right=\quad offset \qquad (4)]
                {\Gamma \vdash pos : it \\ \Gamma \vdash len : it}
                {\Gamma \vdash \textbf{offset} \  (as) \  pos \  len : location}
     \newline \newline
-    \inferrule* [right=\quad field]
-               {\Gamma(\textit{identifier}) = (l, \mu) \\ l\rightarrow location}
+    \inferrule* [right=\quad field \qquad (5)]
+               {\Gamma(\textit{identifier}) = (l, \mu) \\ l \rightarrow location}
                {\Gamma \vdash \textit{identifier} : location}
     \newline \newline
-    \inferrule* [right=\quad miss]
-               {\Gamma (\textit{identifier}) = (l, \mu) \\ l\rightarrow table}
+    \inferrule* [right=\quad miss \qquad (6)]
+               {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
                {\Gamma \vdash \textbf{miss} : type(key(l))}
     \newline \newline
-    \inferrule* [right=\quad ref]
-               {\Gamma (\textit{identifier}) = (l, \mu) \\ l  \rightarrow table}
+    \inferrule* [right=\quad ref \qquad (7)]
+               {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
                {\Gamma \vdash \textit{identifier} : unit}
     \newline \newline
                
