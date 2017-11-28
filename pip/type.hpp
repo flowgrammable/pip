@@ -88,7 +88,24 @@ namespace pip
 // Operations
   
   /// Returns the name of a type node.
-  const char* get_node_name(type_kind k);
+  inline const char* get_node_name(type_kind k)
+  {
+    switch(k)
+    {
+    case tk_int:
+      return "tk_int";
+    case tk_range:
+      return "tk_range";
+    case tk_wild:
+      return "tk_wild";
+    case tk_miss:
+      return "tk_miss";
+    case tk_port:
+      return "tk_port";
+    case tk_loc:
+      return "tk_loc";
+    }
+  }
   
   // Returns the kind of a type.
   inline type_kind
