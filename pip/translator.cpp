@@ -338,7 +338,7 @@ namespace pip
     auto len_ty = static_cast<int_type*>(len->ty);
     auto len_width = len_ty->width;
     
-    return new offset_expr(new int_type(len_width), space, pos, len);
+    return new offset_expr(new loc_type, space, pos, len);
   }
   
   // When given an integer width specifier, such as i32,
