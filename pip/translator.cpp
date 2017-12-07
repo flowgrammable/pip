@@ -174,9 +174,19 @@ namespace pip
     if(*action_name == "copy") {
       expr* src;
       expr* dst;
-      match_list(e, "copy", &src, &dst);
+      expr* n;
+      match_list(e, "copy", &src, &dst, &n);
 
-      return cxt.make_action(ak_copy, src, dst);
+      
+      // TODO: Use libcc diagnostics.
+      if(!dynamic_cast<offset_expr*>(src))
+	throw std::runtime_error("Source in copy action does not have location type.\n");
+      if(!dynamic_cast<offset_expr*>(dst))
+	throw std::runtime_error("Destination in copy action does not have location type.\n");
+      if(!(dynamic_cast<int_expr*>(n)))
+	throw std::runtime_error("Length of copy must be of type int.\n");
+
+      return cxt.make_copy_action(src, dst, n);
     }
     
     if(*action_name == "set") {

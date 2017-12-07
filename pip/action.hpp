@@ -49,12 +49,13 @@ namespace pip
   /// variable (e.g., ingress port)?
   struct copy_action : action
   {
-    copy_action(expr* src, expr* dst)
-      : action(ak_copy), src(src), dst(dst)
+    copy_action(expr* src, expr* dst, int_expr* n)
+      : action(ak_copy), src(src), dst(dst), n(n)
     { }
     
     expr* src;
     expr* dst;
+    int_expr* n;
   };
 
   /// Set a value of a packet field.

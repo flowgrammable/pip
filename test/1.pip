@@ -3,7 +3,8 @@
     (actions
       (copy
         (offset header (int i32 96) (int i32 16))
-        (offset key (int i32 0) (int i32 16))) ; eth.type -> key
+        (offset key (int i32 0) (int i32 16)) ; eth.type -> key
+	(int i32 16))
       (match)
     )
     (rules

@@ -71,7 +71,7 @@ namespace pip
     case ak_advance:
       return new advance_action(parm_a);
     case ak_copy:
-      return new copy_action(parm_a, parm_b);
+      throw std::runtime_error("Use of deprecated make_action function >:(\n");
     case ak_set:
       return new set_action(parm_a, parm_b);
     case ak_write:
@@ -89,6 +89,11 @@ namespace pip
     default:
       throw std::runtime_error("Unexpected action\n");
     }
+  }
+
+  action* context::make_copy_action(expr* src, expr* dst, expr* n)
+  {
+    return new copy_action(src, dst, static_cast<int_expr*>(n));
   }
 }
   

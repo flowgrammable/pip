@@ -31,6 +31,8 @@ namespace pip
     
     /// The type of the expression.
     type* ty;
+
+    virtual ~expr() {}
   };
   
   /// An integer literal.
@@ -41,6 +43,9 @@ namespace pip
     { }
     
     int val;
+
+    ~int_expr()
+    { }
   };
   
   // A range literal denoting values in the range [lo, hi].
@@ -52,6 +57,8 @@ namespace pip
     
     int lo;
     int hi;
+
+    ~range_expr() {}
   };
   
   // A numbered port.
@@ -62,6 +69,8 @@ namespace pip
     { }
     
     int port_num;
+
+    ~port_expr() {}
   };
 
   /// A wildcard literal denoting all values k satisfying
@@ -76,6 +85,8 @@ namespace pip
     
     int val;
     int mask;
+
+    ~wild_expr() {}
   };
   
   /// The 'miss' literal.
@@ -84,6 +95,8 @@ namespace pip
     miss_expr(type* t)
       : expr(ek_miss, t)
     { }
+
+    ~miss_expr() {}
   };
   
   /// A reference to a declared value. Note that references are resolved
@@ -99,6 +112,8 @@ namespace pip
 
     /// The referenced declaration.
     decl* ref;
+
+    ~ref_expr() {}
   };
   
   /// A reference to a packet header.
@@ -110,6 +125,8 @@ namespace pip
     field_expr(expr_kind k, type* t)
       : expr(k, t)
     { }
+
+    ~field_expr() {}
   };
   
   struct offset_expr : expr
@@ -121,6 +138,8 @@ namespace pip
     symbol* space;
     expr* pos;
     expr* len;
+
+    ~offset_expr() {}
   };
 
 // -------------------------------------------------------------------------- //
