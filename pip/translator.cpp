@@ -168,7 +168,7 @@ namespace pip
     if(*action_name == "advance") {
       expr* amount;
       match_list(e, "advance", &amount);
-      return cxt.make_action(ak_advance, amount);
+      return cxt.make_advance_action(amount);
     }
     
     if(*action_name == "copy") {
@@ -193,36 +193,40 @@ namespace pip
       expr* f;
       expr* v;
       match_list(e, "set", &f, &v);
-      return cxt.make_action(ak_set, f, v);
+      return cxt.make_set_action(f, v);
     }
     
     if(*action_name == "write") {
       action* a;
       match_list(e, "write", &a);
       
-      return cxt.make_action(ak_write, nullptr, nullptr, a);
+      return cxt.make_write_action(a);
     }
     
-    if(*action_name == "clear")
-      return cxt.make_action(ak_clear);
-    
-    if( *action_name == "drop" )
-      return cxt.make_action(ak_drop);
-    if( *action_name == "match" )
-      return cxt.make_action(ak_match);
-    
-    if( *action_name == "goto" ) {
+    if(*action_name == "clear") {
+      return cxt.make_clear_action();
+    }
+
+    if(*action_name == "drop") {
+      return cxt.make_drop_action();
+    }
+
+    if(*action_name == "match") {
+      return cxt.make_match_action();
+    }
+
+    if(*action_name == "goto") {
       expr* dst;
       match_list(e, "goto", &dst);
-      
-      return cxt.make_action(ak_goto, dst);
+
+      return cxt.make_goto_action(dst);
     }
     
     if( *action_name == "output" ) {
       expr* dst;
       match_list(e, "output", &dst);
       
-      return cxt.make_action(ak_output, dst);
+      return cxt.make_output_action(dst);
     }
     
     sexpr::throw_unexpected_term(e);

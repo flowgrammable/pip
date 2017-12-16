@@ -67,6 +67,7 @@ namespace pip
   action*
   context::make_action(action_kind k, expr* parm_a, expr* parm_b, action* a)
   {
+    throw std::runtime_error("Do not use this make_action function.\n");
     switch(k) {
     case ak_advance:
       return new advance_action(parm_a);
@@ -91,9 +92,49 @@ namespace pip
     }
   }
 
+  action* context::make_advance_action(expr* amount)
+  {
+    return new advance_action(amount);
+  }
+  
   action* context::make_copy_action(expr* src, expr* dst, expr* n)
   {
     return new copy_action(src, dst, static_cast<int_expr*>(n));
+  }
+
+  action* context::make_set_action(expr* f, expr* v)
+  {
+    return new set_action(f, v);
+  }
+
+  action* context::make_write_action(action* act)
+  {
+    return new write_action(act);
+  }
+
+  action* context::make_clear_action()
+  {
+    return new clear_action();
+  }
+  
+  action* context::make_drop_action()
+  {
+    return new drop_action();
+  }
+  
+  action* context::make_match_action()
+  {
+    return new match_action();
+  }
+  
+  action* context::make_goto_action(expr* table)
+  {
+    return new goto_action(table);
+  }
+  
+  action* context::make_output_action(expr* p)
+  {
+    return new output_action(p);
   }
 }
   
