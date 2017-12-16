@@ -1,5 +1,6 @@
 #include "evaluator.hpp"
 #include "action.hpp"
+#include "expr.hpp"
 
 namespace pip
 {
@@ -82,19 +83,49 @@ namespace pip
   void
   evaluator::eval_advance(const advance_action* a)
   {
+    const auto n = static_cast<int_expr*>(a->amount);
+    int amount = n->val;
 
+    decode += amount;
   }
 
   void
   evaluator::eval_copy(const copy_action* a)
   {
+    auto src_loc = static_cast<offset_expr*>(a->src);
+    auto dst_loc = static_cast<offset_expr*>(a->dst);
+    auto n = a->n->val;
 
+    auto src_pos = static_cast<int_expr*>(src_loc->pos);
+    auto src_len = static_cast<int_expr*>(src_loc->len);
+    auto dst_pos = static_cast<int_expr*>(dst_loc->pos);
+    auto dst_len = static_cast<int_expr*>(dst_loc->len);
+
+    if(*(src_loc->space) == "key")
+      throw std::runtime_error("Cannot copy from a key register.\n");
+
+    if(n > dst_len->val || n > src_len->val)
+      throw std::runtime_error("Copy action overflows buffer.\n");
+
+    for(int i = 0; i < n; ++i)
+    {
+      
+    }
   }
 
   void
   evaluator::eval_set(const set_action* a)
   {
+    const auto loc = static_cast<offset_expr*>(a->f);
+    const auto pos_expr = static_cast<int_expr*>(loc->pos);
+    const auto len_expr = static_cast<int_expr*>(loc->len);
+    const int position = pos_expr->val;
+    const int length = len_expr->val;
 
+    for(int i = position; (position - i) < length; ++i) {
+      
+    }
+    
   }
 
   void
