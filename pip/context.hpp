@@ -44,15 +44,15 @@ namespace pip
 			expr* parm_b = nullptr,
 			action* a = nullptr);
 
-    action* make_advance_action(expr* amount);
-    action* make_copy_action(expr* src, expr* dst, expr* n);
-    action* make_set_action(expr* f, expr* v);
-    action* make_write_action(action* act);
-    action* make_clear_action();
-    action* make_drop_action();
-    action* make_match_action();
-    action* make_goto_action(expr* table);
-    action* make_output_action(expr* p);
+    action* make_advance_action(expr* amount) const;
+    action* make_copy_action(expr* src, expr* dst, expr* n) const;
+    action* make_set_action(expr* f, expr* v) const;
+    action* make_write_action(action* act) const;
+    action* make_clear_action() const;
+    action* make_drop_action() const;
+    action* make_match_action() const;
+    action* make_goto_action(expr* table) const;
+    action* make_output_action(expr* p) const;
     
   private:
     /// The diagnostic manager.

@@ -92,47 +92,47 @@ namespace pip
     }
   }
 
-  action* context::make_advance_action(expr* amount)
+  action* context::make_advance_action(expr* amount) const
   {
     return new advance_action(amount);
   }
   
-  action* context::make_copy_action(expr* src, expr* dst, expr* n)
+  action* context::make_copy_action(expr* src, expr* dst, expr* n) const
   {
     return new copy_action(src, dst, static_cast<int_expr*>(n));
   }
 
-  action* context::make_set_action(expr* f, expr* v)
+  action* context::make_set_action(expr* f, expr* v) const
   {
     return new set_action(f, v);
   }
 
-  action* context::make_write_action(action* act)
+  action* context::make_write_action(action* act) const
   {
     return new write_action(act);
   }
 
-  action* context::make_clear_action()
+  action* context::make_clear_action() const
   {
     return new clear_action();
   }
   
-  action* context::make_drop_action()
+  action* context::make_drop_action() const
   {
     return new drop_action();
   }
   
-  action* context::make_match_action()
+  action* context::make_match_action() const
   {
     return new match_action();
   }
   
-  action* context::make_goto_action(expr* table)
+  action* context::make_goto_action(expr* table) const
   {
     return new goto_action(table);
   }
   
-  action* context::make_output_action(expr* p)
+  action* context::make_output_action(expr* p) const
   {
     return new output_action(p);
   }
