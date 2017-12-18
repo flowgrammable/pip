@@ -1,6 +1,7 @@
 #include "evaluator.hpp"
 #include "action.hpp"
 #include "expr.hpp"
+#include "decode.hpp"
 
 namespace pip
 {
@@ -16,8 +17,16 @@ namespace pip
       keyreg(), 
       decode()
   {
-    // TOOD: Perform static initialization. We need to evaluate all of
+    eth_header eth(data);
+    ipv4_header ipv4(eth);
+    tcp_header tcp(ipv4);
+
+    // TODO: Is this actually the physical port?
+    ingress_port = ntohs(tcp.src_port);
+    
+    // TODO: Perform static initialization. We need to evaluate all of
     // the table definitions to load them with their static rules.
+    
 
     // TODO: Load the instructions from the first table.
   }
