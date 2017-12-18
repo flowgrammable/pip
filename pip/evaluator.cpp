@@ -36,7 +36,7 @@ namespace pip
   const action*
   evaluator::fetch()
   {
-    action* a = eval.front();
+    const action* a = eval.front();
     eval.pop_front();
     return a;
   }
@@ -128,22 +128,19 @@ namespace pip
   void
   evaluator::eval_set(const set_action* a)
   {
+    // TODO: Until fields are implemented, this action is the same as copy.
+    // No reason to implement it.
     const auto loc = static_cast<offset_expr*>(a->f);
     const auto pos_expr = static_cast<int_expr*>(loc->pos);
     const auto len_expr = static_cast<int_expr*>(loc->len);
-    const int position = pos_expr->val;
-    const int length = len_expr->val;
-
-    for(int i = position; (position - i) < length; ++i) {
-      
-    }
-    
+    std::size_t position = pos_expr->val;
+    std::size_t length = len_expr->val;    
   }
 
   void
   evaluator::eval_write(const write_action* a)
-  {
-
+  {;
+    eval.push_back(a);
   }
 
   void

@@ -8,7 +8,7 @@
 namespace pip
 {
   /// A queue of instructions.
-  using action_queue = std::deque<action*>;
+  using action_queue = std::deque<const action*>;
 
 
   /// Evaluates a pipeline for a single packet.
@@ -83,6 +83,9 @@ namespace pip
 
     /// The sequence of actions to execute on egress.
     action_seq actions;
+
+    /// A copy of the frame to be modified throughough the evaluator.
+    unsigned char* modified_buffer;
 
     /// The sequence of actions being evaluated. Each action is fetched from
     /// the queue in turn. On table lookup, the action list for the matched 
