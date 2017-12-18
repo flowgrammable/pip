@@ -17,9 +17,11 @@ namespace pip
       keyreg(), 
       decode()
   {
-    eth_header eth(data);
-    ipv4_header ipv4(eth);
-    tcp_header tcp(ipv4);
+    std::memcpy(modified_buffer, pkt.data(), pkt.size());
+    
+    cap::eth_header eth(data);
+    cap::ipv4_header ipv4(eth);
+    cap::tcp_header tcp(ipv4);
 
     // TODO: Is this actually the physical port?
     ingress_port = ntohs(tcp.src_port);
@@ -116,10 +118,11 @@ namespace pip
     if(n > dst_len->val || n > src_len->val)
       throw std::runtime_error("Copy action overflows buffer.\n");
 
-    for(int i = 0; i < n; ++i)
-    {
-      
-    }
+    if(src_len != dst_len != n)
+      throw std::runtime_error
+	("Length of copy source and destination must be equal.\n");
+
+    std::memcpy(modified_buffer + dst_pos->val, data.data() + src_pos->val, n);
   }
 
   void
