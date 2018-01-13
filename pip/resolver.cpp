@@ -4,6 +4,7 @@
 #include "expr.hpp"
 
 #include <sstream>
+#include <iostream> 
 
 namespace pip
 {

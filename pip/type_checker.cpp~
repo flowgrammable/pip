@@ -1,0 +1,9 @@
+#include "type_checker.hpp"
+
+void type_checker::check()
+{
+  for(auto d : decls)
+  {
+    check(d);
+  }
+}

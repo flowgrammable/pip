@@ -62,9 +62,6 @@ namespace cap
     ipv4_header(const eth_header& eth)
       :eth(eth)
     {
-      // ensure this is an ipv4 packet
-      assert(ntohs(eth.ethertype) == 0x0800);
-
       std::memcpy(&vhl, eth.pkt.data() + SIZE_ETHERNET, 1);      
       std::memcpy(&tos, eth.pkt.data() + SIZE_ETHERNET + 1, 1);
       std::memcpy(&len, eth.pkt.data() + SIZE_ETHERNET + 2, 2);
@@ -156,6 +153,36 @@ namespace cap
    
   private:
     ipv4_header& ipv4;
+  };
+
+  /// A structure representing a decoded packet with utilities for modificaiton.
+  struct decoded_packet
+  {
+    virtual ~decoded_packet() {}
+
+    virtual void set_output_port(int port) = 0;
+    virtual int get_input_port() const = 0;
+  };
+
+  struct tcp_ipv4 : decoded_packet
+  {
+    tcp_ipv4(eth_header eth, ipv4_header ipv4, tcp_header tcp)
+      :eth(eth), ipv4(ipv4), tcp(tcp)
+    { }
+    
+    void set_output_port(int port)
+    {
+      // TODO: implement some kind of error checking on this cast
+      tcp.dst_port = (uint16_t)port;
+    }
+
+    int get_input_port() const
+    { return tcp.src_port; }
+    
+  private:
+    eth_header eth;
+    ipv4_header ipv4;
+    tcp_header tcp;    
   };
 } // namespace cap
 } // namespace pip

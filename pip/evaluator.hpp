@@ -4,6 +4,7 @@
 #include <pip/pcap.hpp>
 
 #include <deque>
+#include "decode.hpp"
 
 namespace pip
 {
@@ -27,6 +28,8 @@ namespace pip
   public:
     evaluator(context& cxt, decl* prog, cap::packet& pkt);
 
+    ~evaluator();
+
     /// Returns true if the program is finished.
     bool done() const { return eval.empty(); }
     
@@ -49,6 +52,7 @@ namespace pip
     void eval_match(const match_action* a);
     void eval_goto(const goto_action* a);
     void eval_output(const output_action* a);
+    
 
   private:
     /// Various program facilities.
@@ -72,6 +76,9 @@ namespace pip
     /// The physical port on which the packet arrived.
     std::uint32_t physical_port;
 
+    /// The port on which the packet will be outputted after processing.
+    std::uint32_t egress_port;
+
     /// Dynamic metadata. This can be written to by copy actions.
     std::uint64_t metadata;
 
@@ -84,8 +91,11 @@ namespace pip
     /// The sequence of actions to execute on egress.
     action_seq actions;
 
-    /// A copy of the frame to be modified throughough the evaluator.
+    /// A copy of the frame to be modified throughout the evaluator.
     unsigned char* modified_buffer;
+
+    /// Newer implementation of modified_buffer
+    cap::decoded_packet* modified_data;
 
     /// The sequence of actions being evaluated. Each action is fetched from
     /// the queue in turn. On table lookup, the action list for the matched 
@@ -100,7 +110,14 @@ namespace pip
     /// end up dropping a rule while it is being executed. In order to avoid
     /// that scenario, we simply copy instructions into the queue.
     action_queue eval;
+
+    /// A list of all tables in the program.
+    std::vector<decl*> tables;
+
+    /// The table currently being examined.
+    table_decl* current_table = nullptr;
   };
 
 
 } // namespace pip
+

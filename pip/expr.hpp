@@ -66,7 +66,9 @@ namespace pip
   {
     port_expr(type* t, int p)
       :expr(ek_port, t), port_num(p)
-    { }
+    {
+      assert(p <= 1 << 16);
+    }
     
     int port_num;
 

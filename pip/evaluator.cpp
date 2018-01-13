@@ -2,10 +2,32 @@
 #include "action.hpp"
 #include "expr.hpp"
 #include "decode.hpp"
+#include "type.hpp"
+#include "decl.hpp"
 
 namespace pip
 {
+  static cap::decoded_packet* create_modified_packet(const cap::packet& pkt)
+  {
+    cap::eth_header eth(pkt);
 
+    // type == ipv4
+    if(eth.ethertype = 0x800)
+    {
+      cap::ipv4_header ipv4(eth);
+
+      // protocol == tcp
+      if(ipv4.protocol == 6)
+      {
+	cap::tcp_header tcp(ipv4);
+	return new cap::tcp_ipv4(eth, ipv4, tcp);
+      }
+	
+    }
+
+    throw std::runtime_error("Unsupported protocol.\n");
+  }
+  
   evaluator::evaluator(context& cxt, decl* prog, cap::packet& pkt)
     : cxt(cxt), 
       prog(prog), 
@@ -17,26 +39,48 @@ namespace pip
       keyreg(), 
       decode()
   {
+    modified_buffer = new unsigned char[pkt.size()];
     std::memcpy(modified_buffer, pkt.data(), pkt.size());
     
-    cap::eth_header eth(data);
-    cap::ipv4_header ipv4(eth);
-    cap::tcp_header tcp(ipv4);
-
-    // TODO: Is this actually the physical port?
-    ingress_port = ntohs(tcp.src_port);
+    modified_data = create_modified_packet(pkt);
+    ingress_port = ntohs(modified_data->get_input_port());
+    
     
     // TODO: Perform static initialization. We need to evaluate all of
     // the table definitions to load them with their static rules.
-    
+    // note (Sam): is this comment referring to rules as in a rule_seq,
+    // or the match rule (exact/wildcard/etc.)? Does it really make
+    // sense to make either static?
+    auto program = static_cast<program_decl*>(prog);
+    std::vector<decl*> tables;
+    for(auto declaration : program->decls)
+      if(auto t = dynamic_cast<table_decl*>(declaration))
+	tables.push_back(t);
+
+    // for(auto t : tables) {
+    //   for(auto rule : t->rules) {
+	
+    //   }
+    // }
 
     // TODO: Load the instructions from the first table.
+    current_table = static_cast<table_decl*>(tables.front());
+    for(auto a : current_table->prep)
+      eval.push_back(a);
+  }
+
+  evaluator::~evaluator()
+  {
+    if(modified_buffer)
+      delete[] modified_buffer;
   }
 
   const action*
   evaluator::fetch()
   {
     const action* a = eval.front();
+    if(a)
+      std::cout << "there is an action in eval\n";
     eval.pop_front();
     return a;
   }
@@ -121,56 +165,120 @@ namespace pip
     if(src_len != dst_len != n)
       throw std::runtime_error
 	("Length of copy source and destination must be equal.\n");
-
-    std::memcpy(modified_buffer + dst_pos->val, data.data() + src_pos->val, n);
+    std::memcpy(modified_buffer + dst_pos->val, data.data() + src_pos->val, n / 8);
   }
 
   void
   evaluator::eval_set(const set_action* a)
   {
-    // TODO: Until fields are implemented, this action is the same as copy.
-    // No reason to implement it.
     const auto loc = static_cast<offset_expr*>(a->f);
     const auto pos_expr = static_cast<int_expr*>(loc->pos);
-    const auto len_expr = static_cast<int_expr*>(loc->len);
+
+    const auto val_expr = static_cast<int_expr*>(a->v);
+
+    int val = val_expr->val;
+    std::size_t val_width = static_cast<int_type*>(val_expr->ty)->width;    
     std::size_t position = pos_expr->val;
-    std::size_t length = len_expr->val;    
+
+    // Determine the amount of bits that can be represented within bytes
+    std::size_t even_bits = val_width - (val_width - (val_width % 8));
+
+    // Determine the amount of bits that remain after the end of a byte
+    // (or the entire value if val_width < 8).
+    std::size_t odd_bits = val_width % 8;
+
+    auto buf = data.data();
+    // buf.position
   }
 
   void
   evaluator::eval_write(const write_action* a)
-  {;
+  {
     eval.push_back(a);
   }
 
   void
   evaluator::eval_clear(const clear_action* a)
   {
-
+    eval.clear();
   }
 
   void
   evaluator::eval_drop(const drop_action* a)
   {
-
+    actions.clear();
   }
 
   void
   evaluator::eval_match(const match_action* a)
   {
+    // Terminate processing if one of the rules is applicable.
+    bool matched = false;
+    
+    // If one of the rules matches the key register, then add
+    // that rule's action list to the action list for egress processing.
+    for(auto r : current_table->rules)
+    {
+      auto key = r->key;
 
+      while(!matched)
+      {
+	switch(get_kind(key))
+	{
+	case ek_int:
+	{
+	  auto key_val = static_cast<int_expr*>(key)->val;
+	  if(keyreg == key_val)
+	    for(auto a : r->acts)
+	      actions.push_back(a);
+	  matched = true;
+	  break;
+	}
+	case ek_port:
+	{
+	  auto key_val = static_cast<port_expr*>(key)->port_num;
+	  if(keyreg == key_val)
+	    for(auto a : r->acts)
+	      actions.push_back(a);
+	  matched = true;
+	  break;
+	}
+	case ek_miss:
+	{
+	  for(auto a : r->acts)
+	    actions.push_back(a);
+	  matched = true;
+	  break;
+	}
+	default:
+	  throw std::runtime_error("Rule key type does not match table kind.\n");
+	  break;
+	}
+      }
+    }
   }
+
 
   void
   evaluator::eval_goto(const goto_action* a)
   {
+    // goto is a terminator action; eval must be empty at this point for this
+    // program to be well formed.
+    assert(eval.empty());
+    
+    decl* dst = static_cast<ref_expr*>(a->dest)->ref;
+    current_table = static_cast<table_decl*>(dst);
 
+    for(auto a : current_table->prep)
+      eval.push_back(a);
   }
 
   void
   evaluator::eval_output(const output_action* a)
   {
+    const port_expr* port = static_cast<port_expr*>(a->port);
 
+    modified_data->set_output_port(port->port_num);
   }
 
 

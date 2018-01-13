@@ -7,6 +7,7 @@ add_library(libpip
   context.cpp
   dumper.cpp
   translator.cpp
+  type_checker.cpp
   resolver.cpp
   evaluator.cpp
   pcap.cpp)
