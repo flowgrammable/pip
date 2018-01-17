@@ -5,6 +5,11 @@
 #include "type.hpp"
 #include "decl.hpp"
 
+#include <climits>
+
+// testing only
+#include <iostream>
+
 namespace pip
 {
   static cap::decoded_packet* create_modified_packet(const cap::packet& pkt)
@@ -102,25 +107,25 @@ namespace pip
     
     const action* a = fetch();
     switch (get_kind(a)) {
-      ak_advance:
+      case ak_advance:
         return eval_advance(cast<advance_action>(a));
-      ak_copy:
+      case ak_copy:
         return eval_copy(cast<copy_action>(a));
-      ak_set:
+      case ak_set:
         return eval_set(cast<set_action>(a));
-      ak_write:
+      case ak_write:
         return eval_write(cast<write_action>(a));
-      ak_clear:
+      case ak_clear:
         return eval_clear(cast<clear_action>(a));
-      ak_drop:
+      case ak_drop:
         return eval_drop(cast<drop_action>(a));
-      ak_match:
+      case ak_match:
         return eval_match(cast<match_action>(a));
-      ak_goto:
+      case ak_goto:
         return eval_goto(cast<goto_action>(a));
-      ak_output:
+      case ak_output:
         return eval_output(cast<output_action>(a));
-      
+        
       default:
         break;   
     }
@@ -144,6 +149,49 @@ namespace pip
     decode += amount;
   }
 
+  // generate a bitmask over a specified range
+  // credit to: ...
+  template<typename R>
+  static constexpr R
+  bitfieldmask(unsigned int const a, unsigned int const b)
+  {
+    return ((static_cast<R>(-1) >> (((sizeof(R) * CHAR_BIT) - 1) - (b)))
+	    & ~((1 << (a)) - 1));	 
+  }
+
+  // copy n bits from position pos in the data buffer into the key register
+  static std::uint64_t
+  data_to_key_reg(std::uint8_t* bytes, std::size_t pos, std::size_t n)
+  {
+    std::uint64_t reg = 0;
+    std::size_t starting_byte = (pos < CHAR_BIT)
+      ? 0 : ((pos - (pos % CHAR_BIT)) / CHAR_BIT);
+    std::size_t even_bytes = (n - (n % CHAR_BIT)) / CHAR_BIT;
+    std::size_t remainder = n - even_bytes * CHAR_BIT;
+
+    for(std::size_t i = 0; i < even_bytes; ++i)
+      if(remainder)
+	reg |= (std::uint64_t)bytes[starting_byte + i]
+	  << (CHAR_BIT * (even_bytes - i));
+      else
+	reg |= (std::uint64_t)bytes[starting_byte + i]
+	  << (CHAR_BIT * (even_bytes - i - 1));
+
+    if(remainder) 
+      reg |= (std::uint64_t)bytes[even_bytes];
+
+    // mask out anything before the first bit
+    if(pos % CHAR_BIT != 0) {
+      std::size_t a = n - pos;
+      std::size_t b = n;
+      auto mask = bitfieldmask<std::uint64_t>(a, b);
+
+      reg = (reg & ~mask);
+    }
+
+    return reg;
+  }
+  
   void
   evaluator::eval_copy(const copy_action* a)
   {
@@ -162,10 +210,20 @@ namespace pip
     if(n > dst_len->val || n > src_len->val)
       throw std::runtime_error("Copy action overflows buffer.\n");
 
-    if(src_len != dst_len != n)
+    if(src_len->val != dst_len->val)
       throw std::runtime_error
 	("Length of copy source and destination must be equal.\n");
-    std::memcpy(modified_buffer + dst_pos->val, data.data() + src_pos->val, n / 8);
+
+    if(*(dst_loc->space) == "key") {
+      keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
+    }
+    else if(*(src_loc->space) == "header")
+      return;
+    else if(*(src_loc->space) == "meta")
+      return;
+    else if(*(src_loc->space) == "packet")
+      return;
+    
   }
 
   void
@@ -212,48 +270,45 @@ namespace pip
   void
   evaluator::eval_match(const match_action* a)
   {
-    // Terminate processing if one of the rules is applicable.
-    bool matched = false;
+    //TODO: Terminate after one match has been made?
     
     // If one of the rules matches the key register, then add
-    // that rule's action list to the action list for egress processing.
+    // that rule's action list to the action list for egress processing.    
     for(auto r : current_table->rules)
     {
       auto key = r->key;
+      std::cout << "keyreg: " << std::hex << keyreg << '\n';
 
-      while(!matched)
+      switch(get_kind(key))
       {
-	switch(get_kind(key))
-	{
-	case ek_int:
-	{
-	  auto key_val = static_cast<int_expr*>(key)->val;
-	  if(keyreg == key_val)
-	    for(auto a : r->acts)
-	      actions.push_back(a);
-	  matched = true;
-	  break;
-	}
-	case ek_port:
-	{
-	  auto key_val = static_cast<port_expr*>(key)->port_num;
-	  if(keyreg == key_val)
-	    for(auto a : r->acts)
-	      actions.push_back(a);
-	  matched = true;
-	  break;
-	}
-	case ek_miss:
-	{
+      case ek_int:
+      {
+	std::cout << "int rule matched\n";
+	auto key_val = static_cast<int_expr*>(key)->val;
+	if(keyreg == key_val)
 	  for(auto a : r->acts)
 	    actions.push_back(a);
-	  matched = true;
-	  break;
-	}
-	default:
-	  throw std::runtime_error("Rule key type does not match table kind.\n");
-	  break;
-	}
+	break;
+      }
+      case ek_port:
+      {
+	std::cout << "port rule matched\n";
+	auto key_val = static_cast<port_expr*>(key)->port_num;
+	if(keyreg == key_val)
+	  for(auto a : r->acts)
+	    actions.push_back(a);
+	break;
+      }
+      case ek_miss:
+      {
+	std::cout << "missed\n";
+	for(auto a : r->acts)
+	  actions.push_back(a);
+	break;
+      }
+      default:
+	throw std::runtime_error("Rule key type does not match table kind.\n");
+	break;
       }
     }
   }
