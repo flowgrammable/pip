@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <cassert>
+#include <algorithm>
 
 #include <netinet/in.h>
 
@@ -20,187 +21,198 @@
 namespace pip
 {
 namespace cap
-{
+{  
   /// Ethernet decoders: read only access to the fields of an ethernet frame ///
   
-  inline const std::vector<unsigned char>
+  inline const std::uint64_t
   ethernet_dst_mac(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(SIZE_MAC_ADDR);
-    std::memcpy(&ret[0], buf, SIZE_MAC_ADDR);
-    return ret;
+    unsigned char copy[SIZE_MAC_ADDR];
+    std::memcpy(copy, buf, SIZE_MAC_ADDR);
+
+    std::uint64_t addr = 0;
+    for(std::size_t i = 0; i < SIZE_MAC_ADDR; ++i)
+      addr |= std::uint64_t(copy[i]) << (8 * (SIZE_MAC_ADDR - 1) - (i * 8));    
+    
+    return addr;
   }
 
-  inline const std::vector<unsigned char>
+  inline const std::uint64_t
   ethernet_src_mac(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(SIZE_MAC_ADDR);
-    std::memcpy(&ret[0], buf + SIZE_MAC_ADDR, SIZE_MAC_ADDR);
-    return ret;
+    unsigned char copy[SIZE_MAC_ADDR];
+    std::memcpy(copy, buf + SIZE_MAC_ADDR, SIZE_MAC_ADDR);
+
+    std::uint64_t addr = 0;
+    for(std::size_t i = 0; i < SIZE_MAC_ADDR; ++i)
+      addr |= std::uint64_t(copy[i]) << (8 * (SIZE_MAC_ADDR - 1) - (i * 8));
+
+    return addr;
   }
 
-  inline const std::vector<unsigned char>
-  ethernet_ethertype(unsigned char* buf)
+  inline const std::uint16_t
+  ethernet_ethertype(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(SIZE_ETHERTYPE);
-    std::memcpy(&ret[0], buf + 2 * SIZE_MAC_ADDR, SIZE_ETHERTYPE);
-    return ret;
+    std::uint16_t ethertype;
+    std::memcpy(&ethertype, buf + 2 * SIZE_MAC_ADDR, SIZE_ETHERTYPE);
+    
+    return ntohs(ethertype);
   } 
 
   /// IPv4 decoders: read only access to the fields of an IPv4 header ///
 
-  inline const std::vector<unsigned char>
-  ipv4_vhl(unsigned char* buf)
+  inline const std::uint8_t
+  ipv4_vhl(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(1);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET, 1);
-    return ret;
+    std::uint8_t vhl;
+    std::memcpy(&vhl, buf + SIZE_ETHERNET, 1);
+    return vhl;
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_tos(unsigned char* buf)
+  inline const std::uint8_t
+  ipv4_tos(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(1);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 1, 1);
-    return ret;
+    std::uint8_t tos;
+    std::memcpy(&tos, buf + SIZE_ETHERNET + 1, 1);
+    return tos;
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_len(unsigned char* buf)
+  inline const std::uint16_t
+  ipv4_len(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 2, 2);
-    return ret;
+    std::uint16_t len;
+    std::memcpy(&len, buf + SIZE_ETHERNET + 2, 2);
+    return ntohs(len);
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_id(unsigned char* buf)
+  inline const std::uint16_t
+  ipv4_id(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 4, 2);
-    return ret;
+    std::uint16_t id;
+    std::memcpy(&id, buf + SIZE_ETHERNET + 4, 2);
+    return ntohs(id);
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_frag_offset(unsigned char* buf)
+  inline const std::uint16_t
+  ipv4_frag_offset(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 6, 2);
-    return ret;
+    std::uint16_t frag_offset;
+    std::memcpy(&frag_offset, buf + SIZE_ETHERNET + 6, 2);
+    return frag_offset;
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_ttl(unsigned char* buf)
+  inline const std::uint8_t
+  ipv4_ttl(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(1);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 8, 1);
-    return ret;
+    std::uint8_t ttl;
+    std::memcpy(&ttl, buf + SIZE_ETHERNET + 8, 1);
+    return ttl;
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_protocol(unsigned char* buf)
+  inline const std::uint8_t
+  ipv4_protocol(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(1);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 9, 1);
-    return ret;
+    std::uint8_t protocol;
+    std::memcpy(&protocol, buf + SIZE_ETHERNET + 9, 1);
+    return protocol;
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_checksum(unsigned char* buf)
+  inline const std::uint16_t
+  ipv4_checksum(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 10, 2);
-    return ret;
+    std::uint16_t checksum;
+    std::memcpy(&checksum, buf + SIZE_ETHERNET + 10, 2);
+    return checksum;
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_src_addr(unsigned char* buf)
+  inline const std::uint32_t
+  ipv4_src_addr(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(4);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 12, 4);
-    return ret;
+    std::uint32_t src_addr;
+    std::memcpy(&src_addr, buf + SIZE_ETHERNET + 12, 4);
+    return ntohl(src_addr);
   }
 
-  inline const std::vector<unsigned char>
-  ipv4_dst_addr(unsigned char* buf)
+  inline const std::uint32_t
+  ipv4_dst_addr(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(4);
-    std::memcpy(&ret[0], buf + SIZE_ETHERNET + 16, 4);
-    return ret;
+    std::uint32_t dst_addr;
+    std::memcpy(&dst_addr, buf + SIZE_ETHERNET + 16, 4);
+    return ntohl(dst_addr);
   }
 
   /// IPv4/TCP decoders: getter functions for a TCP segment of an IPv4 packet
 
-  inline const std::vector<unsigned char>
-  tcp_src_port(unsigned char* buf)
+  inline const std::uint16_t
+  tcp_src_port(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_IPv4, 2);
-    return ret;
+    std::uint16_t port;
+    std::memcpy(&port, buf + SIZE_IPv4, 2);
+    return ntohs(port);
   }
 
-  inline const std::vector<unsigned char>
-  tcp_dst_port(unsigned char* buf)
+  inline const std::uint16_t
+  tcp_dst_port(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 2, 2);
-    return ret;
+    std::uint16_t port;
+    std::memcpy(&port, buf + SIZE_IPv4 + 2, 2);
+    return ntohs(port);
   }
 
-  inline const std::vector<unsigned char>
-  tcp_seq(unsigned char* buf)
+  inline const std::uint32_t
+  tcp_seq(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(4);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 4, 4);
-    return ret;
+    std::uint32_t seq;
+    std::memcpy(&seq, buf + SIZE_IPv4 + 4, 4);
+    return ntohl(seq);;
   }
 
-  inline const std::vector<unsigned char>
-  tcp_ack(unsigned char* buf)
+  inline const std::uint32_t
+  tcp_ack(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(4);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 8, 4);
-    return ret;
+    std::uint32_t ack;
+    std::memcpy(&ack, buf + SIZE_IPv4 + 8, 4);
+    return ntohl(ack);
   }
 
-  inline const std::vector<unsigned char>
-  tcp_offset(unsigned char* buf)
+  inline const std::uint8_t
+  tcp_offset(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(1);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 12, 1);
-    return ret;
+    std::uint8_t offset;
+    std::memcpy(&offset, buf + SIZE_IPv4 + 12, 1);
+    return offset;
   }
 
-  inline const std::vector<unsigned char>
-  tcp_flags(unsigned char* buf)
+  inline const std::uint8_t
+  tcp_flags(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(1);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 13, 1);
-    return ret;
+    std::uint8_t flags;
+    std::memcpy(&flags, buf + SIZE_IPv4 + 13, 1);
+    return flags;
   }
 
-  inline const std::vector<unsigned char>
-  tcp_window(unsigned char* buf)
+  inline const std::uint16_t
+  tcp_window(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 14, 2);
-    return ret;
+    std::uint16_t window;
+    std::memcpy(&window, buf + SIZE_IPv4 + 14, 2);
+    return ntohs(window);
   }
 
-  inline const std::vector<unsigned char>
-  tcp_checksum(unsigned char* buf)
+  inline const std::uint16_t
+  tcp_checksum(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 16, 2);
-    return ret;
+    std::uint16_t checksum;
+    std::memcpy(&checksum, buf + SIZE_IPv4 + 16, 2);
+    return ntohs(checksum);
   }
 
-  inline const std::vector<unsigned char>
-  tcp_urgent_ptr(unsigned char* buf)
+  inline const std::uint16_t
+  tcp_urgent_ptr(const unsigned char* buf)
   {
-    std::vector<unsigned char> ret(2);
-    std::memcpy(&ret[0], buf + SIZE_IPv4 + 18, 2);
-    return ret;
+    std::uint16_t ptr;
+    std::memcpy(&ptr, buf + SIZE_IPv4 + 18, 2);
+    return ntohs(ptr);
   }
   
   struct eth_header
