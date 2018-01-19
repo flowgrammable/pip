@@ -44,6 +44,11 @@ namespace pip
       keyreg(), 
       decode()
   {
+    assert(cap::ethernet_ethertype(pkt.data()) == 0x800  &&
+	   "Non-ethernet frames are not supported.\n");
+    assert(cap::ipv4_protocol(pkt.data()) == 0x06 &&
+	   "Non-TCP packets are not supported.\n");
+    
     modified_buffer = new unsigned char[pkt.size()];
     std::memcpy(modified_buffer, pkt.data(), pkt.size());
     
