@@ -8,6 +8,7 @@
 #include <vector>
 #include <cassert>
 #include <algorithm>
+#include <iterator>
 
 #include <netinet/in.h>
 
@@ -57,7 +58,46 @@ namespace cap
     std::memcpy(&ethertype, buf + 2 * SIZE_MAC_ADDR, SIZE_ETHERTYPE);
     
     return ntohs(ethertype);
-  } 
+  }
+
+  /// Ethernet setters
+
+  inline void
+  set_ethernet_dst_mac(unsigned char* buf, std::uint64_t value)
+  {
+    // ensure value can be expressed in 48 bits
+    assert(value <= 0xffffffffffff);
+
+    // convert the value into a byte array
+    unsigned char value_array[SIZE_MAC_ADDR];
+    std::memcpy(value_array, &value, SIZE_MAC_ADDR);
+    // reverse to account for endianness
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf, value_array, SIZE_MAC_ADDR);
+  }
+
+  inline void
+  set_ethernet_src_mac(unsigned char* buf, std::uint64_t value)
+  {
+    assert(value <= 0xffffffffffff);
+    
+    unsigned char value_array[SIZE_MAC_ADDR];
+    std::memcpy(value_array, &value, SIZE_MAC_ADDR);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_MAC_ADDR, value_array, SIZE_MAC_ADDR);
+  }
+
+  inline void
+  set_ethernet_ethertype(unsigned char* buf, std::uint16_t value)
+  {
+    unsigned char value_array[SIZE_ETHERTYPE];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_MAC_ADDR * 2, value_array, SIZE_ETHERTYPE);
+  }  
 
   /// IPv4 decoders: read only access to the fields of an IPv4 header ///
 
@@ -141,6 +181,104 @@ namespace cap
     return ntohl(dst_addr);
   }
 
+  /// IPv4 header setters
+
+  inline void
+  set_ipv4_vhl(unsigned char* buf, std::uint8_t value)
+  {
+    unsigned char value_array;
+    std::memcpy(&value_array, &value, 1);
+    
+    std::memcpy(buf + SIZE_ETHERNET, &value_array, 1);
+  }
+
+  inline void
+  set_ipv4_tos(unsigned char* buf, std::uint8_t value)
+  {
+    unsigned char value_array;
+    std::memcpy(&value_array, &value, 1);
+    
+    std::memcpy(buf + SIZE_ETHERNET + 1, &value_array, 1);
+  }
+
+  inline void
+  set_ipv4_len(unsigned char* buf, std::uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + 2, value_array, 2);
+  }
+
+  inline void
+  set_ipv4_id(unsigned char* buf, std::uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + 4, value_array, 2);
+  }
+
+  inline void
+  set_ipv4_frag_offset(unsigned char* buf, std::uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + 6, value_array, 2);
+  }
+
+  inline void
+  set_ipv4_ttl(unsigned char* buf, std::uint8_t value)
+  {
+    unsigned char value_array;
+    std::memcpy(&value_array, &value, 1);
+    
+    std::memcpy(buf + SIZE_ETHERNET + 8, &value_array, 1);
+  }
+
+  inline void
+  set_ipv4_protocol(unsigned char* buf, std::uint8_t value)
+  {
+    unsigned char value_array;
+    std::memcpy(&value_array, &value, 1);
+    
+    std::memcpy(buf + SIZE_ETHERNET + 9, &value_array, 1);
+  }
+
+  inline void
+  set_ipv4_checksum(unsigned char* buf, std::uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + 10, value_array, 2);
+  }
+
+  inline void
+  set_ipv4_src_addr(unsigned char* buf, std::uint32_t value)
+  {
+    unsigned char value_array[4];
+    std::memcpy(value_array, &value, 4);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + 12, value_array, 4);
+  }
+
+  inline void
+  set_ipv4_dst_addr(unsigned char* buf, std::uint32_t value)
+  {
+    unsigned char value_array[4];
+    std::memcpy(value_array, &value, 4);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + 16, value_array, 4);
+  }
+
   /// IPv4/TCP decoders: getter functions for a TCP segment of an IPv4 packet
 
   inline const std::uint16_t
@@ -213,6 +351,96 @@ namespace cap
     std::uint16_t ptr;
     std::memcpy(&ptr, buf + SIZE_IPv4 + 18, 2);
     return ntohs(ptr);
+  }
+
+  /// IPv4/TCP setters
+
+  inline void
+  set_tcp_src_port(unsigned char* buf, uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4, value_array, 2);
+  }
+
+  inline void
+  set_tcp_dst_port(unsigned char* buf, uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 2, value_array, 2);
+  }
+
+  inline void
+  set_tcp_seq(unsigned char* buf, uint32_t value)
+  {
+    unsigned char value_array[4];
+    std::memcpy(value_array, &value, 4);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 4, value_array, 4);
+  }
+
+  inline void
+  set_tcp_ack(unsigned char* buf, uint32_t value)
+  {
+    unsigned char value_array[4];
+    std::memcpy(value_array, &value, 4);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 8, value_array, 4);
+  }
+
+  inline void
+  set_tcp_offset(unsigned char* buf, uint8_t value)
+  {
+    unsigned char value_array;
+    std::memcpy(&value_array, &value, 1);
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 12, &value_array, 1);
+  }
+
+  inline void
+  set_tcp_flags(unsigned char* buf, uint8_t value)
+  {
+    unsigned char value_array;
+    std::memcpy(&value_array, &value, 1);
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 13, &value_array, 1);
+  }
+
+  inline void
+  set_tcp_window(unsigned char* buf, uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 14, value_array, 2);
+  }
+
+  inline void
+  set_tcp_checksum(unsigned char* buf, uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 16, value_array, 2);
+  }
+
+  inline void
+  set_tcp_urgent_ptr(unsigned char* buf, uint16_t value)
+  {
+    unsigned char value_array[2];
+    std::memcpy(value_array, &value, 2);
+    std::reverse(std::begin(value_array), std::end(value_array));
+    
+    std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 18, value_array, 2);
   }
   
   struct eth_header
