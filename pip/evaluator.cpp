@@ -159,7 +159,7 @@ namespace pip
   static std::uint64_t
   data_to_key_reg(std::uint8_t* bytes, std::size_t pos, std::size_t n)
   {
-    const std::uint8_t* ptr = bytes + pos / CHAR_BIT;
+    const std::uint8_t* current_byte = bytes + pos / CHAR_BIT;
     std::uint64_t reg = 0;
 
     std::size_t offset = pos % CHAR_BIT;
@@ -167,7 +167,7 @@ namespace pip
     // If the copy begins between two whole bytes,
     if(offset > 0) {
       // copy the specified bits.
-      reg = *(ptr++) & (0xFF >> (offset));
+      reg = *(current_byte++) & (0xff >> offset);
 
       // If there is nothing else to copy, shift off any excess and return.
       if(n <= CHAR_BIT - offset)
@@ -179,13 +179,13 @@ namespace pip
 
     // Copy all remaining whole bytes.
     while(n >= CHAR_BIT) {
-      reg = (reg << CHAR_BIT) + *(ptr++);
+      reg = (reg << CHAR_BIT) + *(current_byte++);
       n -= CHAR_BIT;
     }
 
     // If some fraction of a byte remains to be copied, copy it.
     if(n > 0)
-      reg = (reg << n) + (*ptr >> (CHAR_BIT - n));
+      reg = (reg << n) + (*current_byte >> (CHAR_BIT - n));
 	
     return reg;
   }
@@ -195,13 +195,13 @@ namespace pip
   bitwise_copy(std::uint8_t* dst, std::uint8_t const * src,
 	       std::size_t pos, std::size_t n)
   {
-    std::uint8_t* ptr = dst + (pos / CHAR_BIT);
+    std::uint8_t* current_byte = dst + (pos / CHAR_BIT);
     std::size_t i = 0;
 
     // if the copy begins in between two whole bytes
     if(pos % CHAR_BIT > 0) {
       // copy just what is needed
-      *ptr |= src[i] & (0xFF >> (pos % CHAR_BIT));    
+      *current_byte |= src[i] & (0xFF >> (pos % CHAR_BIT));    
 
       // if there is nothing else to copy, terminate
       if(n <= CHAR_BIT - pos % CHAR_BIT)
@@ -211,19 +211,19 @@ namespace pip
       else
 	n -= CHAR_BIT - pos % CHAR_BIT;
 
-      ++ptr;
+      ++current_byte;
       // note that we have already accessed the first element of src
       ++i;
     }
 
     // copy all whole bytes that remain
     for(; n >= CHAR_BIT; n -= CHAR_BIT, ++i)
-      *ptr++ = src[i];
+      *current_byte++ = src[i];
 
     // if there is a remainder of less than CHAR_BIT bits,
     // copy just that portion of the byte.
     if(n > 0) {
-      *ptr |= src[i] & (0xff << (CHAR_BIT - n));
+      *current_byte |= src[i] & (0xff << (CHAR_BIT - n));
     }  
   }
   
@@ -278,11 +278,11 @@ namespace pip
   reg_to_buf(std::uint8_t* bytes, std::uint64_t in,
 	     std::size_t pos, std::size_t n)
   {
-    std::uint8_t* ptr = bytes + pos / CHAR_BIT;
+    std::uint8_t* current_byte = bytes + pos / CHAR_BIT;
     std::size_t offset = pos % CHAR_BIT;
 
     if(offset > 0) {
-      *ptr++ = (std::uint8_t)in & (0xff >> offset);
+      *current_byte++ = (std::uint8_t)in & (0xff >> offset);
 
       if(n <= CHAR_BIT - offset)
 	return;
@@ -293,13 +293,13 @@ namespace pip
     }
 
     while(n >= CHAR_BIT) {
-      *ptr++ = (std::uint8_t)in & 0xff;
+      *current_byte++ = (std::uint8_t)in & 0xff;
       in >>= 8;
       n -= CHAR_BIT;
     }
 
     if(n > 0)
-      *ptr = (in << (CHAR_BIT - n)) + (*ptr >> n);
+      *current_byte = (in << (CHAR_BIT - n)) + (*current_byte >> n);
   }
 
   void
