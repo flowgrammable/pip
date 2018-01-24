@@ -53,25 +53,16 @@ namespace pip
     std::memcpy(modified_buffer, pkt.data(), pkt.size());
     
     modified_data = create_modified_packet(pkt);
-    ingress_port = ntohs(modified_data->get_input_port());
+    ingress_port = cap::tcp_src_port(pkt.data());
     
     
     // TODO: Perform static initialization. We need to evaluate all of
     // the table definitions to load them with their static rules.
-    // note (Sam): is this comment referring to rules as in a rule_seq,
-    // or the match rule (exact/wildcard/etc.)? Does it really make
-    // sense to make either static?
     auto program = static_cast<program_decl*>(prog);
     std::vector<decl*> tables;
     for(auto declaration : program->decls)
       if(auto t = dynamic_cast<table_decl*>(declaration))
 	tables.push_back(t);
-
-    // for(auto t : tables) {
-    //   for(auto rule : t->rules) {
-	
-    //   }
-    // }
 
     // TODO: Load the instructions from the first table.
     current_table = static_cast<table_decl*>(tables.front());
@@ -164,37 +155,76 @@ namespace pip
 	    & ~((1 << (a)) - 1));	 
   }
 
-  // copy n bits from position pos in the data buffer into the key register
+  // Copy n bits from position pos in a byte array into a 64-bit integer.
   static std::uint64_t
   data_to_key_reg(std::uint8_t* bytes, std::size_t pos, std::size_t n)
   {
+    const std::uint8_t* ptr = bytes + pos / CHAR_BIT;
     std::uint64_t reg = 0;
-    std::size_t starting_byte = (pos < CHAR_BIT)
-      ? 0 : ((pos - (pos % CHAR_BIT)) / CHAR_BIT);
-    std::size_t even_bytes = (n - (n % CHAR_BIT)) / CHAR_BIT;
-    std::size_t remainder = n - even_bytes * CHAR_BIT;
 
-    for(std::size_t i = 0; i < even_bytes; ++i)
-      if(remainder)
-	reg |= (std::uint64_t)bytes[starting_byte + i]
-	  << (CHAR_BIT * (even_bytes - i));
+    std::size_t offset = pos % CHAR_BIT;
+
+    // If the copy begins between two whole bytes,
+    if(offset > 0) {
+      // copy the specified bits.
+      reg = *(ptr++) & (0xFF >> (offset));
+
+      // If there is nothing else to copy, shift off any excess and return.
+      if(n <= CHAR_BIT - offset)
+	return reg >> (CHAR_BIT - offset - n);
+      // Remove the copied bits from n.
       else
-	reg |= (std::uint64_t)bytes[starting_byte + i]
-	  << (CHAR_BIT * (even_bytes - i - 1));
-
-    if(remainder) 
-      reg |= (std::uint64_t)bytes[even_bytes];
-
-    // mask out anything before the first bit
-    if(pos % CHAR_BIT != 0) {
-      std::size_t a = n - pos;
-      std::size_t b = n;
-      auto mask = bitfieldmask<std::uint64_t>(a, b);
-
-      reg = (reg & ~mask);
+	n -= CHAR_BIT - offset;
     }
 
+    // Copy all remaining whole bytes.
+    while(n >= CHAR_BIT) {
+      reg = (reg << CHAR_BIT) + *(ptr++);
+      n -= CHAR_BIT;
+    }
+
+    // If some fraction of a byte remains to be copied, copy it.
+    if(n > 0)
+      reg = (reg << n) + (*ptr >> (CHAR_BIT - n));
+	
     return reg;
+  }
+
+  // Copy n bits from one byte array to another, starting at position pos.
+  static void
+  bitwise_copy(std::uint8_t* dst, std::uint8_t const * src,
+	       std::size_t pos, std::size_t n)
+  {
+    std::uint8_t* ptr = dst + (pos / CHAR_BIT);
+    std::size_t i = 0;
+
+    // if the copy begins in between two whole bytes
+    if(pos % CHAR_BIT > 0) {
+      // copy just what is needed
+      *ptr |= src[i] & (0xFF >> (pos % CHAR_BIT));    
+
+      // if there is nothing else to copy, terminate
+      if(n <= CHAR_BIT - pos % CHAR_BIT)
+	return;
+      // otherwise, even out n to start on the next whole byte
+      // (n is now a multiple of CHAR_BIT)
+      else
+	n -= CHAR_BIT - pos % CHAR_BIT;
+
+      ++ptr;
+      // note that we have already accessed the first element of src
+      ++i;
+    }
+
+    // copy all whole bytes that remain
+    for(; n >= CHAR_BIT; n -= CHAR_BIT, ++i)
+      *ptr++ = src[i];
+
+    // if there is a remainder of less than CHAR_BIT bits,
+    // copy just that portion of the byte.
+    if(n > 0) {
+      *ptr |= src[i] & (0xff << (CHAR_BIT - n));
+    }  
   }
   
   void
@@ -220,15 +250,56 @@ namespace pip
 	("Length of copy source and destination must be equal.\n");
 
     if(*(dst_loc->space) == "key") {
-      keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
+      if(*(src_loc->space) == "packet")
+	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
+      else if(*(src_loc->space) == "header")
+	keyreg = data_to_key_reg((std::uint8_t*)data.data() + SIZE_ETHERNET, src_pos->val, src_len->val);
+      else if(*(src_loc->space) == "meta")
+	throw std::runtime_error("Unimplemented.\n");
     }
-    else if(*(src_loc->space) == "header")
+    else if(*(dst_loc->space) == "header") {
+      if(*(src_loc->space) == "packet")
+	bitwise_copy(modified_buffer + SIZE_ETHERNET, (std::uint8_t*)data.data(), dst_pos->val, dst_len->val);	
+      else if(*(src_loc->space) == "meta")
+	throw std::runtime_error("Unimplemented.\n");
+    }
+    else if(*(dst_loc->space) == "meta")
       return;
-    else if(*(src_loc->space) == "meta")
-      return;
-    else if(*(src_loc->space) == "packet")
+    else if(*(dst_loc->space) == "packet")
+      if(*(src_loc->space) == "header")
+	bitwise_copy(modified_buffer, packet_header(data), dst_pos->val, dst_len->val);
       return;
     
+  }
+
+  // Copy n bits from a uint64_t into a byte array at position pos.
+  // See data_to_key_reg and bitwise_copy for further documentation.
+  static void
+  reg_to_buf(std::uint8_t* bytes, std::uint64_t in,
+	     std::size_t pos, std::size_t n)
+  {
+    std::uint8_t* ptr = bytes + pos / CHAR_BIT;
+    std::size_t offset = pos % CHAR_BIT;
+
+    if(offset > 0) {
+      *ptr++ = (std::uint8_t)in & (0xff >> offset);
+
+      if(n <= CHAR_BIT - offset)
+	return;
+      else
+	n -= CHAR_BIT - offset;
+
+      in >>= offset;
+    }
+
+    while(n >= CHAR_BIT) {
+      *ptr++ = (std::uint8_t)in & 0xff;
+      in >>= 8;
+      n -= CHAR_BIT;
+    }
+
+    if(n > 0)
+      *ptr = (in << (CHAR_BIT - n)) + (*ptr >> n);
   }
 
   void
@@ -239,19 +310,11 @@ namespace pip
 
     const auto val_expr = static_cast<int_expr*>(a->v);
 
-    int val = val_expr->val;
+    std::uint64_t value = val_expr->val;
     std::size_t val_width = static_cast<int_type*>(val_expr->ty)->width;    
     std::size_t position = pos_expr->val;
 
-    // Determine the amount of bits that can be represented within bytes
-    std::size_t even_bits = val_width - (val_width - (val_width % 8));
-
-    // Determine the amount of bits that remain after the end of a byte
-    // (or the entire value if val_width < 8).
-    std::size_t odd_bits = val_width % 8;
-
-    auto buf = data.data();
-    // buf.position
+    reg_to_buf(modified_buffer, value, position, val_width);
   }
 
   void

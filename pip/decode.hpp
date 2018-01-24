@@ -22,7 +22,7 @@
 namespace pip
 {
 namespace cap
-{  
+{ 
   /// Ethernet decoders: read only access to the fields of an ethernet frame ///
   
   inline const std::uint64_t
@@ -65,9 +65,6 @@ namespace cap
   inline void
   set_ethernet_dst_mac(unsigned char* buf, std::uint64_t value)
   {
-    // ensure value can be expressed in 48 bits
-    assert(value <= 0xffffffffffff);
-
     // convert the value into a byte array
     unsigned char value_array[SIZE_MAC_ADDR];
     std::memcpy(value_array, &value, SIZE_MAC_ADDR);
@@ -80,8 +77,6 @@ namespace cap
   inline void
   set_ethernet_src_mac(unsigned char* buf, std::uint64_t value)
   {
-    assert(value <= 0xffffffffffff);
-    
     unsigned char value_array[SIZE_MAC_ADDR];
     std::memcpy(value_array, &value, SIZE_MAC_ADDR);
     std::reverse(std::begin(value_array), std::end(value_array));
@@ -441,6 +436,21 @@ namespace cap
     std::reverse(std::begin(value_array), std::end(value_array));
     
     std::memcpy(buf + SIZE_ETHERNET + SIZE_IPv4 + 18, value_array, 2);
+  }
+
+  /// Address space accessors
+  inline const unsigned char*
+  packet_header(packet const& pkt)
+  {
+    // Size of just the IPv4 header (the Ethernet frame, TCP segment,
+    // and payload are removed).
+    std::size_t header_size = pkt.size() - SIZE_ETHERNET
+      - (pkt.size() - SIZE_ETHERNET - SIZE_IPv4);
+    
+    auto header = new unsigned char[header_size];
+    std::memcpy(header, pkt.data() + SIZE_ETHERNET, header_size);
+
+    return header;
   }
   
   struct eth_header

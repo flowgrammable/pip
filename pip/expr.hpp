@@ -2,6 +2,8 @@
 
 #include <pip/syntax.hpp>
 
+#include <cstdint>
+
 // Expressions are operands of match criteria and actions. Currently, we
 // only support literal values and references to declarations in these
 // positions. In the future, we might extend this to support a broader
@@ -42,7 +44,7 @@ namespace pip
       : expr(ek_int, t), val(n)
     { }
     
-    int val;
+    std::uint64_t val;
 
     ~int_expr()
     { }
