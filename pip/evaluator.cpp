@@ -6,7 +6,7 @@
 #include "decl.hpp"
 
 #include <climits>
-
+#include <sstream>
 // testing only
 #include <iostream>
 
@@ -250,24 +250,59 @@ namespace pip
 	("Length of copy source and destination must be equal.\n");
 
     if(*(dst_loc->space) == "key") {
-      if(*(src_loc->space) == "packet")
+      if(n > 64) {
+	std::stringstream ss;
+	ss << "Attempting to copy " << n << " bits into a register of size 64.\n";
+	throw std::runtime_error(ss.str().c_str());
+      }
+      
+      if(*(src_loc->space) == "packet") {	
 	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
-      else if(*(src_loc->space) == "header")
+      }
+
+      else if(*(src_loc->space) == "header") {
 	keyreg = data_to_key_reg((std::uint8_t*)data.data() + SIZE_ETHERNET, src_pos->val, src_len->val);
+      }
+      
       else if(*(src_loc->space) == "meta")
 	throw std::runtime_error("Unimplemented.\n");
     }
+    
     else if(*(dst_loc->space) == "header") {
-      if(*(src_loc->space) == "packet")
-	bitwise_copy(modified_buffer + SIZE_ETHERNET, (std::uint8_t*)data.data(), dst_pos->val, dst_len->val);	
+      if(*(src_loc->space) == "packet") {
+	if((dst_len->val + dst_pos->val) > (data.size() - SIZE_ETHERNET)) {
+	  std::stringstream ss;
+	  ss << "Cannot write beyond buffer. Attempting to copy ";
+	  ss << dst_len->val;
+	  ss << " bits at position ";
+	  ss << dst_pos->val;
+	  ss << " of a buffer of size ";
+	  ss << data.size() - SIZE_ETHERNET;
+	  throw std::runtime_error(ss.str().c_str());
+	}
+	
+	bitwise_copy(modified_buffer + SIZE_ETHERNET, (std::uint8_t*)data.data(), dst_pos->val, dst_len->val);
+      }
       else if(*(src_loc->space) == "meta")
 	throw std::runtime_error("Unimplemented.\n");
     }
     else if(*(dst_loc->space) == "meta")
       return;
     else if(*(dst_loc->space) == "packet")
-      if(*(src_loc->space) == "header")
+      if(*(src_loc->space) == "header") {
+	if(dst_len->val + dst_pos->val > data.size()) {
+	  std::stringstream ss;
+	  ss << "Cannot write beyond buffer. Attempting to copy ";
+	  ss << dst_len->val;
+	  ss << " bits at position ";
+	  ss << dst_pos->val;
+	  ss << " of a buffer of size ";
+	  ss << data.size();
+	  throw std::runtime_error(ss.str().c_str());
+	}
+	
 	bitwise_copy(modified_buffer, packet_header(data), dst_pos->val, dst_len->val);
+      }
       return;
     
   }
@@ -313,6 +348,17 @@ namespace pip
     std::uint64_t value = val_expr->val;
     std::size_t val_width = static_cast<int_type*>(val_expr->ty)->width;    
     std::size_t position = pos_expr->val;
+
+    if(val_width + position > data.size()) {
+      std::stringstream ss;
+      ss << "Cannot write beyond buffer. Attempting to write a value of ";
+      ss << val_width;
+      ss << " bits at position ";
+      ss << position;
+      ss << " of a buffer of size ";
+      ss << data.size();
+      throw std::runtime_error(ss.str().c_str());
+    }
 
     reg_to_buf(modified_buffer, value, position, val_width);
   }
