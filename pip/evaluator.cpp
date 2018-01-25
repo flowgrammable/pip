@@ -4,6 +4,7 @@
 #include "decode.hpp"
 #include "type.hpp"
 #include "decl.hpp"
+#include "dumper.hpp"
 
 #include <climits>
 #include <sstream>
@@ -143,17 +144,9 @@ namespace pip
     int amount = n->val;
 
     decode += amount;
-  }
 
-  // generate a bitmask over a specified range
-  // credit to: ...
-  template<typename R>
-  static constexpr R
-  bitfieldmask(unsigned int const a, unsigned int const b)
-  {
-    return ((static_cast<R>(-1) >> (((sizeof(R) * CHAR_BIT) - 1) - (b)))
-	    & ~((1 << (a)) - 1));	 
-  }
+    std::cout << "Decode: " << decode << '\n';
+  }  
 
   // Copy n bits from position pos in a byte array into a 64-bit integer.
   static std::uint64_t
@@ -262,10 +255,13 @@ namespace pip
 
       else if(*(src_loc->space) == "header") {
 	keyreg = data_to_key_reg((std::uint8_t*)data.data() + SIZE_ETHERNET, src_pos->val, src_len->val);
+	
       }
       
       else if(*(src_loc->space) == "meta")
 	throw std::runtime_error("Unimplemented.\n");
+
+      std::cout << "Copy " << n << " bits to key register. Register value: " << keyreg << '\n';
     }
     
     else if(*(dst_loc->space) == "header") {
@@ -285,10 +281,13 @@ namespace pip
       }
       else if(*(src_loc->space) == "meta")
 	throw std::runtime_error("Unimplemented.\n");
+
+      std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into header. Header value: (unimplemented)\n";
+      // TODO: print(header);
     }
     else if(*(dst_loc->space) == "meta")
       return;
-    else if(*(dst_loc->space) == "packet")
+    else if(*(dst_loc->space) == "packet") {
       if(*(src_loc->space) == "header") {
 	if(dst_len->val + dst_pos->val > data.size()) {
 	  std::stringstream ss;
@@ -303,8 +302,10 @@ namespace pip
 	
 	bitwise_copy(modified_buffer, packet_header(data), dst_pos->val, dst_len->val);
       }
-      return;
-    
+
+      std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into packet. packet value: (unimplemented)\n";
+      // TODO: print(packet);
+    }    
   }
 
   // Copy n bits from a uint64_t into a byte array at position pos.
@@ -361,29 +362,37 @@ namespace pip
     }
 
     reg_to_buf(modified_buffer, value, position, val_width);
+
+    std::cout << "Set " << val_width << " bits of packet to " << value << ". Value of packet: (unimplemented).\n";
   }
 
   void
   evaluator::eval_write(const write_action* a)
   {
     eval.push_back(a);
+    std::cout << "Write action:\n";
+    dumper d(std::cout);
+    d(a);
   }
 
   void
   evaluator::eval_clear(const clear_action* a)
   {
     eval.clear();
+    std::cout << "Clear.\n";
   }
 
   void
   evaluator::eval_drop(const drop_action* a)
   {
     actions.clear();
+    std::cout << "Drop.\n";
   }
 
   void
   evaluator::eval_match(const match_action* a)
   {
+    std::cout << "Match\n";
     //TODO: Terminate after one match has been made?
     
     // If one of the rules matches the key register, then add
@@ -397,7 +406,7 @@ namespace pip
       {
       case ek_int:
       {
-	std::cout << "int rule matched\n";
+	std::cout << "Integer matched\n";
 	auto key_val = static_cast<int_expr*>(key)->val;
 	if(keyreg == key_val)
 	  for(auto a : r->acts)
@@ -406,7 +415,7 @@ namespace pip
       }
       case ek_port:
       {
-	std::cout << "port rule matched\n";
+	std::cout << "Port matched\n";
 	auto key_val = static_cast<port_expr*>(key)->port_num;
 	if(keyreg == key_val)
 	  for(auto a : r->acts)
@@ -415,7 +424,7 @@ namespace pip
       }
       case ek_miss:
       {
-	std::cout << "missed\n";
+	std::cout << "Packet missed\n";	
 	for(auto a : r->acts)
 	  actions.push_back(a);
 	break;
@@ -440,6 +449,8 @@ namespace pip
 
     for(auto a : current_table->prep)
       eval.push_back(a);
+
+    std::cout << "Goto table: " << current_table << '\n';
   }
 
   void
@@ -448,6 +459,7 @@ namespace pip
     const port_expr* port = static_cast<port_expr*>(a->port);
 
     modified_data->set_output_port(port->port_num);
+    std::cout << "Output to port: " << port->port_num << '\n';
   }
 
 
