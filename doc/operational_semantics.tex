@@ -1,0 +1,161 @@
+\documentclass{article}
+\usepackage{backnaur}
+\usepackage{amsmath}
+
+\begin{document}
+\section{Operational Semantics}
+\subsection{Notation}
+The state of the evaluator, $\sigma$, consists of a \\
+packet, $\pi$\\
+action\_list, $\alpha$ \\
+stored\_action\_list, $\Lambda$ \\
+context, $\xi$, which is the tuple: \\
+$[ ingress\_port, \ egress\_port, \ physical\_port, \ key, \ meta, \ header\_offset, \ table ]$
+\\ \\
+$\pi$ can be introspected with angle brackets, $\langle \ \rangle$ \\
+$\xi$ can be introspected with square brackets, $\lbrack \ \rbrack$ \\
+$\alpha$ can be introspected with parentheses, ( ) \\
+$\Lambda$ can be introspected with $\Lambda$ following parenthesis, $\Lambda$( ) \\
+$\sigma$ can be introspected with curly braces, \{ \} \\
+\subsection{Operational Semantics 5-Tuple}
+$ pip = \langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle $\\
+IF = $program \times \pi \rightarrow CF$ \\
+CF = $\alpha \times \xi \times \pi$ \\
+$\Rightarrow$ = Defined in section ``Reduction Relation''. \\
+FC = $\pi \times \xi$ \\
+OF = $FC \rightarrow \textrm{serialization}$
+
+\subsection{Reduction Relation}
+\begin{equation}
+  (\textbf{\textrm{advance}} \ n)\textrm{,} \ [header\_offset], \ \bar \alpha \Rightarrow [header\_offset + n], \ \bar \alpha'
+\end{equation}
+
+\begin{equation}
+  (\textrm{\textbf{clear}}) \textrm{,} \ \Lambda \Rightarrow \Lambda()
+\end{equation}
+
+\begin{equation}
+  (\textrm{\textbf{drop})} \textrm{,} \ \sigma \Rightarrow \{ \}
+\end{equation}
+
+\begin{equation}
+  (\textrm{\textbf{write}} \ action), \ \Lambda \Rightarrow \Lambda \cdot action
+\end{equation}
+
+\begin{equation}
+  (\textrm{\textbf{goto}} \ table_t) \textrm{,} \ [table] \Rightarrow
+  [table_t]
+\end{equation}
+
+\begin{equation}
+  (\textrm{\textbf{set}} \ field \ value) \Rightarrow \langle field = value \rangle
+\end{equation}
+
+\begin{equation}
+  (\textrm{\textbf{output}} \ port) \textrm{,} \ [egress\_port] \Rightarrow
+  [egress\_port = port]
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst \rangle = [[meta, meta + n)] \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
+    \textrm{\textbf{packet}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst + [header\_offset] \rangle = \\
+  [[meta, meta + n)] \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
+    \textrm{\textbf{header}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [key] =
+  [[meta, meta + n)] \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
+    \textrm{\textbf{key}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst + [header\_offset] \rangle = [[meta, meta + n)] \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
+    \textrm{\textbf{header}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst \rangle = \langle [src, src + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
+    \textrm{\textbf{packet}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst + [header\_offset] \rangle =  \langle [src, src + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
+    \textrm{\textbf{header}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [key] =
+  \langle [src, src + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
+    \textrm{\textbf{key}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst + [header\_offset] \rangle = \\
+  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
+    \textrm{\textbf{header}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
+  dst \rangle = \\
+  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
+    \textrm{\textbf{packet}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [key] = \\
+  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
+    \textrm{\textbf{key}}
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [meta] = \\
+  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
+    \textrm{\textbf{meta}}
+\end{split}
+\end{equation}
+
+\end{document}
