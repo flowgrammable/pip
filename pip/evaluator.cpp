@@ -5,6 +5,8 @@
 #include "type.hpp"
 #include "decl.hpp"
 #include "dumper.hpp"
+#include "context.hpp"
+#include "logger.hpp"
 
 #include <climits>
 #include <sstream>
@@ -62,8 +64,15 @@ namespace pip
     auto program = static_cast<program_decl*>(prog);
     std::vector<decl*> tables;
     for(auto declaration : program->decls)
-      if(auto t = dynamic_cast<table_decl*>(declaration))
-	tables.push_back(t);
+      if(auto table = dynamic_cast<table_decl*>(declaration)) {
+	for(auto r : table->rules) {
+	  if(auto int_key = dynamic_cast<int_expr*>(r->key))
+	    table->key_table.insert(int_key->val);
+	  if(auto port_key = dynamic_cast<port_expr*>(r->key))
+	    table->key_table.insert(port_key->port_num);
+	}
+	tables.push_back(table);
+      }
 
     // TODO: Load the instructions from the first table.
     current_table = static_cast<table_decl*>(tables.front());
@@ -223,6 +232,7 @@ namespace pip
   void
   evaluator::eval_copy(const copy_action* a)
   {
+    cxt.get_diagnostics().inform(cc::location(), "Hello world");
     auto src_loc = static_cast<offset_expr*>(a->src);
     auto dst_loc = static_cast<offset_expr*>(a->dst);
     auto n = a->n->val;
@@ -392,45 +402,22 @@ namespace pip
   void
   evaluator::eval_match(const match_action* a)
   {
-    std::cout << "Match\n";
-    //TODO: Terminate after one match has been made?
+    // If one of the rules matches the key register, then evaluate
+    // that rule's action list.
     
-    // If one of the rules matches the key register, then add
-    // that rule's action list to the action list for egress processing.    
     for(auto r : current_table->rules)
     {
       auto key = r->key;
-      std::cout << "keyreg: " << std::hex << keyreg << '\n';
 
-      switch(get_kind(key))
-      {
-      case ek_int:
-      {
-	std::cout << "Integer matched\n";
-	auto key_val = static_cast<int_expr*>(key)->val;
-	if(keyreg == key_val)
-	  for(auto a : r->acts)
-	    actions.push_back(a);
-	break;
+      if(get_kind(key) == ek_miss) {
+      	std::cout << "packet missed.\n";
+      	eval.insert(eval.end(), r->acts.begin(), r->acts.end());
+      	break;
       }
-      case ek_port:
-      {
-	std::cout << "Port matched\n";
-	auto key_val = static_cast<port_expr*>(key)->port_num;
-	if(keyreg == key_val)
-	  for(auto a : r->acts)
-	    actions.push_back(a);
-	break;
-      }
-      case ek_miss:
-      {
-	std::cout << "Packet missed\n";	
-	for(auto a : r->acts)
-	  actions.push_back(a);
-	break;
-      }
-      default:
-	throw std::runtime_error("Rule key type does not match table kind.\n");
+
+      if(current_table->key_table.find(keyreg) != current_table->key_table.end()) {
+	std::cout << keyreg << " was matched in table.\n";
+	eval.insert(eval.end(), r->acts.begin(), r->acts.end());
 	break;
       }
     }
