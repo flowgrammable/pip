@@ -1,6 +1,8 @@
 #pragma once
 
 #include <pip/syntax.hpp>
+#include <functional>
+#include <unordered_set>
 
 namespace pip
 {
@@ -108,6 +110,9 @@ namespace pip
 
     /// The content of the action table.
     rule_seq rules;
+
+    /// A hash table to match keys for exact-match tables
+    std::unordered_set<std::uint64_t, std::hash<std::uint64_t>> key_table;
   };
 
   /// A flow metering device.
