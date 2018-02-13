@@ -119,19 +119,7 @@ namespace pip
 
     ~ref_expr() {}
   };
-  
-  /// A reference to a packet header.
-  ///
-  /// \todo These probably resolve to a function that can load the value
-  /// from a packet.
-  struct field_expr : expr
-  {
-    field_expr(expr_kind k, type* t)
-      : expr(k, t)
-    { }
-
-    ~field_expr() {}
-  };
+ 
   
   struct offset_expr : expr
   {
@@ -144,6 +132,32 @@ namespace pip
     expr* len;
 
     ~offset_expr() {}
+  };
+
+  /// A reference to a packet header.
+  ///
+  /// \todo These probably resolve to a function that can load the value
+  /// from a packet.
+  struct field_expr : expr
+  {
+    field_expr(expr_kind k, type* t)
+      : expr(k, t)
+    { }
+    
+    field_expr(expr_kind k, type* t, offset_expr* val)
+      : expr(k, t)
+    {
+      value = val;
+    }
+
+    field_expr(expr_kind k, type* t, symbol* field)
+      : expr(k, t), field(field)
+    { }
+
+    offset_expr* value;
+    symbol* field;
+
+    ~field_expr() {}
   };
 
 // -------------------------------------------------------------------------- //

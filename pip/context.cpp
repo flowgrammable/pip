@@ -1,6 +1,7 @@
 #include "context.hpp"
 #include "expr.hpp"
 #include "action.hpp"
+#include "type.hpp"
 
 namespace pip
 {
@@ -53,9 +54,9 @@ namespace pip
   }
   
   expr*
-  context::make_field_expr(type* t, expr_kind kind)
+  context::make_field_expr(type* t, symbol* field)
   {
-    return new field_expr(kind, t);
+    return new field_expr(ek_field, t, field);
   }
   
   expr*
@@ -65,9 +66,9 @@ namespace pip
   }
 
   expr*
-  context::make_offset_expr(type* t, symbol* space, expr* pos, expr* len)
+  context::make_offset_expr(symbol* space, expr* pos, expr* len)
   {
-    return new offset_expr(t, space, pos, len);
+    return new offset_expr(new loc_type, space, pos, len);
   }
   
 

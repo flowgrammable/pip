@@ -270,6 +270,8 @@ namespace pip
 	return trans_offset_expr(list);
       if (*sym == "miss")
 	return trans_miss_expr();
+      if (*sym == "field")
+	return trans_field_expr(list);
     }
   }
   
@@ -330,8 +332,12 @@ namespace pip
   }
   
   expr*
-  translator::trans_field_expr(const sexpr::id_expr* e)
+  translator::trans_field_expr(const sexpr::list_expr* e)
   {
+    symbol* field;
+    match_list(e, "field", &field);
+
+    return cxt.make_field_expr(new loc_type, field);
   }
   
   expr*
@@ -352,7 +358,7 @@ namespace pip
     
     match_list(e, "offset", &space, &pos, &len);
     
-    return cxt.make_offset_expr(new loc_type, space, pos, len);
+    return cxt.make_offset_expr(space, pos, len);
   }
   
   // When given an integer width specifier, such as i32,

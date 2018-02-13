@@ -450,6 +450,54 @@ namespace pip
     std::cout << "Output to port: " << port->port_num << '\n';
   }
 
+  std::uint64_t
+  evaluator::eval_field_expr(const field_expr* e)
+  {
+    const std::string field = *e->field;
+    if(field == "eth.dst")
+      return cap::ethernet_dst_mac(data.data());
+    else if(field == "eth.src")
+      return cap::ethernet_src_mac(data.data());
+    else if(field == "eth.type")
+      return cap::ethernet_ethertype(data.data());
+    else if(field == "ipv4.vhl")
+      return cap::ipv4_vhl(data.data());
+    else if(field == "ipv4.tos")
+      return cap::ipv4_tos(data.data());
+    else if(field == "ipv4.len")
+      return cap::ipv4_len(data.data());
+    else if(field == "ipv4.id")
+      return cap::ipv4_id(data.data());
+    else if(field == "ipv4.frag")
+      return cap::ipv4_frag_offset(data.data());
+    else if(field == "ipv4.ttl")
+      return cap::ipv4_ttl(data.data());
+    else if(field == "ipv4.protocol")
+      return cap::ipv4_protocol(data.data());
+    else if(field == "ipv4.checksum")
+      return cap::ipv4_checksum(data.data());
+    else if(field == "ipv4.src")
+      return cap::ipv4_src_addr(data.data());
+    else if(field == "ipv4.dst")
+      return cap::ipv4_dst_addr(data.data());
+    else if(field == "tcp.src")
+      return cap::tcp_src_port(data.data());
+    else if(field == "tcp.dst")
+      return cap::tcp_dst_port(data.data());
+    else if(field == "tcp.seq")
+      return cap::tcp_seq(data.data());
+    else if(field == "tcp.ack")
+      return cap::tcp_ack(data.data());
+    else if(field == "tcp.offset")
+      return cap::tcp_offset(data.data());
+    else if(field == "tcp.flags")
+      return cap::tcp_flags(data.data());
+    else if(field == "tcp.window")
+      return cap::tcp_window(data.data());
+    else if(field == "tcp.urgent_ptr")
+      return cap::tcp_urgent_ptr(data.data());
+  }
+
 
 
 } // namespace pip
