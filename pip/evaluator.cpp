@@ -432,13 +432,13 @@ namespace pip
     // program to be well formed.
     assert(eval.empty());
     
-    decl* dst = static_cast<ref_expr*>(a->dest)->ref;
-    current_table = static_cast<table_decl*>(dst);
+    ref_expr* dst = static_cast<ref_expr*>(a->dest);
+    current_table = static_cast<table_decl*>(dst->ref);
 
     for(auto a : current_table->prep)
       eval.push_back(a);
 
-    std::cout << "Goto table: " << current_table << '\n';
+    std::cout << "Goto table: " << *(dst->id) << '\n';
   }
 
   void

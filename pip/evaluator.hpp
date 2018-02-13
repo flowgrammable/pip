@@ -89,7 +89,7 @@ namespace pip
     std::uint32_t decode;
 
     /// The sequence of actions to execute on egress.
-    action_seq actions;
+    std::vector<const action*> actions;
 
     /// A copy of the frame to be modified throughout the evaluator.
     unsigned char* modified_buffer;
