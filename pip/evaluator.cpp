@@ -379,7 +379,7 @@ namespace pip
   void
   evaluator::eval_write(const write_action* a)
   {
-    eval.push_back(a);
+    actions.push_back(a);
     std::cout << "Write action:\n";
     dumper d(std::cout);
     d(a);
@@ -395,6 +395,7 @@ namespace pip
   void
   evaluator::eval_drop(const drop_action* a)
   {
+    eval.clear();
     actions.clear();
     std::cout << "Drop.\n";
   }
