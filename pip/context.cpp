@@ -63,7 +63,14 @@ namespace pip
   {
     return new port_expr(t, port_num);
   }
+
+  expr*
+  context::make_offset_expr(type* t, symbol* space, expr* pos, expr* len)
+  {
+    return new offset_expr(t, space, pos, len);
+  }
   
+
   action*
   context::make_action(action_kind k, expr* parm_a, expr* parm_b, action* a)
   {

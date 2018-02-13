@@ -117,7 +117,8 @@ namespace pip
       
       match_list(list, &key, &actions);
       
-      return new rule(rk_exact, key, std::move(actions));
+      auto r = new rule(rk_exact, key, std::move(actions));
+      return r;
     }
     
     sexpr::throw_unexpected_term(e);
@@ -132,7 +133,11 @@ namespace pip
     
     match_list(e, "rule", &key, &actions);
     
-    return new rule(rk_exact, key, std::move(actions));
+    auto r = new rule(rk_exact, key, std::move(actions));
+
+    dumper d(std::cout);
+    d(r);
+    return r;
   }
   
   
@@ -346,13 +351,8 @@ namespace pip
     expr* len;
     
     match_list(e, "offset", &space, &pos, &len);
-
-    // TODO: ensure safety of this operation
-    auto len_int = static_cast<int_expr*>(len);
-    auto len_ty = static_cast<int_type*>(len->ty);
-    auto len_width = len_ty->width;
     
-    return new offset_expr(new loc_type, space, pos, len);
+    return cxt.make_offset_expr(new loc_type, space, pos, len);
   }
   
   // When given an integer width specifier, such as i32,
@@ -387,7 +387,7 @@ namespace pip
     
     int w = deduce_int_type_width(width_specifier);
     
-    return cxt.make_int_expr( new int_type(w), value );
+    return cxt.make_int_expr( new int_type(w), value );    
   }
   
   // -------------------------------------------------------------------------- //
