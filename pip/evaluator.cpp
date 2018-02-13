@@ -446,7 +446,7 @@ namespace pip
   {
     const port_expr* port = static_cast<port_expr*>(a->port);
 
-    modified_data->set_output_port(port->port_num);
+    egress_port = port->port_num;
     std::cout << "Output to port: " << port->port_num << '\n';
   }
 
