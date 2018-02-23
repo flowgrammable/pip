@@ -1,65 +1,100 @@
 \documentclass{article}
-\usepackage{backnaur}
-\usepackage{amsmath}
+%% \usepackage{amsmath}
+\usepackage[fleqn]{amsmath}
+\usepackage{bbold}
 
 \begin{document}
 \section{Operational Semantics}
 \subsection{Notation}
-The state of the evaluator, $\sigma$, consists of a \\
+The state of the evaluator, $\sigma$, is the tuple consisting of \\
 packet, $\pi$\\
 action\_list, $\alpha$ \\
 stored\_action\_list, $\Lambda$ \\
-context, $\xi$, which is the tuple: \\
-$[ ingress\_port, \ egress\_port, \ physical\_port, \ key, \ meta, \ header\_offset, \ table ]$
+\textbf{context}, which is the tuple: \\
+$\langle ingress\_port, \ egress\_port, \ physical\_port, \ key, \ meta, \ header\_offset, \ table \rangle$ \\ \\
+Compactly, $\sigma = \langle \pi, \alpha, \Lambda, \textbf{\textrm{context}} \rangle$
 \\ \\
-$\pi$ can be introspected with angle brackets, $\langle \ \rangle$ \\
-$\xi$ can be introspected with square brackets, $\lbrack \ \rbrack$ \\
-$\alpha$ can be introspected with parentheses, ( ) \\
-$\Lambda$ can be introspected with $\Lambda$ following parenthesis, $\Lambda$( ) \\
-$\sigma$ can be introspected with curly braces, \{ \} \\
+We can examine or change the status of $\pi$ or \textbf{context} by using the index operator, []. The index itself is context-sensitive: $\pi$ is indexed by some \textit{field}, \textbf{context} is indexed by one of its substructures.
+A field in $\pi$ can be set to a literal value or copied from a bitfield or register. For example:
+\begin{equation}
+  \pi[\textit{field}] \leftarrow \textit{value}
+\end{equation}
+\begin{equation}
+  \pi[\textit{field}] \leftarrow \mathbb{r}
+\end{equation}
+\begin{equation}
+  \pi[\textit{field}] \leftarrow \textit{bitfield}
+\end{equation}
+
+Comments:
+\begin{enumerate}
+\item Field \textit{field} with a packet, $\pi$, is set to some literal value, \textit{value}.
+\item The value of register $\mathbb{r}$ is copied into \textit{field}.
+\item The value of some bitfield, \textit{bitfield} is copied into \textit{field}.
+\end{enumerate}
 \subsection{Operational Semantics 5-Tuple}
 $ pip = \langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle $\\
 IF = $program \times \pi \rightarrow CF$ \\
 CF = $\alpha \times \xi \times \pi$ \\
 $\Rightarrow$ = Defined in section ``Reduction Relation''. \\
-FC = $\pi \times \xi$ \\
+FC = $(\Lambda = \emptyset) \times \pi \times \textbf{\textrm{context}}\langle egress\_port \neq 0 \rangle $ \\
 OF = $FC \rightarrow \textrm{serialization}$
 
 \subsection{Reduction Relation}
+\setlength{\mathindent}{0pt}
 \begin{equation}
-  (\textbf{\textrm{advance}} \ n)\textrm{,} \ [header\_offset], \ \bar \alpha \Rightarrow [header\_offset + n], \ \bar \alpha'
+\begin{split}
+  (\textbf{\textrm{advance}} \ n)\textrm{,} \ \langle \pi, \ (\textrm{\textbf{advance}} \ \oplus \ \bar \alpha), \ \Lambda,
+  \ \textrm{\textbf{context}}[header\_offset] \rangle \\ \Rightarrow \langle \pi, \ \bar \alpha, \ \Lambda,
+  \ \textrm{\textbf{context}}[header\_offset + n] \rangle
+\end{split}
 \end{equation}
 
 \begin{equation}
-  (\textrm{\textbf{clear}}) \textrm{,} \ \Lambda \Rightarrow \Lambda()
+  (\textrm{\textbf{clear}}) \textrm{,} \ \langle \pi, \ (\textbf{\textrm{clear}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \ \textrm{\textbf{context}} \rangle
+  \Rightarrow \langle \pi, \ \bar \alpha, \ \emptyset, \  \textrm{\textbf{context}} \rangle
+\end{equation}
+
+\begin{equation}  
+  (\textrm{\textbf{drop})} \textrm{,} \ \langle \pi, \ (\textrm{\textbf{drop}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textbf{\textrm{context}} \rangle
+  \Rightarrow \langle \emptyset \rangle
 \end{equation}
 
 \begin{equation}
-  (\textrm{\textbf{drop})} \textrm{,} \ \sigma \Rightarrow \{ \}
+  (\textrm{\textbf{write}} \ action), \ \langle \pi, \ (\textrm{\textbf{write}} \ \oplus \ \bar \alpha), \ \bar \Lambda,
+  \textrm{\textbf{context}} \rangle \Rightarrow
+  \langle \pi, \ \bar \alpha, \ \bar \Lambda \cdot action, \textrm{\textbf{context}} \rangle
 \end{equation}
 
 \begin{equation}
-  (\textrm{\textbf{write}} \ action), \ \Lambda \Rightarrow \Lambda \cdot action
-\end{equation}
-
-\begin{equation}
-  (\textrm{\textbf{goto}} \ table_t) \textrm{,} \ [table] \Rightarrow
-  [table_t]
-\end{equation}
-
-\begin{equation}
-  (\textrm{\textbf{set}} \ field \ value) \Rightarrow \langle field = value \rangle
-\end{equation}
-
-\begin{equation}
-  (\textrm{\textbf{output}} \ port) \textrm{,} \ [egress\_port] \Rightarrow
-  [egress\_port = port]
+  (\textrm{\textbf{goto}} \ \tau) \textrm{,} \ \langle \pi, \ (\textrm{\textbf{goto}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textrm{\textbf{context}}[table] \rangle
+  \Rightarrow \langle \pi, \ \bar \alpha, \ \bar \Lambda, \textrm{\textbf{context}}[\tau] \rangle
 \end{equation}
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst \rangle = [[meta, meta + n)] \\ 
+  (\textrm{\textbf{set}} \ field \ value) \textrm{,} \ \langle \pi, (\textrm{\textbf{set}} \ \oplus \ \bar \alpha), \bar \Lambda,
+  \textbf{\textrm{context}}[field] \rangle \\
+  \Rightarrow \langle \pi, \bar \alpha, \bar \Lambda,
+  \textbf{\textrm{context}}[field] = value \rangle
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{output}} \ port) \textrm{,} \ \langle \pi, (\textrm{\textbf{output}} \ \oplus \ \bar \alpha), \bar \Lambda,
+  \textbf{\textrm{context}}[egress\_port] \rangle \\
+  \Rightarrow 
+  \langle \pi, \bar \alpha, \bar \Lambda,
+  \textbf{\textrm{context}}[egress\_port] = port \rangle
+\end{split}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[dst], (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}}[dst] \rangle \\ \Rightarrow
+  \langle \pi[dst] = [meta, meta + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
     \textrm{\textbf{packet}}
 \end{split}
@@ -67,9 +102,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst + [header\_offset] \rangle = \\
-  [[meta, meta + n)] \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[dst + header\_offset], (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow
+  \langle \pi[dst + header\_offset] = [meta, meta + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
     \textrm{\textbf{header}}
 \end{split}
@@ -77,8 +113,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [key] =
-  [[meta, meta + n)] \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi, (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}[key]} \rangle \\
+  \Rightarrow
+  \langle \pi, \bar \alpha, \bar \Lambda, \textrm{\textbf{context}[key]} = [meta, meta + n) \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
     \textrm{\textbf{key}}
 \end{split}
@@ -86,8 +124,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst + [header\_offset] \rangle = [[meta, meta + n)] \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[dst + header\_offset], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow
+  \langle \pi[dst + header\_offset] = [meta, meta + n), (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
     \textrm{\textbf{header}}
 \end{split}
@@ -95,8 +135,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst \rangle = \langle [src, src + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[dst], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow 
+  \langle \pi[dst] = [src, src + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
     \textrm{\textbf{packet}}
 \end{split}
@@ -104,8 +146,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst + [header\_offset] \rangle =  \langle [src, src + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[dst + header\_offset], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow
+  \langle \pi[dst + header\_offset] = [src, src + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
     \textrm{\textbf{header}}
 \end{split}
@@ -113,8 +157,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [key] =
-  \langle [src, src + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[src], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}}[key] \rangle \\
+  \Rightarrow
+  \langle \pi[src], \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}[key] = \pi[src] \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
     \textrm{\textbf{key}}
 \end{split}
@@ -122,9 +168,11 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst + [header\_offset] \rangle = \\
-  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi[dst + header\_offset], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow
+  \langle \pi[dst + header\_offset] = \\ \pi[src + header\_offset, src + header\_offset + n),
+  \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
     \textrm{\textbf{header}}
 \end{split}
@@ -132,9 +180,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow \langle
-  dst \rangle = \\
-  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \\ \langle \pi[src + header\_offset] \wedge \pi[dst], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\  
+  \Rightarrow
+  \langle \pi[dst] = \pi[[src + header\_offset, src + header\_offset + n], \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\  
     \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
     \textrm{\textbf{packet}}
 \end{split}
@@ -142,8 +191,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [key] = \\
-  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi, (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow
+  \langle \pi, \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}[key] = \\\pi[[src + header\_offset, src + header\_offset + n)] \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
     \textrm{\textbf{key}}
 \end{split}
@@ -151,8 +202,10 @@ OF = $FC \rightarrow \textrm{serialization}$
 
 \begin{equation}
 \begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n) \Rightarrow [meta] = \\
-  \langle [src + [header\_offset], src + [header\_offset] + n) \rangle \\ 
+  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+  \textrm{,} \ \langle \pi, (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
+  \Rightarrow
+  \langle \pi, \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}[meta] = \\ \pi[[src + header\_offset, src + header\_offset + n)] \rangle \\
     \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
     \textrm{\textbf{meta}}
 \end{split}
