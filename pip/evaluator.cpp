@@ -45,8 +45,9 @@ namespace pip
       physical_port(), 
       metadata(), 
       keyreg(), 
-      decode()
-  {
+      decode(),
+      dec(cxt)
+  {    
     assert(cap::ethernet_ethertype(pkt.data()) == 0x800  &&
 	   "Non-ethernet frames are not supported.\n");
     assert(cap::ipv4_protocol(pkt.data()) == 0x06 &&
@@ -65,12 +66,9 @@ namespace pip
     std::vector<decl*> tables;
     for(auto declaration : program->decls)
       if(auto table = dynamic_cast<table_decl*>(declaration)) {
-	for(auto r : table->rules) {
+	for(auto r : table->rules)
 	  if(auto int_key = dynamic_cast<int_expr*>(r->key))
 	    table->key_table.insert(int_key->val);
-	  if(auto port_key = dynamic_cast<port_expr*>(r->key))
-	    table->key_table.insert(port_key->port_num);
-	}
 	tables.push_back(table);
       }
 
@@ -261,6 +259,10 @@ namespace pip
       
       if(*(src_loc->space) == "packet") {	
 	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
+	std::cout << "value at packet: ";
+	for(int i = 0; i < src_len->val / 8; ++i)
+	  std::cout << (unsigned)*(data.data() + src_pos->val + i);
+	std::cout << '\n';
       }
 
       else if(*(src_loc->space) == "header") {
@@ -271,7 +273,7 @@ namespace pip
       else if(*(src_loc->space) == "meta")
 	throw std::runtime_error("Unimplemented.\n");
 
-      std::cout << "Copy " << n << " bits to key register. Register value: " << keyreg << '\n';
+      std::cout << "Copy " << n << " bits to key register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
     }
     
     else if(*(dst_loc->space) == "header") {
@@ -405,6 +407,9 @@ namespace pip
   {
     // If one of the rules matches the key register, then evaluate
     // that rule's action list.
+
+    std::cout << "keyreg: " << keyreg << '\n';
+    std::cout << "keyreg ntohs: " << ntohs(keyreg) << '\n';
     
     for(auto r : current_table->rules)
     {
@@ -446,8 +451,18 @@ namespace pip
   {
     const port_expr* port = static_cast<port_expr*>(a->port);
 
-    egress_port = port->port_num;
-    std::cout << "Output to port: " << port->port_num << '\n';
+    int port_num;
+    if(port->port_kind == port_expr::pk_int)
+      port_num = static_cast<int_expr*>(port->port_num)->val;
+    else if(port->port_kind == port_expr::pk_loc) {
+      auto loc = static_cast<offset_expr*>(port->port_num);
+      auto pos = static_cast<int_expr*>(loc->pos);
+      auto len = static_cast<int_expr*>(loc->len);
+      port_num = data_to_key_reg((std::uint8_t*)data.data(), pos->val, len->val);
+    }
+
+    egress_port = port_num;
+    std::cout << "Output to port: " << egress_port << '\n';
   }
 
   std::uint64_t

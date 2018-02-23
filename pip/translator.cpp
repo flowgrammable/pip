@@ -15,7 +15,7 @@
 namespace pip
 {
   translator::translator(context& cxt)
-    : cxt(cxt)
+    : cxt(cxt), field_decoder(cxt)
   { }
   
   /// program ::= (pip <decl-seq>)
@@ -336,15 +336,20 @@ namespace pip
   {
     symbol* field;
     match_list(e, "field", &field);
-
-    return cxt.make_field_expr(new loc_type, field);
+   
+    return field_decoder.decode_field_expr(
+      static_cast<field_expr*>(cxt.make_field_expr(new loc_type, field)));
   }
   
   expr*
   translator::trans_port_expr(const sexpr::list_expr* e)
   {
-    int port;
+    expr* port;
     match_list(e, "port", &port);
+
+    if(get_kind(port) != ek_int && get_kind(port) != ek_offset) {
+      throw std::logic_error("Invalid type for port value.\n");
+    }
     
     return cxt.make_port_expr(new port_type, port);
   }

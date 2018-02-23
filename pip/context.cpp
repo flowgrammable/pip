@@ -60,7 +60,7 @@ namespace pip
   }
   
   expr*
-  context::make_port_expr(type* t, int port_num)
+  context::make_port_expr(type* t, expr* port_num)
   {
     return new port_expr(t, port_num);
   }

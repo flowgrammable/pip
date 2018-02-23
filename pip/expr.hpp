@@ -63,18 +63,29 @@ namespace pip
     ~range_expr() {}
   };
   
+  expr_kind get_kind(const expr* e);
+
   // A numbered port.
   struct port_expr : expr
   {
-    port_expr(type* t, int p)
+    port_expr(type* t, expr* p)
       :expr(ek_port, t), port_num(p)
     {
-      assert(p <= 1 << 16);
-    }
-    
-    int port_num;
+      if(get_kind(p) == ek_int)
+	port_kind = pk_int;
+      if(get_kind(p) == ek_port)
+	port_kind = pk_loc;
+    }   
 
     ~port_expr() {}
+
+    expr* port_num;
+
+    // Ports can be expressed as integer literals or locations within the context.
+    enum {
+      pk_int,
+      pk_loc,
+    } port_kind;
   };
 
   /// A wildcard literal denoting all values k satisfying
@@ -164,7 +175,7 @@ namespace pip
 // Operations
 
   /// Returns the kind of an expression.
-  expr_kind get_kind(const expr* e);
+  // expr_kind get_kind(const expr* e);
 
   /// Returns a string representation of an expression kind.
   const char* get_phrase_name(expr_kind k);
