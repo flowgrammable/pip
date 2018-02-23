@@ -9,9 +9,9 @@
     )
     (rules
       (rule (int i32 100)
-        (actions (output (port 1)))) ; if eth.type == 100: output to 1
+        (actions (output (port (int i32 1))))) ; if eth.type == 100: output to 1
       (rule (int i32 101)
-        (actions (output (port 2)))) ; if eth.type == 101: output to 2
+        (actions (output (port (int i32 2))))) ; if eth.type == 101: output to 2
       (rule (miss)
         (actions (drop)))
     )
