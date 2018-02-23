@@ -1,0 +1,21 @@
+(pip
+  (table tcp_filter exact
+    (actions
+      (copy
+        (field tcp.src)
+	(offset key (int i32 0) (int i32 16)) ; context[key] = π[tcp.src])
+	(int i32 16)
+      (match))
+    ) ; actions
+    (rules
+      (rule (int i32 80)
+        (actions (output (port (field tcp.dst))))) ; if tcp.src == 80 (HTTP): forward the packet
+      (rule (int i32 443)
+        (actions (output (port (field tcp.dst))))) ; if tcp.src == 443 (HTTPS): forward the packet
+      (rule (miss)
+	(actions drop))
+      ) ; rules
+  ) ; tcp_filter
+) ; pip
+
+     
