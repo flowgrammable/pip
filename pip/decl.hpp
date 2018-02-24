@@ -57,7 +57,7 @@ namespace pip
     { }
 
     ~program_decl()
-    { for(auto d : decls) delete d; }
+    { for(auto d : decls) if(d) delete d; }
 
     /// A list of declarations.
     decl_seq decls;
@@ -106,7 +106,7 @@ namespace pip
     { }
 
     ~table_decl()
-    { for(auto r : rules) delete r; }
+    { for(auto r : rules) if(r) delete r; }
 
     /// The kind of table.
     rule_kind rule;
