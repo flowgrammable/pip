@@ -64,10 +64,6 @@ namespace pip
   /// table-decl ::= (table id <match-kind> <action-seq> <rule-seq>)
   ///
   /// rule-kind ::= exact | prefix | wildcard | range
-  ///
-  /// FIXME: We actually need parse the key extraction program. This
-  /// would be a sequence of actions that bits from the current offset
-  /// into a "key register".
   decl*
   translator::trans_table(const sexpr::list_expr* e)
   {
