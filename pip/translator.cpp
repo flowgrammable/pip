@@ -14,6 +14,22 @@
 
 namespace pip
 {
+  class type_error : public cc::diagnosable_error
+  {
+  public:
+    type_error(cc::location loc, const std::string& msg)
+      : cc::diagnosable_error(cc::dk_error, "type", loc, msg)
+    { }
+  };
+
+  class syntax_error : public cc::diagnosable_error
+  {
+  public:
+    syntax_error(cc::location loc, const std::string& msg)
+      : cc::diagnosable_error(cc::dk_error, "syntax", loc, msg)
+    { }
+  };
+  
   translator::translator(context& cxt)
     : cxt(cxt), field_decoder(cxt)
   {
@@ -74,8 +90,11 @@ namespace pip
     match_list(e, "table", &id, &kind, &actions, &rules);
     
     auto it = match_kinds.find(kind);
-    if(it == match_kinds.end())
-      throw std::logic_error("Invalid table rule.");
+    if(it == match_kinds.end()) {
+      std::stringstream ss;
+      ss << "Invalid table rule: " << *(kind);
+      throw syntax_error(cc::get_location(e), ss.str());
+    }
 
     match_kind = it->second;
     
@@ -132,8 +151,6 @@ namespace pip
     
     auto r = new rule(match_kind, key, std::move(actions));
 
-    dumper d(std::cout);
-    d(r);
     return r;
   }
   
@@ -179,13 +196,26 @@ namespace pip
       expr* n;
       match_list(e, "copy", &src, &dst, &n);
       
-      // TODO: Use libcc diagnostics.
-      if(!dynamic_cast<bitfield_expr*>(src))
-	throw std::runtime_error("Source in copy action does not have location type.\n");
-      if(!dynamic_cast<bitfield_expr*>(dst))
-	throw std::runtime_error("Destination in copy action does not have location type.\n");
-      if(!(dynamic_cast<int_expr*>(n)))
-	throw std::runtime_error("Length of copy must be of type int.\n");
+      if(!dynamic_cast<bitfield_expr*>(src)) {
+	std::stringstream ss;
+	ss << "Source in copy action does not have location type. Currently of type: "
+	   << get_node_name(src->ty) << '\n';
+	throw type_error(cc::get_location(e), ss.str());
+      }
+      
+      if(!dynamic_cast<bitfield_expr*>(dst)) {
+	std::stringstream ss;
+	ss << "Destination of copy must be of type location. Currently of type: "
+	   << get_node_name(dst->ty) << '\n';
+	throw type_error(cc::get_location(e), ss.str());
+      }
+      
+      if(!(dynamic_cast<int_expr*>(n))) {
+	std::stringstream ss;
+	ss << "Length of copy must be of type int. Currently of type: "
+	   << get_node_name(n->ty) << '\n';
+	throw type_error(cc::get_location(e), ss.str());
+      }
 
       return cxt.make_copy_action(src, dst, n);
     }
@@ -243,8 +273,11 @@ namespace pip
 
       auto it = expression_symbols.find(sym);
 
-      if(it == expression_symbols.end())
-	throw std::logic_error("Invalid expression.");
+      if(it == expression_symbols.end()) {
+	std::stringstream ss;
+	ss << "Invalid expression kind: " << *(sym);
+	throw syntax_error(cc::get_location(e), ss.str());
+      }
 
       switch(it->second) {
       case es_int:
@@ -262,6 +295,8 @@ namespace pip
 	return trans_miss_expr();
       case es_named_field:
 	return trans_named_field_expr(list);
+      case es_ref:
+	return trans_ref_expr(list);
       }
     }
   }
@@ -287,8 +322,19 @@ namespace pip
     expr* hi;
     match_list(e, "range", &lo, &hi);
     
-    auto lo_expr = as<int_expr>(lo);
+    auto lo_expr = as<int_expr>(lo);    
+    if(!lo_expr) {
+      std::stringstream ss;
+      ss << "Expression 1 in range not of int type. Currently of type: " << get_node_name(lo->ty);
+      throw type_error(cc::get_location(e), ss.str());
+    }
+    
     auto hi_expr = as<int_expr>(hi);
+    if(!hi_expr) {
+      std::stringstream ss;
+      ss << "Expression 2 in range not of int type. Currently of type: " << get_node_name(hi->ty);
+      throw type_error(cc::get_location(e), ss.str());
+    }
     
     auto lo_val = lo_expr->val;
     auto hi_val = hi_expr->val;
@@ -299,11 +345,10 @@ namespace pip
     if(lo_ty->width == hi_ty->width)
       return cxt.make_range_expr(new range_type(
 				   new int_type(lo_ty->width)), lo_val, hi_val);
-    //TODO: proper diagnostic
     std::stringstream ss;
     ss << "Width of range arguments not equal: " << lo_ty->width << ", and "
        << hi_ty->width << "\n";
-    throw std::runtime_error(ss.str().c_str());
+    throw type_error(cc::get_location(e), ss.str());
   }
   
   expr*
@@ -314,16 +359,8 @@ namespace pip
   expr*
   translator::trans_miss_expr()
   {
-    switch(match_kind) {
-    case rk_exact:
-      return cxt.make_miss_expr(new int_type(64));
-    case rk_range:
-      return cxt.make_miss_expr(new range_type(new int_type(64)));
-    case rk_wildcard:
-      return cxt.make_miss_expr(new wild_type(64));
-    case rk_prefix:
-      return cxt.make_miss_expr(new int_type(64));
-    }
+    // FIXME: this should correspond to the match kind of the table.
+    return cxt.make_miss_expr(new int_type(64));
   }
   
   expr*
@@ -340,7 +377,8 @@ namespace pip
   {
     symbol* field;
     match_list(e, "named_field", &field);
-   
+
+    // TODO: move decoding to resolver
     return field_decoder.decode_named_field(
       static_cast<named_field_expr*>(cxt.make_named_field_expr(new loc_type, field)));
   }
@@ -352,7 +390,9 @@ namespace pip
     match_list(e, "port", &port);
 
     if(get_kind(port) != ek_int && get_kind(port) != ek_bitfield) {
-      throw std::logic_error("Invalid type for port value.\n");
+      std::stringstream ss;
+      ss << "Port value must be of type int or location. Currently of type: " << get_node_name(port->ty);
+      throw type_error(cc::get_location(e), ss.str());
     }
     
     return cxt.make_port_expr(new port_type, port);
@@ -371,8 +411,27 @@ namespace pip
     auto it = address_spaces.find(space);
     if(it != address_spaces.end())
       as = it->second;
-    else
-      throw std::logic_error("Invalid address space.");
+    else {
+      std::stringstream ss;
+      ss << "Invalid address space: " << *(space);
+      throw syntax_error(cc::get_location(e), ss.str());
+    }
+
+    int_type* pos_ty = dynamic_cast<int_type*>(pos->ty);
+    if(!pos_ty) {
+      std::stringstream ss;
+      ss << "Position in bitfield expression must be of type int. Currently of type: " <<
+	get_node_name(pos->ty);
+      throw type_error(cc::get_location(e), ss.str());
+    }
+
+    int_type* len_ty = dynamic_cast<int_type*>(len->ty);
+    if(!len_ty) {
+      std::stringstream ss;
+      ss << "Length in bitfield expression must be of type int. Currently of type: " <<
+	get_node_name(len->ty);
+      throw type_error(cc::get_location(e), ss.str());
+    }
     
     return cxt.make_bitfield_expr(as, pos, len);
   }
@@ -380,7 +439,7 @@ namespace pip
   // When given an integer width specifier, such as i32,
   // return the integer after the i. In this case, 32.
   static int
-  deduce_int_type_width(const symbol* ty)
+  deduce_int_type_width(const sexpr::list_expr* e, const symbol* ty)
   {
     std::string spec = *ty;
     
@@ -389,6 +448,13 @@ namespace pip
       
       std::size_t it;
       auto width = std::stoi(spec.c_str(), &it);
+
+      if(it > 64 || it < 1) {
+	std::stringstream ss;
+	ss << "Integer width specifier must be between 1 and 64."
+	   << " Currently of value: " << it;
+	throw syntax_error(cc::get_location(e), ss.str());
+      }
       
       if(spec.size() == it)
 	return width;
@@ -397,7 +463,7 @@ namespace pip
     std::stringstream ss;
     ss << "Invalid integer width specifier: " << *ty <<
       ". Specifier should be of form i[integer].\n";
-    throw std::runtime_error(ss.str().c_str());
+    throw syntax_error(cc::get_location(e), ss.str());
   }
   
   expr*
@@ -407,7 +473,7 @@ namespace pip
     int value;
     match_list(e, "int", &width_specifier, &value);
     
-    int w = deduce_int_type_width(width_specifier);
+    int w = deduce_int_type_width(e, width_specifier);
     
     return cxt.make_int_expr(new int_type(w), value);
   }

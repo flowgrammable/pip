@@ -82,7 +82,8 @@ namespace pip
       es_port,
       es_bitfield,
       es_miss,
-      es_named_field
+      es_named_field,
+      es_ref
     };
 
     const std::unordered_map<symbol*, expression_symbol> expression_symbols {
@@ -93,6 +94,7 @@ namespace pip
       {cxt.get_symbol("bitfield"), es_bitfield},
       {cxt.get_symbol("miss"), es_miss},
       {cxt.get_symbol("named_field"), es_named_field},
+      {cxt.get_symbol("ref"), es_ref},
     };
 
     const std::unordered_map<symbol*, rule_kind> match_kinds {
