@@ -238,20 +238,7 @@ namespace pip
   expr*
   translator::trans_expr(const sexpr::expr* e)
   {
-    // Match bare integer literals.
-    // TODO: match int width
-    // if (const sexpr::int_expr* num = as<sexpr::int_expr>(e))
-    //   return trans_int_expr(num, 32);
-        
-    // Match bare keyword literals.
-    // if (const sexpr::id_expr* id = as<sexpr::id_expr>(e)) {
-    //   if (*id->id == "miss")
-    // 		return trans_miss_expr(id);
-    // }
-        
     // Match phrases.
-    //
-    // FIXME: Use a lookup table + switch.
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       symbol* sym;
       match_list(list, &sym);
