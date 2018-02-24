@@ -2,6 +2,7 @@
 
 #include <pip/syntax.hpp>
 #include <pip/decoder.hpp>
+#include <pip/decl.hpp>
 
 #include <sexpr/translation.hpp>
 
@@ -90,6 +91,13 @@ namespace pip
       {cxt.get_symbol("bitfield"), es_bitfield},
       {cxt.get_symbol("miss"), es_miss},
       {cxt.get_symbol("named_field"), es_named_field},
+    };
+
+    const std::unordered_map<symbol*, rule_kind> match_kinds {
+      {cxt.get_symbol("exact"), rk_exact},
+      {cxt.get_symbol("prefix"), rk_prefix},
+      {cxt.get_symbol("wildcard"), rk_wildcard},
+      {cxt.get_symbol("range"), rk_range},
     };
 
   };

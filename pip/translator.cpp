@@ -73,11 +73,11 @@ namespace pip
     rule_seq rules;
     match_list(e, "table", &id, &kind, &actions, &rules);
     
-    // TODO: Actually parse the kind of match. For now, we can simply
-    // assume that all tables are exact. Hint: use the match_list framework
-    // to return a match kind.
+    auto it = match_kinds.find(kind);
+    if(it == match_kinds.end())
+      throw std::logic_error("Invalid table rule.");    
     
-    return new table_decl(id, rk_exact, std::move(actions), std::move(rules));
+    return new table_decl(id, it->second, std::move(actions), std::move(rules));
   }
   
   /// rule_seq ::= (<rule*>)
