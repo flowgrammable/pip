@@ -20,9 +20,9 @@ namespace pip
     ek_wild,  // Wildcard literals
     ek_miss,  // Miss literal.
     ek_ref,   // Declaration reference
-    ek_field, // Field references
+    ek_named_field, // A named field, for example eth.ethertype
     ek_port, // Port number
-    ek_offset
+    ek_offset // A bitfield in the context or packet
   };
   
   /// The base class of all expressions.
@@ -149,26 +149,26 @@ namespace pip
   ///
   /// \todo These probably resolve to a function that can load the value
   /// from a packet.
-  struct field_expr : expr
+  struct named_field_expr : expr
   {
-    field_expr(expr_kind k, type* t)
+    named_field_expr(expr_kind k, type* t)
       : expr(k, t)
     { }
     
-    field_expr(expr_kind k, type* t, offset_expr* val)
+    named_field_expr(expr_kind k, type* t, offset_expr* val)
       : expr(k, t)
     {
       value = val;
     }
 
-    field_expr(expr_kind k, type* t, symbol* field)
+    named_field_expr(expr_kind k, type* t, symbol* field)
       : expr(k, t), field(field)
     { }
 
     offset_expr* value;
     symbol* field;
 
-    ~field_expr() {}
+    ~named_field_expr() {}
   };
 
 // -------------------------------------------------------------------------- //
@@ -226,10 +226,10 @@ namespace cc
   };
 
   template<>
-  struct node_info<pip::field_expr>
+  struct node_info<pip::named_field_expr>
   {
     static bool
-    has_kind(const node* n) { return get_node_kind(n) == pip::ek_field; }
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_named_field; }
   };
 
   template<>

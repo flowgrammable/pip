@@ -49,8 +49,8 @@ void type_checker::check_expr(expr* e)
   case ek_ref:
     check_ref_expr(static_cast<ref_expr*>(e));
     break;
-  case ek_field:
-    check_field_expr(static_cast<field_expr*>(e));
+  case ek_named_field:
+    check_named_field_expr(static_cast<named_field_expr*>(e));
     break;
   case ek_port:
     check_port_expr(static_cast<port_expr*>(e));
@@ -98,7 +98,7 @@ void type_checker::check_port_expr(port_expr* e)
     throw std::runtime_error("Port expression of invalid type");
 }
 
-void type_checker::check_field_expr(field_expr* e)
+void type_checker::check_named_field_expr(named_field_expr* e)
 {
   if(e->ty->kind != tk_loc)
     throw std::runtime_error("Field expression of invalid type");

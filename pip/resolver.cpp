@@ -151,8 +151,8 @@ namespace pip
         return resolve_expr(cast<miss_expr>(e));
       case ek_ref:
         return resolve_expr(cast<ref_expr>(e));
-      case ek_field:
-        return resolve_expr(cast<field_expr>(e));
+      case ek_named_field:
+        return resolve_expr(cast<named_field_expr>(e));
       case ek_port:
         return resolve_expr(cast<port_expr>(e));
       case ek_offset:
@@ -191,7 +191,7 @@ namespace pip
   }
 
   void
-  resolver::resolve_expr(field_expr* e)
+  resolver::resolve_expr(named_field_expr* e)
   {
     // FIXME: Match field expressions to internal definitions of protocol
     // information and functionality. For example, the field "eth.type"

@@ -181,7 +181,6 @@ namespace pip
       expr* dst;
       expr* n;
       match_list(e, "copy", &src, &dst, &n);
-
       
       // TODO: Use libcc diagnostics.
       if(!dynamic_cast<offset_expr*>(src))
@@ -270,8 +269,8 @@ namespace pip
 	return trans_offset_expr(list);
       if (*sym == "miss")
 	return trans_miss_expr();
-      if (*sym == "field")
-	return trans_field_expr(list);
+      if (*sym == "named_field")
+	return trans_named_field_expr(list);
     }
   }
   
@@ -332,13 +331,13 @@ namespace pip
   }
   
   expr*
-  translator::trans_field_expr(const sexpr::list_expr* e)
+  translator::trans_named_field_expr(const sexpr::list_expr* e)
   {
     symbol* field;
-    match_list(e, "field", &field);
+    match_list(e, "named_field", &field);
    
-    return field_decoder.decode_field_expr(
-      static_cast<field_expr*>(cxt.make_field_expr(new loc_type, field)));
+    return field_decoder.decode_named_field(
+      static_cast<named_field_expr*>(cxt.make_named_field_expr(new loc_type, field)));
   }
   
   expr*

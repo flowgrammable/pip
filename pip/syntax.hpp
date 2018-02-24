@@ -35,7 +35,7 @@ namespace pip
   struct wild_expr;
   struct range_expr;
   struct ref_expr;
-  struct field_expr;
+  struct named_field_expr;
   struct port_expr;
   struct miss_expr;
   struct offset_expr;

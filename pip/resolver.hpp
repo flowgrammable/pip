@@ -42,7 +42,7 @@ namespace pip
     void resolve_expr(wild_expr* e);
     void resolve_expr(range_expr* e);
     void resolve_expr(ref_expr* e);
-    void resolve_expr(field_expr* e);
+    void resolve_expr(named_field_expr* e);
     void resolve_expr(miss_expr* e);
     void resolve_expr(port_expr* e);
     void resolve_expr(offset_expr* e);

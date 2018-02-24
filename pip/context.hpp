@@ -37,7 +37,7 @@ namespace pip
     expr* make_wild_expr(type* t, int val, int mask);
     expr* make_miss_expr(type* t);
     expr* make_ref_expr(type* t, symbol* id);
-    expr* make_field_expr(type* t, symbol* field);
+    expr* make_named_field_expr(type* t, symbol* field);
     expr* make_port_expr(type* t, expr* port_num);
     expr* make_offset_expr(symbol* space, expr* pos, expr* len);
     

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pip/syntax.hpp>
+#include <pip/decoder.hpp>
 
 #include <sexpr/translation.hpp>
 
@@ -33,14 +34,13 @@ namespace pip
     action_seq trans_actions(const sexpr::expr* e);
     action* trans_action(const sexpr::list_expr* e);
 
-    // TODO: ensure that these use the correct sexpr types
     expr* trans_expr(const sexpr::expr* e);
     expr_seq trans_exprs(const sexpr::expr* e);
     expr* trans_range_expr(const sexpr::list_expr* e);
     expr* trans_wild_expr(const sexpr::list_expr* e);
     expr* trans_miss_expr();
     expr* trans_ref_expr(const sexpr::id_expr* e);
-    expr* trans_field_expr(const sexpr::list_expr* e);
+    expr* trans_named_field_expr(const sexpr::list_expr* e);
     expr* trans_port_expr(const sexpr::list_expr* e);
     expr* trans_offset_expr(const sexpr::list_expr* e);
     expr* trans_int_expr(const sexpr::list_expr* e);
@@ -58,6 +58,7 @@ namespace pip
 
   private:
     context& cxt;
+    decoder field_decoder;
   };
 
 

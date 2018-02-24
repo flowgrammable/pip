@@ -22,8 +22,8 @@ namespace pip
       return "miss";
     case ek_ref:
       return "ref";
-    case ek_field:
-      return "field";
+    case ek_named_field:
+      return "named field";
     case ek_port:
       return "port";
     case ek_offset:

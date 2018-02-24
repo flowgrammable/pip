@@ -54,8 +54,6 @@ namespace pip
     void eval_goto(const goto_action* a);
     void eval_output(const output_action* a);
 
-    std::uint64_t eval_field_expr(const field_expr* e);
-
   private:
     /// Various program facilities.
     context& cxt;

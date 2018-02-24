@@ -54,9 +54,9 @@ namespace pip
   }
   
   expr*
-  context::make_field_expr(type* t, symbol* field)
+  context::make_named_field_expr(type* t, symbol* field)
   {
-    return new field_expr(ek_field, t, field);
+    return new named_field_expr(ek_named_field, t, field);
   }
   
   expr*

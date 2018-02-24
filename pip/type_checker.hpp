@@ -25,7 +25,7 @@ private:
   void check_range_expr(range_expr* e);
   void check_wild_expr(wild_expr* e);
   void check_ref_expr(ref_expr* e);
-  void check_field_expr(field_expr* e);
+  void check_named_field_expr(named_field_expr* e);
   void check_port_expr(port_expr* e);
   void check_offset_expr(offset_expr* e);
   void check_miss_expr(miss_expr* e);
