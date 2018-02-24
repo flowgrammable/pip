@@ -39,7 +39,7 @@ namespace pip
     expr* make_ref_expr(type* t, symbol* id);
     expr* make_named_field_expr(type* t, symbol* field);
     expr* make_port_expr(type* t, expr* port_num);
-    expr* make_offset_expr(symbol* space, expr* pos, expr* len);
+    expr* make_bitfield_expr(symbol* space, expr* pos, expr* len);
     
     action* make_action(action_kind k, expr* parm_a = nullptr,
 			expr* parm_b = nullptr,

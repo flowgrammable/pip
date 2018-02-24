@@ -22,7 +22,7 @@ namespace pip
     ek_ref,   // Declaration reference
     ek_named_field, // A named field, for example eth.ethertype
     ek_port, // Port number
-    ek_offset // A bitfield in the context or packet
+    ek_bitfield // A bitfield in the context or packet
   };
   
   /// The base class of all expressions.
@@ -132,17 +132,17 @@ namespace pip
   };
  
   
-  struct offset_expr : expr
+  struct bitfield_expr : expr
   {
-    offset_expr(type* t, symbol* space, expr* pos, expr* len)
-      : expr(ek_offset, t), space(space), pos(pos), len(len)
+    bitfield_expr(type* t, symbol* space, expr* pos, expr* len)
+      : expr(ek_bitfield, t), space(space), pos(pos), len(len)
     { }
     
     symbol* space;
     expr* pos;
     expr* len;
 
-    ~offset_expr() {}
+    ~bitfield_expr() {}
   };
 
   /// A reference to a packet header.
@@ -155,7 +155,7 @@ namespace pip
       : expr(k, t)
     { }
     
-    named_field_expr(expr_kind k, type* t, offset_expr* val)
+    named_field_expr(expr_kind k, type* t, bitfield_expr* val)
       : expr(k, t)
     {
       value = val;
@@ -165,7 +165,7 @@ namespace pip
       : expr(k, t), field(field)
     { }
 
-    offset_expr* value;
+    bitfield_expr* value;
     symbol* field;
 
     ~named_field_expr() {}
@@ -240,10 +240,10 @@ namespace cc
   };
 
   template<>
-  struct node_info<pip::offset_expr>
+  struct node_info<pip::bitfield_expr>
   {
     static bool
-    has_kind(const node* n) { return get_node_kind(n) == pip::ek_offset; }
+    has_kind(const node* n) { return get_node_kind(n) == pip::ek_bitfield; }
   };
 
 } // namespace cc

@@ -183,9 +183,9 @@ namespace pip
       match_list(e, "copy", &src, &dst, &n);
       
       // TODO: Use libcc diagnostics.
-      if(!dynamic_cast<offset_expr*>(src))
+      if(!dynamic_cast<bitfield_expr*>(src))
 	throw std::runtime_error("Source in copy action does not have location type.\n");
-      if(!dynamic_cast<offset_expr*>(dst))
+      if(!dynamic_cast<bitfield_expr*>(dst))
 	throw std::runtime_error("Destination in copy action does not have location type.\n");
       if(!(dynamic_cast<int_expr*>(n)))
 	throw std::runtime_error("Length of copy must be of type int.\n");
@@ -265,8 +265,8 @@ namespace pip
 	return trans_range_expr(list);
       if (*sym == "port")
 	return trans_port_expr(list);
-      if (*sym == "offset")
-	return trans_offset_expr(list);
+      if (*sym == "bitfield")
+	return trans_bitfield_expr(list);
       if (*sym == "miss")
 	return trans_miss_expr();
       if (*sym == "named_field")
@@ -346,7 +346,7 @@ namespace pip
     expr* port;
     match_list(e, "port", &port);
 
-    if(get_kind(port) != ek_int && get_kind(port) != ek_offset) {
+    if(get_kind(port) != ek_int && get_kind(port) != ek_bitfield) {
       throw std::logic_error("Invalid type for port value.\n");
     }
     
@@ -354,15 +354,15 @@ namespace pip
   }
   
   expr*
-  translator::trans_offset_expr(const sexpr::list_expr* e)
+  translator::trans_bitfield_expr(const sexpr::list_expr* e)
   {
     symbol* space;
     expr* pos;
     expr* len;
     
-    match_list(e, "offset", &space, &pos, &len);
+    match_list(e, "bitfield", &space, &pos, &len);
     
-    return cxt.make_offset_expr(space, pos, len);
+    return cxt.make_bitfield_expr(space, pos, len);
   }
   
   // When given an integer width specifier, such as i32,

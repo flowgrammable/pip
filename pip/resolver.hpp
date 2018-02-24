@@ -45,7 +45,7 @@ namespace pip
     void resolve_expr(named_field_expr* e);
     void resolve_expr(miss_expr* e);
     void resolve_expr(port_expr* e);
-    void resolve_expr(offset_expr* e);
+    void resolve_expr(bitfield_expr* e);
 
   private:
     context& cxt;

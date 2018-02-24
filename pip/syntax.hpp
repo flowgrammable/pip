@@ -38,7 +38,7 @@ namespace pip
   struct named_field_expr;
   struct port_expr;
   struct miss_expr;
-  struct offset_expr;
+  struct bitfield_expr;
   using expr_seq = std::vector<expr*>;
 
   // Actions

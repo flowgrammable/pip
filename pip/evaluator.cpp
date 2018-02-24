@@ -209,8 +209,8 @@ namespace pip
   evaluator::eval_copy(const copy_action* a)
   {
     cxt.get_diagnostics().inform(cc::location(), "Hello world");
-    auto src_loc = static_cast<offset_expr*>(a->src);
-    auto dst_loc = static_cast<offset_expr*>(a->dst);
+    auto src_loc = static_cast<bitfield_expr*>(a->src);
+    auto dst_loc = static_cast<bitfield_expr*>(a->dst);
     auto n = a->n->val;
 
     auto src_pos = static_cast<int_expr*>(src_loc->pos);
@@ -331,7 +331,7 @@ namespace pip
   void
   evaluator::eval_set(const set_action* a)
   {
-    const auto loc = static_cast<offset_expr*>(a->f);
+    const auto loc = static_cast<bitfield_expr*>(a->f);
     const auto pos_expr = static_cast<int_expr*>(loc->pos);
 
     const auto val_expr = static_cast<int_expr*>(a->v);
@@ -433,7 +433,7 @@ namespace pip
     if(port->port_kind == port_expr::pk_int)
       port_num = static_cast<int_expr*>(port->port_num)->val;
     else if(port->port_kind == port_expr::pk_loc) {
-      auto loc = static_cast<offset_expr*>(port->port_num);
+      auto loc = static_cast<bitfield_expr*>(port->port_num);
       auto pos = static_cast<int_expr*>(loc->pos);
       auto len = static_cast<int_expr*>(loc->len);
       port_num = data_to_key_reg((std::uint8_t*)data.data(), pos->val, len->val);

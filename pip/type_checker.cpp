@@ -55,8 +55,8 @@ void type_checker::check_expr(expr* e)
   case ek_port:
     check_port_expr(static_cast<port_expr*>(e));
     break;
-  case ek_offset:
-    check_offset_expr(static_cast<offset_expr*>(e));
+  case ek_bitfield:
+    check_bitfield_expr(static_cast<bitfield_expr*>(e));
     break;
   }
     
@@ -104,10 +104,10 @@ void type_checker::check_named_field_expr(named_field_expr* e)
     throw std::runtime_error("Field expression of invalid type");
 }
 
-void type_checker::check_offset_expr(offset_expr* e)
+void type_checker::check_bitfield_expr(bitfield_expr* e)
 {
   if(e->ty->kind != tk_loc)
-    throw std::runtime_error("Offset expression of invalid type");
+    throw std::runtime_error("Bitfield expression of invalid type");
 }  
 
 // ACTIONS

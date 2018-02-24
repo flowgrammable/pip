@@ -155,8 +155,8 @@ namespace pip
         return resolve_expr(cast<named_field_expr>(e));
       case ek_port:
         return resolve_expr(cast<port_expr>(e));
-      case ek_offset:
-        return resolve_expr(cast<offset_expr>(e));
+      case ek_bitfield:
+        return resolve_expr(cast<bitfield_expr>(e));
     }
   }
 
@@ -214,7 +214,7 @@ namespace pip
   }
 
   void
-  resolver::resolve_expr(offset_expr* e)
+  resolver::resolve_expr(bitfield_expr* e)
   {
     // TODO: implement me if I need it
   }

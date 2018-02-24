@@ -3,7 +3,7 @@
     (actions
       (copy
         (named_field tcp.src)
-	(offset key (int i32 0) (int i32 16)) ; context[key] = π[tcp.src])
+	(bitfield key (int i32 0) (int i32 16)) ; context[key] = π[tcp.src])
 	(int i32 16))
       (match)
     ) ; actions

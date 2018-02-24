@@ -27,7 +27,7 @@ private:
   void check_ref_expr(ref_expr* e);
   void check_named_field_expr(named_field_expr* e);
   void check_port_expr(port_expr* e);
-  void check_offset_expr(offset_expr* e);
+  void check_bitfield_expr(bitfield_expr* e);
   void check_miss_expr(miss_expr* e);
 
   void check_action(action* a);

@@ -14,33 +14,33 @@ namespace pip
       : cxt(cxt)
     { }
 
-    offset_expr* decode_named_field(named_field_expr* field) const;
+    bitfield_expr* decode_named_field(named_field_expr* field) const;
 
   private:
-    offset_expr* ethernet_dst_mac() const;
-    offset_expr* ethernet_src_mac() const;
-    offset_expr* ethernet_ethertype() const;
+    bitfield_expr* ethernet_dst_mac() const;
+    bitfield_expr* ethernet_src_mac() const;
+    bitfield_expr* ethernet_ethertype() const;
 
-    offset_expr* ipv4_vhl() const;
-    offset_expr* ipv4_tos() const;
-    offset_expr* ipv4_len() const;
-    offset_expr* ipv4_id() const;
-    offset_expr* ipv4_frag_offset() const;
-    offset_expr* ipv4_ttl() const;
-    offset_expr* ipv4_protocol() const;
-    offset_expr* ipv4_checksum() const;
-    offset_expr* ipv4_src_addr() const;
-    offset_expr* ipv4_dst_addr() const;
+    bitfield_expr* ipv4_vhl() const;
+    bitfield_expr* ipv4_tos() const;
+    bitfield_expr* ipv4_len() const;
+    bitfield_expr* ipv4_id() const;
+    bitfield_expr* ipv4_frag_offset() const;
+    bitfield_expr* ipv4_ttl() const;
+    bitfield_expr* ipv4_protocol() const;
+    bitfield_expr* ipv4_checksum() const;
+    bitfield_expr* ipv4_src_addr() const;
+    bitfield_expr* ipv4_dst_addr() const;
 
-    offset_expr* tcp_src_port() const;
-    offset_expr* tcp_dst_port() const;
-    offset_expr* tcp_seq() const;
-    offset_expr* tcp_ack() const;
-    offset_expr* tcp_offset() const;
-    offset_expr* tcp_flags() const;
-    offset_expr* tcp_window() const;
-    offset_expr* tcp_checksum() const;
-    offset_expr* tcp_urgent_ptr() const;
+    bitfield_expr* tcp_src_port() const;
+    bitfield_expr* tcp_dst_port() const;
+    bitfield_expr* tcp_seq() const;
+    bitfield_expr* tcp_ack() const;
+    bitfield_expr* tcp_offset() const;
+    bitfield_expr* tcp_flags() const;
+    bitfield_expr* tcp_window() const;
+    bitfield_expr* tcp_checksum() const;
+    bitfield_expr* tcp_urgent_ptr() const;
 
   private:
     context& cxt;

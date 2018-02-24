@@ -66,9 +66,9 @@ namespace pip
   }
 
   expr*
-  context::make_offset_expr(symbol* space, expr* pos, expr* len)
+  context::make_bitfield_expr(symbol* space, expr* pos, expr* len)
   {
-    return new offset_expr(new loc_type, space, pos, len);
+    return new bitfield_expr(new loc_type, space, pos, len);
   }
   
 

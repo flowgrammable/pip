@@ -26,8 +26,8 @@ namespace pip
       return "named field";
     case ek_port:
       return "port";
-    case ek_offset:
-      return "offset";
+    case ek_bitfield:
+      return "bitfield";
     }
   }
   
