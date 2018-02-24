@@ -10,9 +10,9 @@ namespace pip
     tk_int,
     tk_range,
     tk_wild,
-    tk_miss,
     tk_port,
     tk_loc,
+    tk_ref
   };
   
   /// Represents a type.
@@ -21,6 +21,9 @@ namespace pip
     type(type_kind k)
       : cc::node(k, {}) 
     { }
+
+    virtual ~type()
+    {}
   };
   
   /// The type of integer values. 
@@ -42,6 +45,9 @@ namespace pip
     range_type(type* t)
       : type(tk_range), value(t) 
     { }
+
+    ~range_type()
+    { delete value; }
     
     /// The underlying integer type.
     type* value;
@@ -58,22 +64,12 @@ namespace pip
     int width;
   };
   
-  /// The type of a miss expression; this is temporary.
-  /// miss expressions may change to have the type of
-  /// the key that was missed, or unit type
-  struct miss_type : type
-  {
-    miss_type()
-      : type(tk_miss)
-    {}
-  };
-  
   /// The type of a port expression
   struct port_type : type
   {
     port_type()
       : type(tk_port)
-    {}
+    { }
   };
   
   /// The type of a location or field
@@ -81,7 +77,14 @@ namespace pip
   {
     loc_type()
       : type(tk_loc)
-    {}
+    { }
+  };
+
+  struct ref_type : type
+  {
+    ref_type()
+      : type(tk_ref)
+    { }
   };
   
 // -------------------------------------------------------------------------- //
@@ -93,17 +96,17 @@ namespace pip
     switch(k)
     {
     case tk_int:
-      return "tk_int";
+      return "int type";
     case tk_range:
-      return "tk_range";
+      return "range type";
     case tk_wild:
-      return "tk_wild";
-    case tk_miss:
-      return "tk_miss";
+      return "wildcard type";
     case tk_port:
-      return "tk_port";
+      return "port type";
     case tk_loc:
-      return "tk_loc";
+      return "location type";
+    case tk_ref:
+      return "reference type";
     }
   }
   

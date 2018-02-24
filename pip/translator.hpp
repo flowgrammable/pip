@@ -27,7 +27,9 @@ namespace pip
     decl* trans_program(const sexpr::expr* e);
     decl_seq trans_decls(const sexpr::expr* e);
     decl* trans_decl(const sexpr::expr* e);
-    decl* trans_table(const sexpr::list_expr* e);		
+    decl* trans_table(const sexpr::list_expr* e);
+    /// The match rule of the table currently being translated.
+    rule_kind match_kind;
 
     rule_seq trans_rules(const sexpr::expr* e);
     rule_seq trans_rules(const sexpr::list_expr* e);
@@ -42,7 +44,7 @@ namespace pip
     expr* trans_range_expr(const sexpr::list_expr* e);
     expr* trans_wild_expr(const sexpr::list_expr* e);
     expr* trans_miss_expr();
-    expr* trans_ref_expr(const sexpr::id_expr* e);
+    expr* trans_ref_expr(const sexpr::list_expr* e);
     expr* trans_named_field_expr(const sexpr::list_expr* e);
     expr* trans_port_expr(const sexpr::list_expr* e);
     expr* trans_bitfield_expr(const sexpr::list_expr* e);

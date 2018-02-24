@@ -75,9 +75,11 @@ namespace pip
     
     auto it = match_kinds.find(kind);
     if(it == match_kinds.end())
-      throw std::logic_error("Invalid table rule.");    
+      throw std::logic_error("Invalid table rule.");
+
+    match_kind = it->second;
     
-    return new table_decl(id, it->second, std::move(actions), std::move(rules));
+    return new table_decl(id, match_kind, std::move(actions), std::move(rules));
   }
   
   /// rule_seq ::= (<rule*>)
@@ -112,7 +114,7 @@ namespace pip
       
       match_list(list, &key, &actions);
       
-      auto r = new rule(rk_exact, key, std::move(actions));
+      auto r = new rule(match_kind, key, std::move(actions));
       return r;
     }
     
@@ -128,7 +130,7 @@ namespace pip
     
     match_list(e, "rule", &key, &actions);
     
-    auto r = new rule(rk_exact, key, std::move(actions));
+    auto r = new rule(match_kind, key, std::move(actions));
 
     dumper d(std::cout);
     d(r);
@@ -312,12 +314,25 @@ namespace pip
   expr*
   translator::trans_miss_expr()
   {
-    return cxt.make_miss_expr(new int_type(64));
+    switch(match_kind) {
+    case rk_exact:
+      return cxt.make_miss_expr(new int_type(64));
+    case rk_range:
+      return cxt.make_miss_expr(new range_type(new int_type(64)));
+    case rk_wildcard:
+      return cxt.make_miss_expr(new wild_type(64));
+    case rk_prefix:
+      return cxt.make_miss_expr(new int_type(64));
+    }
   }
   
   expr*
-  translator::trans_ref_expr(const sexpr::id_expr* e)
+  translator::trans_ref_expr(const sexpr::list_expr* e)
   {
+    symbol* ref;
+    match_list(e, "ref", &ref);
+
+    return cxt.make_ref_expr(new ref_type, ref);
   }
   
   expr*
@@ -394,7 +409,7 @@ namespace pip
     
     int w = deduce_int_type_width(width_specifier);
     
-    return cxt.make_int_expr( new int_type(w), value );    
+    return cxt.make_int_expr(new int_type(w), value);
   }
   
   // -------------------------------------------------------------------------- //

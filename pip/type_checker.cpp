@@ -82,8 +82,7 @@ void type_checker::check_wild_expr(wild_expr* e)
 
 void type_checker::check_miss_expr(miss_expr* e)
 {
-  if(e->ty->kind != tk_miss)
-    throw std::runtime_error("Miss expression of invalid type");
+  /// not implemented
 }
 
 void type_checker::check_ref_expr(ref_expr* e)
