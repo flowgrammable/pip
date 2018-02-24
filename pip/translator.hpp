@@ -68,6 +68,28 @@ namespace pip
       {cxt.get_symbol("key"), as_key},
       {cxt.get_symbol("meta"), as_meta},
     };
+
+    /// Keywords in expression lists.
+    enum expression_symbol : int {
+      es_int,
+      es_wildcard,
+      es_range,
+      es_port,
+      es_bitfield,
+      es_miss,
+      es_named_field
+    };
+
+    const std::unordered_map<symbol*, expression_symbol> expression_symbols {
+      {cxt.get_symbol("int"), es_int},
+      {cxt.get_symbol("wildcard"), es_wildcard},
+      {cxt.get_symbol("range"), es_range},
+      {cxt.get_symbol("port"), es_port},
+      {cxt.get_symbol("bitfield"), es_bitfield},
+      {cxt.get_symbol("miss"), es_miss},
+      {cxt.get_symbol("named_field"), es_named_field},
+    };
+
   };
 
 

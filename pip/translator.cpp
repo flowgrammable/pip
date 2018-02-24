@@ -255,21 +255,29 @@ namespace pip
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       symbol* sym;
       match_list(list, &sym);
-      if (*sym == "int")
+
+      auto it = expression_symbols.find(sym);
+
+      if(it == expression_symbols.end())
+	throw std::logic_error("Invalid expression.");
+
+      switch(it->second) {
+      case es_int:
 	return trans_int_expr(list);
       
-      if (*sym == "wildcard")
+      case es_wildcard:
 	return trans_wild_expr(list);
-      if (*sym == "range")
+      case es_range:
 	return trans_range_expr(list);
-      if (*sym == "port")
+      case es_port:
 	return trans_port_expr(list);
-      if (*sym == "bitfield")
+      case es_bitfield:
 	return trans_bitfield_expr(list);
-      if (*sym == "miss")
+      case es_miss:
 	return trans_miss_expr();
-      if (*sym == "named_field")
+      case es_named_field:
 	return trans_named_field_expr(list);
+      }
     }
   }
   
