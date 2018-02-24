@@ -5,6 +5,8 @@
 
 #include <sexpr/translation.hpp>
 
+#include <unordered_map>
+
 struct match;
 
 namespace pip
@@ -59,6 +61,8 @@ namespace pip
   private:
     context& cxt;
     decoder field_decoder;
+
+    std::unordered_map<symbol*, address_space> address_spaces;
   };
 
 

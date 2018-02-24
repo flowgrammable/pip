@@ -25,6 +25,14 @@ namespace pip
     ek_port, // Port number
     ek_bitfield // A bitfield in the context or packet
   };
+
+  enum address_space : int
+  {
+    as_packet,
+    as_header,
+    as_key,
+    as_meta
+  };
   
   /// The base class of all expressions.
   struct expr : cc::node
@@ -48,7 +56,7 @@ namespace pip
     std::uint64_t val;
 
     ~int_expr()
-    { delete ty; }
+    { delete static_cast<int_type*>(ty); }
   };
   
   // A range literal denoting values in the range [lo, hi].
@@ -61,7 +69,7 @@ namespace pip
     int lo;
     int hi;
 
-    ~range_expr() { delete ty; }
+    ~range_expr() { delete static_cast<range_type*>(ty); }
   };
   
   expr_kind get_kind(const expr* e);
@@ -78,7 +86,7 @@ namespace pip
 	port_kind = pk_loc;
     }   
 
-    ~port_expr() { delete ty; }
+    ~port_expr() { delete static_cast<port_type*>(ty); }
 
     expr* port_num;
 
@@ -97,12 +105,12 @@ namespace pip
   {
     wild_expr(type* t, int n, int m)
       : expr(ek_wild, t), val(n), mask(m)
-    { delete ty; }
+    { }
     
     int val;
     int mask;
 
-    ~wild_expr() { delete ty; }
+    ~wild_expr() { delete static_cast<wild_type*>(ty); }
   };
   
   /// The 'miss' literal.
@@ -110,9 +118,13 @@ namespace pip
   {
     miss_expr(type* t)
       : expr(ek_miss, t)
-    { delete ty; }
+    {}
 
-    ~miss_expr() { delete ty; }
+    ~miss_expr()
+    {
+      if(int_type* miss_ty = dynamic_cast<int_type*>(ty))
+	 delete miss_ty;
+    }
   };
   
   /// A reference to a declared value. Note that references are resolved
@@ -121,7 +133,7 @@ namespace pip
   {
     ref_expr(type* t, symbol* id)
       : expr(ek_ref, t), id(id)
-    { }
+    { throw std::runtime_error("Unimplemented."); }
     
     /// The identifier naming the table.
     symbol* id;
@@ -129,21 +141,21 @@ namespace pip
     /// The referenced declaration.
     decl* ref;
 
-    ~ref_expr() { delete ty; }
+    ~ref_expr() { delete ty;}
   };
  
   
   struct bitfield_expr : expr
   {
-    bitfield_expr(type* t, symbol* space, expr* pos, expr* len)
-      : expr(ek_bitfield, t), space(space), pos(pos), len(len)
+    bitfield_expr(type* t, address_space as, expr* pos, expr* len)
+      : expr(ek_bitfield, t), as(as), pos(pos), len(len)
     { }
     
-    symbol* space;
+    address_space as;
     expr* pos;
     expr* len;
 
-    ~bitfield_expr() { delete ty; }
+    ~bitfield_expr() { delete static_cast<loc_type*>(ty); }
   };
 
   /// A reference to a packet header.
@@ -169,7 +181,11 @@ namespace pip
     bitfield_expr* value;
     symbol* field;
 
-    ~named_field_expr() { delete ty; }
+    ~named_field_expr()
+    {
+      delete static_cast<loc_type*>(ty);
+    }
+      
   };
 
 // -------------------------------------------------------------------------- //

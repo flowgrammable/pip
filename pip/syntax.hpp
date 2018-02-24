@@ -30,6 +30,7 @@ namespace pip
 
   // Expressions
   enum expr_kind : int;
+  enum address_space : int;
   struct expr;
   struct int_expr;
   struct wild_expr;

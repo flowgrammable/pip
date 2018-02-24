@@ -218,7 +218,7 @@ namespace pip
     auto dst_pos = static_cast<int_expr*>(dst_loc->pos);
     auto dst_len = static_cast<int_expr*>(dst_loc->len);
 
-    if(*(src_loc->space) == "key")
+    if(src_loc->as == as_key)
       throw std::runtime_error("Cannot copy from a key register.\n");
 
     if(n > dst_len->val || n > src_len->val)
@@ -228,14 +228,14 @@ namespace pip
       throw std::runtime_error
 	("Length of copy source and destination must be equal.\n");
 
-    if(*(dst_loc->space) == "key") {
+    if(dst_loc->as == as_key) {
       if(n > 64) {
 	std::stringstream ss;
 	ss << "Attempting to copy " << n << " bits into a register of size 64.\n";
 	throw std::runtime_error(ss.str().c_str());
       }
       
-      if(*(src_loc->space) == "packet") {	
+      if(src_loc->as == as_packet) {	
 	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
 	std::cout << "value at packet: ";
 	for(int i = 0; i < src_len->val / 8; ++i)
@@ -243,19 +243,19 @@ namespace pip
 	std::cout << '\n';
       }
 
-      else if(*(src_loc->space) == "header") {
+      else if(src_loc->as == as_header) {
 	keyreg = data_to_key_reg((std::uint8_t*)data.data() + SIZE_ETHERNET, src_pos->val, src_len->val);
 	
       }
       
-      else if(*(src_loc->space) == "meta")
+      else if(src_loc->as == as_meta)
 	throw std::runtime_error("Unimplemented.\n");
 
       std::cout << "Copy " << n << " bits to key register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
     }
     
-    else if(*(dst_loc->space) == "header") {
-      if(*(src_loc->space) == "packet") {
+    else if(dst_loc->as == as_header) {
+      if(src_loc->as == as_packet) {
 	if((dst_len->val + dst_pos->val) > (data.size() - SIZE_ETHERNET)) {
 	  std::stringstream ss;
 	  ss << "Cannot write beyond buffer. Attempting to copy ";
@@ -269,16 +269,16 @@ namespace pip
 	
 	bitwise_copy(modified_buffer + SIZE_ETHERNET, (std::uint8_t*)data.data(), dst_pos->val, dst_len->val);
       }
-      else if(*(src_loc->space) == "meta")
+      else if(src_loc->as == as_meta)
 	throw std::runtime_error("Unimplemented.\n");
 
       std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into header. Header value: (unimplemented)\n";
       // TODO: print(header);
     }
-    else if(*(dst_loc->space) == "meta")
+    else if(dst_loc->as == as_meta)
       return;
-    else if(*(dst_loc->space) == "packet") {
-      if(*(src_loc->space) == "header") {
+    else if(dst_loc->as == as_packet) {
+      if(src_loc->as == as_header) {
 	if(dst_len->val + dst_pos->val > data.size()) {
 	  std::stringstream ss;
 	  ss << "Cannot write beyond buffer. Attempting to copy ";

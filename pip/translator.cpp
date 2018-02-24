@@ -16,7 +16,12 @@ namespace pip
 {
   translator::translator(context& cxt)
     : cxt(cxt), field_decoder(cxt)
-  { }
+  {
+    address_spaces.insert({cxt.get_symbol("packet"), as_packet});
+    address_spaces.insert({cxt.get_symbol("header"), as_header});
+    address_spaces.insert({cxt.get_symbol("key"), as_key});
+    address_spaces.insert({cxt.get_symbol("meta"), as_meta});
+  }
   
   /// program ::= (pip <decl-seq>)
   decl*
@@ -38,10 +43,8 @@ namespace pip
     if (const sexpr::list_expr* list = as<sexpr::list_expr>(e)) {
       decl_seq decls;
 
-      // for (const sexpr::expr* elem : list->exprs) {
       decl* d = trans_decl(list);
       decls.push_back(d);
-      // }
       
       return decls;
     }
@@ -226,7 +229,7 @@ namespace pip
       return cxt.make_goto_action(dst);
     }
     
-    if( *action_name == "output" ) {
+    if(*action_name == "output") {
       expr* dst;
       match_list(e, "output", &dst);
       
@@ -322,7 +325,7 @@ namespace pip
   expr*
   translator::trans_miss_expr()
   {
-    return cxt.make_miss_expr(new miss_type);
+    return cxt.make_miss_expr(new int_type(64));
   }
   
   expr*
@@ -361,8 +364,15 @@ namespace pip
     expr* len;
     
     match_list(e, "bitfield", &space, &pos, &len);
+
+    address_space as;
+    auto it = address_spaces.find(space);
+    if(it != address_spaces.end())
+      as = it->second;
+    else
+      throw std::logic_error("Invalid address space.");
     
-    return cxt.make_bitfield_expr(space, pos, len);
+    return cxt.make_bitfield_expr(as, pos, len);
   }
   
   // When given an integer width specifier, such as i32,

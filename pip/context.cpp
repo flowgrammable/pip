@@ -13,9 +13,9 @@ namespace pip
 
   context::~context()
   {
-    for(expr* expression : expression_pool)
+    for(auto expression : expression_pool)
       delete expression;
-    for(action* act : action_pool)
+    for(auto act : action_pool)
       delete act;
   }
   
@@ -81,7 +81,7 @@ namespace pip
   }
 
   expr*
-  context::make_bitfield_expr(symbol* space, expr* pos, expr* len)
+  context::make_bitfield_expr(address_space space, expr* pos, expr* len)
   {
     expression_pool.emplace_back(new bitfield_expr(new loc_type, space, pos, len));
     return expression_pool.back();

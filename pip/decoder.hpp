@@ -49,8 +49,6 @@ namespace pip
     const int size_mac_addr = 6;
     const int size_ethertype = 2;
     const int size_ipv4 = size_ethernet + 20;
-
-    symbol* packet_space = new std::string("packet");
   };
   
 } // namespace pip
