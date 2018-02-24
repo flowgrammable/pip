@@ -15,6 +15,8 @@ namespace pip
   {
     for(expr* expression : expression_pool)
       delete expression;
+    for(action* act : action_pool)
+      delete act;
   }
   
   symbol*
@@ -85,78 +87,67 @@ namespace pip
     return expression_pool.back();
   }
   
+  action*
+  context::make_advance_action(expr* amount)
+  {
+    action_pool.emplace_back(new advance_action(amount));
+    return action_pool.back();
+  }
+  
+  action*
+  context::make_copy_action(expr* src, expr* dst, expr* n)
+  {
+    action_pool.emplace_back(new copy_action(src, dst, static_cast<int_expr*>(n)));
+    return action_pool.back();
+  }
 
   action*
-  context::make_action(action_kind k, expr* parm_a, expr* parm_b, action* a)
+  context::make_set_action(expr* f, expr* v)
   {
-    throw std::runtime_error("Do not use this make_action function.\n");
-    switch(k) {
-    case ak_advance:
-      return new advance_action(parm_a);
-    case ak_copy:
-      throw std::runtime_error("Use of deprecated make_action function >:(\n");
-    case ak_set:
-      return new set_action(parm_a, parm_b);
-    case ak_write:
-      return new write_action(a);
-    case ak_clear:
-      return new clear_action;
-    case ak_drop:
-      return new drop_action;
-    case ak_match:
-      return new match_action;
-    case ak_goto:
-      return new goto_action(parm_a);
-    case ak_output:
-      return new output_action(parm_a);
-    default:
-      throw std::runtime_error("Unexpected action\n");
-    }
+    action_pool.emplace_back(new set_action(f, v));
+    return action_pool.back();
   }
 
-  action* context::make_advance_action(expr* amount) const
+  action*
+  context::make_write_action(action* act)
   {
-    return new advance_action(amount);
-  }
-  
-  action* context::make_copy_action(expr* src, expr* dst, expr* n) const
-  {
-    return new copy_action(src, dst, static_cast<int_expr*>(n));
+    action_pool.emplace_back(new write_action(act));
+    return action_pool.back();
   }
 
-  action* context::make_set_action(expr* f, expr* v) const
+  action*
+  context::make_clear_action()
   {
-    return new set_action(f, v);
-  }
-
-  action* context::make_write_action(action* act) const
-  {
-    return new write_action(act);
-  }
-
-  action* context::make_clear_action() const
-  {
-    return new clear_action();
+    action_pool.emplace_back(new clear_action());
+    return action_pool.back();
   }
   
-  action* context::make_drop_action() const
+  action*
+  context::make_drop_action()
   {
-    return new drop_action();
+    action_pool.emplace_back(new drop_action());
+    return action_pool.back();
   }
   
-  action* context::make_match_action() const
+  action*
+  context::make_match_action()
   {
-    return new match_action();
+    action_pool.emplace_back(new match_action());
+    return action_pool.back();
   }
   
-  action* context::make_goto_action(expr* table) const
+  action*
+  context::make_goto_action(expr* table)
   {
-    return new goto_action(table);
+    action_pool.emplace_back(new goto_action(table));
+    return action_pool.back();
   }
   
-  action* context::make_output_action(expr* p) const
+  action*
+  context::make_output_action(expr* p)
   {
-    return new output_action(p);
+    action_pool.emplace_back(new output_action(p));
+    return action_pool.back();
   }  
 }
   

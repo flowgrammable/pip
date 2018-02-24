@@ -41,20 +41,16 @@ namespace pip
     expr* make_named_field_expr(type* t, symbol* field);
     expr* make_port_expr(type* t, expr* port_num);
     expr* make_bitfield_expr(symbol* space, expr* pos, expr* len);
-    
-    action* make_action(action_kind k, expr* parm_a = nullptr,
-			expr* parm_b = nullptr,
-			action* a = nullptr);
 
-    action* make_advance_action(expr* amount) const;
-    action* make_copy_action(expr* src, expr* dst, expr* n) const;
-    action* make_set_action(expr* f, expr* v) const;
-    action* make_write_action(action* act) const;
-    action* make_clear_action() const;
-    action* make_drop_action() const;
-    action* make_match_action() const;
-    action* make_goto_action(expr* table) const;
-    action* make_output_action(expr* p) const;
+    action* make_advance_action(expr* amount);
+    action* make_copy_action(expr* src, expr* dst, expr* n);
+    action* make_set_action(expr* f, expr* v);
+    action* make_write_action(action* act);
+    action* make_clear_action();
+    action* make_drop_action();
+    action* make_match_action();
+    action* make_goto_action(expr* table);
+    action* make_output_action(expr* p);
     
   private:
     /// The diagnostic manager.
@@ -66,9 +62,10 @@ namespace pip
     /// The symbol table.
     cc::symbol_table& syms;
 
-    /// Allocated memory for expressions (not limited).
-    /// Expressions go out of scope with the context.
+    /// Allocated memory for expressions and actions (not limited).
+    /// Their memory goes out of scope with the context.
     std::vector<expr*> expression_pool;
+    std::vector<action*> action_pool;
   };
 
 } // namespace pip
