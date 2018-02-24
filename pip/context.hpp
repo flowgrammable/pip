@@ -16,6 +16,7 @@ namespace pip
     context(cc::diagnostic_manager& diags, 
 	    cc::input_manager& in, 
 	    cc::symbol_table& syms);
+    ~context();
     
     /// Returns the diagnostic manager.
     cc::diagnostic_manager& get_diagnostics() { return diags; }
@@ -63,7 +64,11 @@ namespace pip
     cc::input_manager& input;
 
     /// The symbol table.
-    cc::symbol_table& syms;		
+    cc::symbol_table& syms;
+
+    /// Allocated memory for expressions (not limited).
+    /// Expressions go out of scope with the context.
+    std::vector<expr*> expression_pool;
   };
 
-} // namesapce pip
+} // namespace pip

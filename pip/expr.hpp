@@ -1,6 +1,7 @@
 #pragma once
 
 #include <pip/syntax.hpp>
+#include <pip/type.hpp>
 
 #include <cstdint>
 
@@ -47,7 +48,7 @@ namespace pip
     std::uint64_t val;
 
     ~int_expr()
-    { }
+    { delete ty; }
   };
   
   // A range literal denoting values in the range [lo, hi].
@@ -55,12 +56,12 @@ namespace pip
   {
     range_expr(type* t, int l, int h)
       : expr(ek_range, t), lo(l), hi(h)
-    { }
+    { delete ty; }
     
     int lo;
     int hi;
 
-    ~range_expr() {}
+    ~range_expr() { delete ty; }
   };
   
   expr_kind get_kind(const expr* e);
@@ -77,7 +78,7 @@ namespace pip
 	port_kind = pk_loc;
     }   
 
-    ~port_expr() {}
+    ~port_expr() { delete ty; }
 
     expr* port_num;
 
@@ -96,12 +97,12 @@ namespace pip
   {
     wild_expr(type* t, int n, int m)
       : expr(ek_wild, t), val(n), mask(m)
-    { }
+    { delete ty; }
     
     int val;
     int mask;
 
-    ~wild_expr() {}
+    ~wild_expr() { delete ty; }
   };
   
   /// The 'miss' literal.
@@ -109,9 +110,9 @@ namespace pip
   {
     miss_expr(type* t)
       : expr(ek_miss, t)
-    { }
+    { delete ty; }
 
-    ~miss_expr() {}
+    ~miss_expr() { delete ty; }
   };
   
   /// A reference to a declared value. Note that references are resolved
@@ -128,7 +129,7 @@ namespace pip
     /// The referenced declaration.
     decl* ref;
 
-    ~ref_expr() {}
+    ~ref_expr() { delete ty; }
   };
  
   
@@ -142,7 +143,7 @@ namespace pip
     expr* pos;
     expr* len;
 
-    ~bitfield_expr() {}
+    ~bitfield_expr() { delete ty; }
   };
 
   /// A reference to a packet header.
@@ -168,7 +169,7 @@ namespace pip
     bitfield_expr* value;
     symbol* field;
 
-    ~named_field_expr() {}
+    ~named_field_expr() { delete ty; }
   };
 
 // -------------------------------------------------------------------------- //

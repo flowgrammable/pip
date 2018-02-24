@@ -10,6 +10,12 @@ namespace pip
 		   cc::symbol_table& syms)
     : diags(diags), input(in), syms(syms)
   { }
+
+  context::~context()
+  {
+    for(expr* expression : expression_pool)
+      delete expression;
+  }
   
   symbol*
   context::get_symbol(const char* str)
@@ -26,49 +32,57 @@ namespace pip
   expr*
   context::make_int_expr(type* t, int val)
   {
-    return new int_expr(t, val);
+    expression_pool.emplace_back(new int_expr(t, val));
+    return expression_pool.back();
   }
   
   expr*
   context::make_range_expr(type* t, int lo, int hi)
-  {
-    return new range_expr(t, lo, hi);
+  {    
+    expression_pool.emplace_back(new range_expr(t, lo, hi));
+    return expression_pool.back();
   }
   
   expr*
   context::make_wild_expr(type* t, int val, int mask)
   {
-    return new wild_expr(t, val, mask);
+    expression_pool.emplace_back(new wild_expr(t, val, mask));
+    return expression_pool.back();
   }
   
   expr*
   context::make_miss_expr(type* t)
   {
-    return new miss_expr(t);
+    expression_pool.emplace_back(new miss_expr(t));
+    return expression_pool.back();
   }
   
   expr*
   context::make_ref_expr(type* t, symbol* id)
   {
-    return new ref_expr(t, id);
+    expression_pool.emplace_back(new ref_expr(t, id));
+    return expression_pool.back();
   }
   
   expr*
   context::make_named_field_expr(type* t, symbol* field)
   {
-    return new named_field_expr(ek_named_field, t, field);
+    expression_pool.emplace_back(new named_field_expr(ek_named_field, t, field));
+    return expression_pool.back();
   }
   
   expr*
   context::make_port_expr(type* t, expr* port_num)
   {
-    return new port_expr(t, port_num);
+    expression_pool.emplace_back(new port_expr(t, port_num));
+    return expression_pool.back();
   }
 
   expr*
   context::make_bitfield_expr(symbol* space, expr* pos, expr* len)
   {
-    return new bitfield_expr(new loc_type, space, pos, len);
+    expression_pool.emplace_back(new bitfield_expr(new loc_type, space, pos, len));
+    return expression_pool.back();
   }
   
 
@@ -143,7 +157,7 @@ namespace pip
   action* context::make_output_action(expr* p) const
   {
     return new output_action(p);
-  }
+  }  
 }
   
   
