@@ -56,6 +56,9 @@ namespace pip
       : decl(dk_program, nullptr), decls(std::move(ds))
     { }
 
+    ~program_decl()
+    { for(auto d : decls) delete d; }
+
     /// A list of declarations.
     decl_seq decls;
   };
@@ -101,6 +104,9 @@ namespace pip
     table_decl(symbol* id, rule_kind k, action_seq&& as, rule_seq&& ms)
       : decl(dk_table, id), rule(k), prep(std::move(as)), rules(std::move(ms))
     { }
+
+    ~table_decl()
+    { for(auto r : rules) delete r; }
 
     /// The kind of table.
     rule_kind rule;
