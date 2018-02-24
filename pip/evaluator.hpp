@@ -2,6 +2,7 @@
 
 #include <pip/syntax.hpp>
 #include <pip/pcap.hpp>
+#include <pip/decoder.hpp>
 
 #include <deque>
 #include "decode.hpp"
@@ -59,6 +60,9 @@ namespace pip
     /// Various program facilities.
     context& cxt;
 
+    /// Facilities to decode field expressions
+    decoder dec;
+
     /// The pip program to execute.
     decl* prog;
 
@@ -94,9 +98,6 @@ namespace pip
 
     /// A copy of the frame to be modified throughout the evaluator.
     unsigned char* modified_buffer;
-
-    /// Newer implementation of modified_buffer
-    cap::decoded_packet* modified_data;
 
     /// The sequence of actions being evaluated. Each action is fetched from
     /// the queue in turn. On table lookup, the action list for the matched 

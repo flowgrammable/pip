@@ -15,27 +15,6 @@
 
 namespace pip
 {
-  static cap::decoded_packet* create_modified_packet(const cap::packet& pkt)
-  {
-    cap::eth_header eth(pkt);
-
-    // type == ipv4
-    if(eth.ethertype = 0x800)
-    {
-      cap::ipv4_header ipv4(eth);
-
-      // protocol == tcp
-      if(ipv4.protocol == 6)
-      {
-	cap::tcp_header tcp(ipv4);
-	return new cap::tcp_ipv4(eth, ipv4, tcp);
-      }
-	
-    }
-
-    throw std::runtime_error("Unsupported protocol.\n");
-  }
-  
   evaluator::evaluator(context& cxt, decl* prog, cap::packet& pkt)
     : cxt(cxt), 
       prog(prog), 
@@ -56,11 +35,10 @@ namespace pip
     modified_buffer = new unsigned char[pkt.size()];
     std::memcpy(modified_buffer, pkt.data(), pkt.size());
     
-    modified_data = create_modified_packet(pkt);
     ingress_port = cap::tcp_src_port(pkt.data());
     
     
-    // TODO: Perform static initialization. We need to evaluate all of
+    // Perform static initialization. We need to evaluate all of
     // the table definitions to load them with their static rules.
     auto program = static_cast<program_decl*>(prog);
     std::vector<decl*> tables;
@@ -72,7 +50,7 @@ namespace pip
 	tables.push_back(table);
       }
 
-    // TODO: Load the instructions from the first table.
+    // Load the instructions from the first table.
     current_table = static_cast<table_decl*>(tables.front());
     for(auto a : current_table->prep)
       eval.push_back(a);
