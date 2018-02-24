@@ -17,10 +17,6 @@ namespace pip
   translator::translator(context& cxt)
     : cxt(cxt), field_decoder(cxt)
   {
-    address_spaces.insert({cxt.get_symbol("packet"), as_packet});
-    address_spaces.insert({cxt.get_symbol("header"), as_header});
-    address_spaces.insert({cxt.get_symbol("key"), as_key});
-    address_spaces.insert({cxt.get_symbol("meta"), as_meta});
   }
   
   /// program ::= (pip <decl-seq>)

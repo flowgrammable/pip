@@ -62,7 +62,12 @@ namespace pip
     context& cxt;
     decoder field_decoder;
 
-    std::unordered_map<symbol*, address_space> address_spaces;
+    const std::unordered_map<symbol*, address_space> address_spaces {
+      {cxt.get_symbol("packet"), as_packet},
+      {cxt.get_symbol("header"), as_header},
+      {cxt.get_symbol("key"), as_key},
+      {cxt.get_symbol("meta"), as_meta},
+    };
   };
 
 
