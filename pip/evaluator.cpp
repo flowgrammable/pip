@@ -204,98 +204,19 @@ namespace pip
       *current_byte |= src[i] & (0xff << (CHAR_BIT - n));
     }  
   }
-  
-  void
-  evaluator::eval_copy(const copy_action* a)
+
+  // Copy n bits from src register to dst register starting at position pos.
+  static std::uint64_t
+  reg_to_reg(std::uint64_t src, std::uint64_t dst, std::size_t pos, std::size_t n)
   {
-    cxt.get_diagnostics().inform(cc::location(), "Hello world");
-    auto src_loc = static_cast<bitfield_expr*>(a->src);
-    auto dst_loc = static_cast<bitfield_expr*>(a->dst);
-    auto n = a->n->val;
+    // Create a string of 1s starting at pos to the least significant bit
+    std::uint64_t mask = (((~0 & (1U << pos)) - 1));
+    // Make the string of 1s stop n bits after pos.
+    mask &= ~((~0 & (((1U << (pos - n - 1))) - 1) << 1) + 1);
 
-    auto src_pos = static_cast<int_expr*>(src_loc->pos);
-    auto src_len = static_cast<int_expr*>(src_loc->len);
-    auto dst_pos = static_cast<int_expr*>(dst_loc->pos);
-    auto dst_len = static_cast<int_expr*>(dst_loc->len);
-
-    if(src_loc->as == as_key)
-      throw std::runtime_error("Cannot copy from a key register.\n");
-
-    if(n > dst_len->val || n > src_len->val)
-      throw std::runtime_error("Copy action overflows buffer.\n");
-
-    if(src_len->val != dst_len->val)
-      throw std::runtime_error
-	("Length of copy source and destination must be equal.\n");
-
-    if(dst_loc->as == as_key) {
-      if(n > 64) {
-	std::stringstream ss;
-	ss << "Attempting to copy " << n << " bits into a register of size 64.\n";
-	throw std::runtime_error(ss.str().c_str());
-      }
-      
-      if(src_loc->as == as_packet) {	
-	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
-	std::cout << "value at packet: ";
-	for(int i = 0; i < src_len->val / 8; ++i)
-	  std::cout << (unsigned)*(data.data() + src_pos->val + i);
-	std::cout << '\n';
-      }
-
-      else if(src_loc->as == as_header) {
-	keyreg = data_to_key_reg((std::uint8_t*)data.data() + SIZE_ETHERNET, src_pos->val, src_len->val);
-	
-      }
-      
-      else if(src_loc->as == as_meta)
-	throw std::runtime_error("Unimplemented.\n");
-
-      std::cout << "Copy " << n << " bits to key register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
-    }
-    
-    else if(dst_loc->as == as_header) {
-      if(src_loc->as == as_packet) {
-	if((dst_len->val + dst_pos->val) > (data.size() - SIZE_ETHERNET)) {
-	  std::stringstream ss;
-	  ss << "Cannot write beyond buffer. Attempting to copy ";
-	  ss << dst_len->val;
-	  ss << " bits at position ";
-	  ss << dst_pos->val;
-	  ss << " of a buffer of size ";
-	  ss << data.size() - SIZE_ETHERNET;
-	  throw std::runtime_error(ss.str().c_str());
-	}
-	
-	bitwise_copy(modified_buffer + SIZE_ETHERNET, (std::uint8_t*)data.data(), dst_pos->val, dst_len->val);
-      }
-      else if(src_loc->as == as_meta)
-	throw std::runtime_error("Unimplemented.\n");
-
-      std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into header. Header value: (unimplemented)\n";
-      // TODO: print(header);
-    }
-    else if(dst_loc->as == as_meta)
-      return;
-    else if(dst_loc->as == as_packet) {
-      if(src_loc->as == as_header) {
-	if(dst_len->val + dst_pos->val > data.size()) {
-	  std::stringstream ss;
-	  ss << "Cannot write beyond buffer. Attempting to copy ";
-	  ss << dst_len->val;
-	  ss << " bits at position ";
-	  ss << dst_pos->val;
-	  ss << " of a buffer of size ";
-	  ss << data.size();
-	  throw std::runtime_error(ss.str().c_str());
-	}
-	
-	bitwise_copy(modified_buffer, packet_header(data), dst_pos->val, dst_len->val);
-      }
-
-      std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into packet. packet value: (unimplemented)\n";
-      // TODO: print(packet);
-    }    
+    dst &= mask;
+    src &= ~mask;
+    return dst | src;
   }
 
   // Copy n bits from a uint64_t into a byte array at position pos.
@@ -326,6 +247,135 @@ namespace pip
 
     if(n > 0)
       *current_byte = (in << (CHAR_BIT - n)) + (*current_byte >> n);
+  }
+  
+  void
+  evaluator::eval_copy(const copy_action* a)
+  {
+    cxt.get_diagnostics().inform(cc::location(), "Hello world");
+    auto src_loc = static_cast<bitfield_expr*>(a->src);
+    auto dst_loc = static_cast<bitfield_expr*>(a->dst);
+    auto n = a->n->val;
+
+    auto src_pos = static_cast<int_expr*>(src_loc->pos);
+    auto src_len = static_cast<int_expr*>(src_loc->len);
+    auto dst_pos = static_cast<int_expr*>(dst_loc->pos);
+    auto dst_len = static_cast<int_expr*>(dst_loc->len);
+
+    if(src_loc->as == as_key)
+      throw std::runtime_error("Cannot copy from a key register.\n");
+
+    if(n > dst_len->val || n > src_len->val)
+      throw std::runtime_error("Copy action overflows buffer.\n");
+
+    if(src_len->val != dst_len->val)
+      throw std::runtime_error
+	("Length of copy source and destination must be equal.\n");
+
+    /// Copying into key register.
+    if(dst_loc->as == as_key) {
+      if(n > 64) {
+	std::stringstream ss;
+	ss << "Attempting to copy " << n << " bits into a register of size 64.\n";
+	throw std::runtime_error(ss.str().c_str());
+      }
+      
+      if(src_loc->as == as_packet) {	
+	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
+	std::cout << "value at packet: ";
+	for(int i = 0; i < src_len->val / 8; ++i)
+	  std::cout << (unsigned)*(data.data() + src_pos->val + i);
+	std::cout << '\n';
+      }
+
+      else if(src_loc->as == as_header) {
+	keyreg = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val + decode, src_len->val);	
+      }
+      
+      else if(src_loc->as == as_meta)
+	keyreg = reg_to_reg(metadata, keyreg, src_pos->val, src_len->val);
+
+      std::cout << "Copy " << n << " bits to key register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
+    }
+
+    /// Copying into header bitfield.
+    else if(dst_loc->as == as_header) {
+      if(src_loc->as == as_packet) {
+	if((dst_len->val + dst_pos->val + decode) > data.size()) {
+	  std::stringstream ss;
+	  ss << "Cannot write beyond buffer. Attempting to copy ";
+	  ss << dst_len->val;
+	  ss << " bits at position ";
+	  ss << dst_pos->val;
+	  ss << " of a buffer of size ";
+	  ss << data.size() - decode;
+	  throw std::runtime_error(ss.str().c_str());
+	}
+	
+	bitwise_copy(modified_buffer, (std::uint8_t*)data.data(), dst_pos->val + decode, dst_len->val);
+      }
+      else if(src_loc->as == as_meta)
+	reg_to_buf(modified_buffer, metadata, dst_pos->val + decode, dst_len->val);
+
+      std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into header. Header value: (unimplemented)\n";
+      // TODO: print(header);
+    }
+
+    /// Copying into metadata register.
+    else if(dst_loc->as == as_meta) {
+      if(n > 64) {
+	std::stringstream ss;
+	ss << "Attempting to copy " << n << " bits into a register of size 64.\n";
+	throw std::runtime_error(ss.str().c_str());
+      }
+      
+      if(src_loc->as == as_packet) {	
+	metadata = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val, src_len->val);
+	std::cout << "value at packet: ";
+	for(int i = 0; i < src_len->val / 8; ++i)
+	  std::cout << (unsigned)*(data.data() + src_pos->val + i);
+	std::cout << '\n';
+      }
+
+      else if(src_loc->as == as_header) {
+	metadata = data_to_key_reg((std::uint8_t*)data.data(), src_pos->val + decode, src_len->val);	
+      }
+      
+      else if(src_loc->as == as_meta)
+	metadata = reg_to_reg(metadata, keyreg, src_pos->val, src_len->val);
+
+      std::cout << "Copy " << n << " bits to metadata register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
+    }
+
+    /// Copying into packet bitfield.
+    else if(dst_loc->as == as_packet) {
+      if(src_loc->as == as_header) {
+	if(dst_len->val + dst_pos->val > data.size()) {
+	  std::stringstream ss;
+	  ss << "Cannot write beyond buffer. Attempting to copy ";
+	  ss << dst_len->val;
+	  ss << " bits at position ";
+	  ss << dst_pos->val;
+	  ss << " of a buffer of size ";
+	  ss << data.size();
+	  throw std::runtime_error(ss.str().c_str());
+	}
+	
+	bitwise_copy(modified_buffer, packet_header(data), dst_pos->val, dst_len->val);
+      }
+      else if(src_loc->as == as_meta) {
+	if(n > data.size()) {
+	  std::stringstream ss;
+	  ss << "Attempting to copy " << n << " bits into a packet of size: " << data.size();
+	  throw std::runtime_error(ss.str().c_str());
+	}
+      
+	reg_to_buf(modified_buffer, metadata, dst_pos->val, dst_len->val);
+      }
+
+      std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into packet. packet value: (unimplemented)\n";
+      // TODO: print(packet);
+    }    
   }
 
   void
