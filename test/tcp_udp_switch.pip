@@ -1,0 +1,51 @@
+(pip
+  (table filter exact
+    (actions
+      (copy
+        (named_field ipv4.protocol)
+	(bitfield key (int i8 0) (int i8 8)) ; context[key] = π[ipv4.protocol])
+	(int i32 8))
+      (match)
+    ) ; actions
+    (rules
+      (rule (int i8 06)
+        (actions (goto (ref tcp_table))) ; if protocol == 06 (TCP): use TCP rules
+      (rule (int i8 17)
+        (actions (goto (ref udp_table))) ; if protocol == 17 (UDP): use UDP rules
+      (rule (miss)
+	(actions drop))
+      ) ; rules
+  ) ; tcp_filter
+
+  (table tcp_table exact
+    (actions
+      (copy
+        (named_field tcp.dst)
+	(bitfield key (int i32 0) (int i32 16))
+	(int i32 16))
+      (match)
+    )
+  (rules
+    (rule (int i16 80)
+      (actions (output (port (named_field tcp.dst)))) ; if output == 80 (HTTP): output
+    )
+  ) ;rules
+  ) ; tcp_table
+
+  (table udp_table exact
+    (actions
+      (copy
+        (named_field udp.dst)
+	(bitfield key (int i32 0) (int i32 16))
+	(int i32 16))
+      (match)
+    )
+  (rules
+    (rule (int i16 80)
+      (actions (output (port (named_field udp.dst)))) ; if output == 80 (HTTP): output
+    )
+  ) ;rules
+  ) ; tcp_table
+) ; pip
+
+     
