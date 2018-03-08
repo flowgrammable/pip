@@ -6,6 +6,7 @@
 #include <pip/type_checker.hpp>
 #include <pip/pcap.hpp>
 #include <pip/decode.hpp>
+#include <pip/codegen.hpp>
 
 #include <sexpr/syntax.hpp>
 #include <sexpr/context.hpp>
@@ -16,28 +17,14 @@
 #include <cc/diagnostics.hpp>
 
 #include <iostream>
+#include <fstream>
 
 #include <cstring>
 #include <cstdint>
 #include <netinet/in.h>
 #include <climits>
-#include <bitset>
+#include <algorithm>
 
-
-template <typename R>
-static constexpr R bitmask(unsigned int const onecount)
-{
-    return static_cast<R>(-(onecount != 0))
-        & (static_cast<R>(-1) >> ((sizeof(R) * CHAR_BIT) - onecount));
-}
-
-template<typename R>
-static constexpr R bitfieldmask(unsigned int const a, unsigned int const b)
-{
-  return ((static_cast<R>(-1) >> (((sizeof(R) * CHAR_BIT) - 1) - (b)))
-	  & ~((1 << (a)) - 1));
-	 
-}
 
 int
 main(int argc, char* argv[])
@@ -69,6 +56,27 @@ main(int argc, char* argv[])
     // Stage 1. Accept the input file.
     const cc::file& input = inputs.add_file(argv[1]);
 
+    // If the amount of physical is not defined, it is the maximum 32-bit uinteger.
+    std::uint32_t physical_ports = (std::uint32_t)(~0);
+    std::vector<std::string> arguments;
+    arguments.assign(argv, argv + argc);
+
+    // Otherwise, restrict the set if it is in range.
+    auto port_arg_it = std::find(arguments.begin(), arguments.end(), "-p");
+    if(port_arg_it == arguments.end())
+      port_arg_it = std::find(arguments.begin(), arguments.end(), "--ports");
+    
+    if(port_arg_it != arguments.end()) {
+      std::string amount_string = *(port_arg_it + 1);
+      std::size_t size;
+      int amount = std::stoi(amount_string, &size);
+      if(amount_string.size() != size)
+	throw std::runtime_error("Invalid amount of physical ports.");
+      if(amount < 1 || amount > physical_ports)
+	throw std::runtime_error("Invalid amount of physical ports.");
+      physical_ports = amount;
+    }        
+
     // Stage 2: Parse the program as an uninterpreted s-expression.
     sexpr::context sexpr(diags, inputs, syms);
     sexpr::parser parse(sexpr, input);
@@ -79,20 +87,25 @@ main(int argc, char* argv[])
     pip::translator trans(cxt);
     prog = trans(e);
     prog->dump();
+    auto program = static_cast<pip::program_decl*>(prog);
 
     std::cout << "End translation\n";
+    std::ofstream outfile("out.pip");
+    pip::generator gen(dynamic_cast<pip::program_decl*>(prog));
+    outfile << gen.generate();
+    outfile.close();
 
     // Stage 4: Name lookup. Match identifiers to declarations.
     pip::resolver resolve(cxt);
     resolve(prog);
 
-    // Stage 5: Type checking. Assign a type to each expression.
-    pip::type_checker types(cxt, static_cast<pip::program_decl*>(prog));
-    types.check();
+    // // Stage 5: Type checking. Assign a type to each expression.
+    // pip::type_checker types(cxt, program);
+    // types.check();
 
     // Stage K: Other static analysis?
 
-    // ...
+    // ...      
 
     // Stage K + N: Evaluate the program.
     //
@@ -103,102 +116,22 @@ main(int argc, char* argv[])
     pip::cap::packet pkt;
     while (in.get(pkt)) {
 
-      std::cout << "PKT:\n";
-      uint8_t* vec = new uint8_t[pkt.size()];
-      for(int i = 0; i < pkt.size(); ++i)
-      {
-      	uint8_t n;
-      	std::memcpy(&n, pkt.data() + i, 1);
-	vec[i] = n;
-	
-      	std::cout << std::hex << (unsigned)vec[i] << '\t';
-
-      	if(i > 1 && i % 8 == 0)
-      	  std::cout << '\n';
+      for(auto d : program->decls) {
+	if(auto t = dynamic_cast<pip::table_decl*>(d)) {
+	  for(auto r : t->rules)
+	    if(auto i = dynamic_cast<pip::int_expr*>(r->key))
+	      std::cout << "rule key: " << i->val << '\n';
+	}
       }
-      // pip::cap::eth_header eth(pkt);
-      // const pip::cap::eth_header* eth;
-      // eth = (pip::cap::eth_header*)(pkt.data());
-      pip::cap::eth_header eth(pkt);
-      // eth.print();
-      std::cout << "\nETH:\n";
-      eth.print(std::cout);
-      std::cout << "\nIP:\n";
-      pip::cap::ipv4_header ipv4(eth);
-      ipv4.print(std::cout);
-
-      std::cout << "\nTCP:\n";
-      pip::cap::tcp_header tcp(ipv4);
-      tcp.print(std::cout);
-
-      // int bitwidth = 7;
-      // uint64_t field = 0;
-      // uint64_t value = 94;
-      // int field_width = 16;
-      // int enjamb = (field_width - (field_width % 8)) / 8;
-      // uint64_t mask = bitmask<uint32_t>(bitwidth);
-
-      // // We can enjamb a value into the beginning of an integer
-      // // by creating a mask and ORing 
-      // if(bitwidth < sizeof(value) * 8)
-      // {
-      // 	mask << ((sizeof(value) * 8) - bitwidth);
-      // 	field = (field & ~mask) | (value << (sizeof(value) * 8) - bitwidth);
-      // 	uint8_t* exploded_field = new uint8_t[8];
-
-      // 	std::memcpy(exploded_field, &field, 8);
-
-      // 	std::bitset<64> x(field);
-      // 	std::cout << "Enjambed number: " << x << '\n';
-
-      // 	std::cout << "Enjambed array: ";
-      // 	for(int i = 0; i < enjamb; ++i)
-      // 	{
-      // 	  std::cout << exploded_field[i] << " ";
-      // 	}
-      // 	std::cout << '\n';
-      // }
-
       
-      // std::cout << "\nNEW BUF\n";
-      // for(int i = 0; i < pkt.size(); ++i)
-      // {
-      // 	std::cout << std::hex << (unsigned)vec[i] << '\t';
+      pip::evaluator eval(cxt, program, pkt);
+      eval.run();
 
-      // 	if(i > 1 && i % 8 == 0)
-      // 	  std::cout << '\n';
-      // }      
-      delete[] vec;
-      
-      // for(int i = 0; i < 6; ++i)
-      // 	std::cout << std::hex << (unsigned)eth->dst_mac[i] << '\t';
-
-      // std::cout << '\n';
-      // for(int i = 0; i < 6; ++i)
-      // 	std::cout << std::hex << (unsigned)eth->src_mac[i] << '\t';
-      
-      // std::cout << '\n';
-      //   std::cout << std::hex << (unsigned)eth->ethertype << '\t';
-					      
-      // for(int i = 0; i < sizeof(eth->payload); ++i) {
-      // 	if(i > 1 && i % 8 == 0)
-      // 	  std::cout << '\n';
-      // 	std::cout << std::hex << (unsigned)eth->payload[i] << '\t';	
-      // }
-      
-      // Ignore incomplete packets.
-      if(!pkt.is_complete()) {
-        ++partial;
-        continue;
-      }
-
-      pip::evaluator eval(cxt, nullptr, pkt);
-
+    }
       // TODO: This is where we could turn this into a debugger. Simply
       // allowing the user to invoke the step command would enable them
       // to step through the execution of the packet in the pipeline.
       // eval.run();
-    }
 
     std::cout << "partial packets: " << partial << '\n';
   }
