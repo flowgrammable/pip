@@ -136,6 +136,10 @@ address_space_to_string(address_space as)
     return std::string("key");
   case as_meta:
     return std::string("meta");
+  case as_ingress_port:
+    return std::string("ingress_port");
+  case as_physical_port:
+    return std::string("physical_port");
   }
 }
   

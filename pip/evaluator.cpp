@@ -270,6 +270,8 @@ namespace pip
 
     if(src_loc->as == as_key)
       throw std::runtime_error("Cannot copy from a key register.\n");
+    if(dst_loc->as == as_ingress_port || dst_loc->as == as_physical_port)
+      throw std::runtime_error("Cannot copy into a context variable.\n");
 
     if(n > dst_len->val || n > src_len->val)
       throw std::runtime_error("Copy action overflows buffer.\n");
@@ -300,6 +302,10 @@ namespace pip
       
       else if(src_loc->as == as_meta)
 	keyreg = reg_to_reg(metadata, keyreg, src_pos->val, src_len->val);
+      else if(src_loc->as == as_ingress_port)
+	keyreg = reg_to_reg(ingress_port, keyreg, src_pos->val, src_len->val);
+      else if(src_loc->as == as_physical_port)
+	keyreg = reg_to_reg(physical_port, keyreg, src_pos->val, src_len->val);
 
       std::cout << "Copy " << n << " bits to key register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
     }
@@ -322,6 +328,10 @@ namespace pip
       }
       else if(src_loc->as == as_meta)
 	reg_to_buf(modified_buffer, metadata, dst_pos->val + decode, dst_len->val);
+      else if(src_loc->as == ingress_port)
+	reg_to_buf(modified_buffer, ingress_port, dst_pos->val + decode, dst_len->val);
+      else if(src_loc->as == physical_port)
+	reg_to_buf(modified_buffer, physical_port, dst_pos->val + decode, dst_len->val);
 
       std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into header. Header value: (unimplemented)\n";
       // TODO: print(header);
@@ -348,7 +358,12 @@ namespace pip
       }
       
       else if(src_loc->as == as_meta)
-	metadata = reg_to_reg(metadata, keyreg, src_pos->val, src_len->val);
+	metadata = reg_to_reg(metadata, metadata, src_pos->val, src_len->val);
+      else if(src_loc->as == as_ingress_port)
+	metadata = reg_to_reg(ingress_port, metadata, src_pos->val, src_len->val);
+      else if(src_loc->as == as_physical_port)
+	metadata = reg_to_reg(physical_port, metadata, src_pos->val, src_len->val);
+
 
       std::cout << "Copy " << n << " bits to metadata register from position " << src_pos->val << ". Register value: " << keyreg << '\n';
     }
@@ -379,9 +394,29 @@ namespace pip
 	reg_to_buf(modified_buffer, metadata, dst_pos->val, dst_len->val);
       }
 
+      else if(src_loc->as == as_ingress_port) {
+	if(n > data.size()) {
+	  std::stringstream ss;
+	  ss << "Attempting to copy " << n << " bits into a packet of size: " << data.size();
+	  throw std::runtime_error(ss.str().c_str());
+	}
+      
+	reg_to_buf(modified_buffer, ingress_port, dst_pos->val, dst_len->val);
+      }
+
+      else if(src_loc->as == as_physical_port) {
+	if(n > data.size()) {
+	  std::stringstream ss;
+	  ss << "Attempting to copy " << n << " bits into a packet of size: " << data.size();
+	  throw std::runtime_error(ss.str().c_str());
+	}
+      
+	reg_to_buf(modified_buffer, physical_port, dst_pos->val, dst_len->val);
+      }
+
       std::cout << "Copy " << dst_len->val << " bits at position " << dst_pos->val << " into packet. packet value: (unimplemented)\n";
       // TODO: print(packet);
-    }    
+    }
   }
 
   void

@@ -32,7 +32,9 @@ namespace pip
     as_packet,
     as_header,
     as_key,
-    as_meta
+    as_meta,
+    as_ingress_port,
+    as_physical_port
   };
   
   /// The base class of all expressions.
