@@ -79,6 +79,13 @@ namespace pip
     expression_pool.emplace_back(new port_expr(t, port_num));
     return expression_pool.back();
   }
+  
+  expr*
+  context::make_port_expr(type* t, symbol* port_name)
+  {
+    expression_pool.emplace_back(new port_expr(t, port_name));
+    return expression_pool.back();
+  }
 
   expr*
   context::make_bitfield_expr(address_space space, expr* pos, expr* len)

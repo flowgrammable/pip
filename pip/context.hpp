@@ -40,6 +40,7 @@ namespace pip
     expr* make_ref_expr(type* t, symbol* id);
     expr* make_named_field_expr(type* t, symbol* field);
     expr* make_port_expr(type* t, expr* port_num);
+    expr* make_port_expr(type* t, symbol* port_name);
     expr* make_bitfield_expr(address_space space, expr* pos, expr* len);
 
     action* make_advance_action(expr* amount);

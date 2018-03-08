@@ -4,6 +4,7 @@
 #include <pip/type.hpp>
 
 #include <cstdint>
+#include <unordered_map>
 
 // Expressions are operands of match criteria and actions. Currently, we
 // only support literal values and references to declarations in these
@@ -74,27 +75,47 @@ namespace pip
   
   expr_kind get_kind(const expr* e);
 
+  enum reserved_ports
+  {
+    rp_non_reserved,
+    rp_all,
+    rp_controller,
+    rp_table,
+    rp_in_port,
+    rp_any,
+    rp_unset,
+  };
+
+  const std::unordered_map<std::string, reserved_ports>
+  port_names {
+    {"all", rp_all},
+    {"controller", rp_controller},
+    {"table", rp_table},
+    {"in_port", rp_in_port},
+    {"any", rp_any},
+    {"unset", rp_unset},
+  };
+
   // A numbered port.
   struct port_expr : expr
   {
     port_expr(type* t, expr* p)
-      :expr(ek_port, t), port_num(p)
+      :expr(ek_port, t), port_num(p), rp(rp_non_reserved)
     {
-      if(get_kind(p) == ek_int)
-	port_kind = pk_int;
-      if(get_kind(p) == ek_port)
-	port_kind = pk_loc;
-    }   
+    }
+
+    port_expr(type* t, symbol* port_name)
+      :expr(ek_port, t), port_num()
+    {
+      std::string name = *port_name;
+      auto it = port_names.find(name);
+      rp = it->second;
+    }
 
     ~port_expr() { delete static_cast<port_type*>(ty); }
 
     expr* port_num;
-
-    // Ports can be expressed as integer literals or locations within the context.
-    enum {
-      pk_int,
-      pk_loc,
-    } port_kind;
+    reserved_ports rp;
   };
 
   /// A wildcard literal denoting all values k satisfying

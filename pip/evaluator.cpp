@@ -480,16 +480,9 @@ namespace pip
     const port_expr* port = static_cast<port_expr*>(a->port);
 
     int port_num;
-    if(port->port_kind == port_expr::pk_int)
-      port_num = static_cast<int_expr*>(port->port_num)->val;
-    else if(port->port_kind == port_expr::pk_loc) {
-      auto loc = static_cast<bitfield_expr*>(port->port_num);
-      auto pos = static_cast<int_expr*>(loc->pos);
-      auto len = static_cast<int_expr*>(loc->len);
-      port_num = data_to_key_reg((std::uint8_t*)data.data(), pos->val, len->val);
-    }
-
+    port_num = static_cast<int_expr*>(port->port_num)->val;
     egress_port = port_num;
+    
     std::cout << "Output to port: " << egress_port << '\n';
   }
 

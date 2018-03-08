@@ -47,6 +47,7 @@ namespace pip
     expr* trans_ref_expr(const sexpr::list_expr* e);
     expr* trans_named_field_expr(const sexpr::list_expr* e);
     expr* trans_port_expr(const sexpr::list_expr* e);
+    expr* trans_reserved_port_expr(const sexpr::list_expr* e);
     expr* trans_bitfield_expr(const sexpr::list_expr* e);
     expr* trans_int_expr(const sexpr::list_expr* e);
 
@@ -80,6 +81,7 @@ namespace pip
       es_wildcard,
       es_range,
       es_port,
+      es_reserved_port,
       es_bitfield,
       es_miss,
       es_named_field,
@@ -91,6 +93,7 @@ namespace pip
       {cxt.get_symbol("wildcard"), es_wildcard},
       {cxt.get_symbol("range"), es_range},
       {cxt.get_symbol("port"), es_port},
+      {cxt.get_symbol("reserved_port"), es_reserved_port},
       {cxt.get_symbol("bitfield"), es_bitfield},
       {cxt.get_symbol("miss"), es_miss},
       {cxt.get_symbol("named_field"), es_named_field},

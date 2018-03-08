@@ -389,13 +389,29 @@ namespace pip
     expr* port;
     match_list(e, "port", &port);
 
-    if(get_kind(port) != ek_int && get_kind(port) != ek_bitfield) {
+    if(get_kind(port) != ek_int) {
       std::stringstream ss;
-      ss << "Port value must be of type int or location. Currently of type: " << get_node_name(port->ty);
+      ss << "Port value must be of type int. Currently of type: " << get_node_name(port->ty);
       throw type_error(cc::get_location(e), ss.str());
     }
     
     return cxt.make_port_expr(new port_type, port);
+  }
+
+  expr*
+  translator::trans_reserved_port_expr(const sexpr::list_expr* e)
+  {
+    symbol* port_name;
+    match_list(e, "reserved_port", &port_name);
+
+    auto find = port_names.find(*port_name);
+    if(find == port_names.end()) {
+      std::stringstream ss;
+      ss << "Invalid reserved port: \"" << *port_name << "\"";
+      throw syntax_error(cc::get_location(e), ss.str());
+    }
+
+    return cxt.make_port_expr(new port_type, port_name);
   }
   
   expr*
