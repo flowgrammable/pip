@@ -289,6 +289,8 @@ namespace pip
 	return trans_range_expr(list);
       case es_port:
 	return trans_port_expr(list);
+      case es_reserved_port:
+	return trans_reserved_port_expr(list);
       case es_bitfield:
 	return trans_bitfield_expr(list);
       case es_miss:
@@ -462,17 +464,17 @@ namespace pip
     if(spec.front() == 'i') {
       spec.erase(0, 1);
       
-      std::size_t it;
-      auto width = std::stoi(spec.c_str(), &it);
+      std::size_t size;
+      auto width = std::stoi(spec.c_str(), &size);
 
-      if(it > 64 || it < 1) {
+      if(width > 64 || width < 1) {
 	std::stringstream ss;
 	ss << "Integer width specifier must be between 1 and 64."
-	   << " Currently of value: " << it;
+	   << " Currently of value: " << width;
 	throw syntax_error(cc::get_location(e), ss.str());
       }
       
-      if(spec.size() == it)
+      if(spec.size() == size)
 	return width;
     }
     
