@@ -481,14 +481,15 @@ namespace pip
 
     int port_num;
     
-    if(port->rp == rp_non_reserved)
+    if(port->rp == rp_non_reserved) {
       port_num = static_cast<int_expr*>(port->port_num)->val;
-    else
+      std::cout << "Output to port: " << port_num << '\n';
+    } else {
       port_num = (int)port->rp;
+      std::cout << "Output to port: " << get_phrase_name(port->rp) << '\n';
+    }
     
     egress_port = port_num;
-    
-    std::cout << "Output to port: " << egress_port << '\n';
   }
 
 } // namespace pip
