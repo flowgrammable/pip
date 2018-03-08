@@ -71,9 +71,9 @@ main(int argc, char* argv[])
       std::size_t size;
       int amount = std::stoi(amount_string, &size);
       if(amount_string.size() != size)
-	throw std::runtime_error("Invalid amount of physical ports.");
+	throw std::runtime_error("Invalid amount of physical ports. Usage: -p <uint32> or --ports <uint32>.");
       if(amount < 1 || amount > physical_ports)
-	throw std::runtime_error("Invalid amount of physical ports.");
+	throw std::runtime_error("Amount of physical ports must be a 32-bit unsigned integer.");
       physical_ports = amount;
     }        
 
