@@ -261,9 +261,14 @@ generator::generate_named_field_expr(named_field_expr* e)
 void
 generator::generate_port_expr(port_expr* e)
 {
-  code << "(port ";
-  generate_expr(e->port_num);
-  code << ") ";
+  if(e->rp == rp_non_reserved) {
+    code << "(port ";
+    generate_expr(e->port_num);
+    code << ") ";
+  } else {
+    code << "(reserved_port " << get_phrase_name(e->rp) << ") ";
+    
+  }
 }
 
 void

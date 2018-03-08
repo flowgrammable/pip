@@ -75,15 +75,15 @@ namespace pip
   
   expr_kind get_kind(const expr* e);
 
-  enum reserved_ports
+  enum reserved_ports : int
   {
     rp_non_reserved,
-    rp_all,
-    rp_controller,
-    rp_table,
-    rp_in_port,
-    rp_any,
-    rp_unset,
+    rp_all = -1,
+    rp_controller = -2,
+    rp_table = -3,
+    rp_in_port = -4,
+    rp_any = -5,
+    rp_unset = -6,
   };
 
   const std::unordered_map<std::string, reserved_ports>
@@ -217,6 +217,9 @@ namespace pip
 
   /// Returns a string representation of an expression kind.
   const char* get_phrase_name(expr_kind k);
+
+  /// Returns a string representation of a reserved port.
+  const char* get_phrase_name(reserved_ports p);
 
   /// Returns a string representation of an expression's name.
   const char* get_phrase_name(const expr* e);

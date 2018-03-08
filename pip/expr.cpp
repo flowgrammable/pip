@@ -30,7 +30,27 @@ namespace pip
       return "bitfield";
     }
   }
-  
+
+  const char*
+  get_phrase_name(reserved_ports p)
+  {
+    switch (p) {
+    case rp_non_reserved:
+      return "non_reserved";
+    case rp_all:
+      return "all";
+    case rp_controller:
+      return "controller";
+    case rp_table:
+      return "table";
+    case rp_in_port:
+      return "in_port";
+    case rp_any:
+      return "any";
+    case rp_unset:
+      return "unset";
+    }
+  }
   
   const char*
   get_phrase_name(const expr* e)
