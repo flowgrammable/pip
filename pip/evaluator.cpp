@@ -480,7 +480,12 @@ namespace pip
     const port_expr* port = static_cast<port_expr*>(a->port);
 
     int port_num;
-    port_num = static_cast<int_expr*>(port->port_num)->val;
+    
+    if(port->rp == rp_non_reserved)
+      port_num = static_cast<int_expr*>(port->port_num)->val;
+    else
+      port_num = (int)port->rp;
+    
     egress_port = port_num;
     
     std::cout << "Output to port: " << egress_port << '\n';

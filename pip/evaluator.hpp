@@ -39,6 +39,8 @@ namespace pip
     
     /// Execute the program.
     void run();
+  public:
+    std::int32_t get_egress_port() const { return egress_port; }
 
   private:
     /// Fetch the next instruction from the evaluation queue.
@@ -80,7 +82,7 @@ namespace pip
     std::uint32_t physical_port;
 
     /// The port on which the packet will be outputted after processing.
-    std::uint32_t egress_port;
+    std::int32_t egress_port;
 
     /// Dynamic metadata. This can be written to by copy actions.
     std::uint64_t metadata;
