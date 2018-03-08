@@ -9,13 +9,14 @@
 #include "logger.hpp"
 
 #include <climits>
+#include <random>
 #include <sstream>
 // testing only
 #include <iostream>
 
 namespace pip
 {
-  evaluator::evaluator(context& cxt, decl* prog, cap::packet& pkt)
+  evaluator::evaluator(context& cxt, decl* prog, cap::packet& pkt, std::uint32_t physical_ports)
     : cxt(cxt), 
       prog(prog), 
       data(pkt), 
@@ -36,7 +37,12 @@ namespace pip
     std::memcpy(modified_buffer, pkt.data(), pkt.size());
     
     ingress_port = cap::tcp_src_port(pkt.data());
-    
+
+    std::random_device rand_device;
+    std::mt19937 rand_engine(rand_device());
+    std::uniform_int_distribution<std::uint32_t> rand_distribution(1, physical_ports);
+    physical_port = rand_distribution(rand_engine);
+    std::cout << "Packet received on port: " << physical_port << '\n';
     
     // Perform static initialization. We need to evaluate all of
     // the table definitions to load them with their static rules.

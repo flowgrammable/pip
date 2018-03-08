@@ -5,6 +5,7 @@
 #include <pip/decoder.hpp>
 
 #include <deque>
+#include <cstdint>
 #include "decode.hpp"
 
 namespace pip
@@ -27,7 +28,7 @@ namespace pip
   class evaluator
   {
   public:
-    evaluator(context& cxt, decl* prog, cap::packet& pkt);
+    evaluator(context& cxt, decl* prog, cap::packet& pkt, std::uint32_t physical_ports);
 
     ~evaluator();
 

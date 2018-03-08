@@ -75,7 +75,7 @@ main(int argc, char* argv[])
       if(amount < 1 || amount > physical_ports)
 	throw std::runtime_error("Amount of physical ports must be a 32-bit unsigned integer.");
       physical_ports = amount;
-    }        
+    }
 
     // Stage 2: Parse the program as an uninterpreted s-expression.
     sexpr::context sexpr(diags, inputs, syms);
@@ -124,7 +124,7 @@ main(int argc, char* argv[])
 	}
       }
       
-      pip::evaluator eval(cxt, program, pkt);
+      pip::evaluator eval(cxt, program, pkt, physical_ports);
       eval.run();
 
     }
