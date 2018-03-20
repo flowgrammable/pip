@@ -527,7 +527,12 @@ namespace pip
       std::cout << "Output to port: " << port_num << '\n';
     } else {
       port_num = (int)port->rp;
-      std::cout << "Output to port: " << get_phrase_name(port->rp) << '\n';
+
+      if(port_num == rp_in_port)
+	std::cout << "Output to port: " << get_phrase_name(port->rp) << " ("
+		  << physical_port << ")\n";
+      else
+	std::cout << "Output to port: " << get_phrase_name(port->rp) << '\n';
     }
     
     egress_port = port_num;
