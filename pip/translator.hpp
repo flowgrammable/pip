@@ -73,6 +73,8 @@ namespace pip
       {cxt.get_symbol("header"), as_header},
       {cxt.get_symbol("key"), as_key},
       {cxt.get_symbol("meta"), as_meta},
+      {cxt.get_symbol("ingress_port"), as_ingress_port},
+      {cxt.get_symbol("physical_port"), as_physical_port},
     };
 
     /// Keywords in expression lists.
