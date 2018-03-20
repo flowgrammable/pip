@@ -1,0 +1,13 @@
+(pip
+  (table echo exact
+    (actions
+      (set key (int i64 0))
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (output (ingress)))
+      )
+    )
+  )
+)

@@ -1,0 +1,13 @@
+(pip
+  (table drop exact
+    (actions
+      (set (bitfield key (int i32 0) (int i32 64)) (int i64 0))
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (output (reserved_port all)))
+      )
+    )
+  )
+)
