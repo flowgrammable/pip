@@ -1,12 +1,15 @@
 (pip
   (table echo exact
     (actions
-      (set key (int i64 0))
+      (copy
+	(bitfield physical_port (int i32 0) (int i32 64))
+	(bitfield key (int i32 0) (int i32 64))
+	(int i32 64))
       (match)
     ) ; actions
     (rules
       (rule (miss)
-        (actions (output (ingress)))
+        (actions (output (reserved_port in_port)))
       )
     )
   )
