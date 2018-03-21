@@ -40,8 +40,9 @@ namespace pip
     
     /// Execute the program.
     void run();
-  public:
-    std::int32_t get_egress_port() const { return egress_port; }
+
+    inline std::int32_t get_egress_port() const { return egress_port; }
+    inline bool controller_program() const { controller; }
 
   private:
     /// Fetch the next instruction from the evaluation queue.
@@ -119,6 +120,9 @@ namespace pip
 
     /// The table currently being examined.
     table_decl* current_table = nullptr;
+
+    /// Set to true if outputted to controller.
+    bool controller = false;
   };
 
 
