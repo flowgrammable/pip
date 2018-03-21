@@ -12,7 +12,8 @@ add_library(libpip
   evaluator.cpp
   pcap.cpp
   decoder.cpp
-  codegen.cpp)
+  codegen.cpp
+  libpip.cpp)
 
 add_executable(pip pip.cpp)
 target_link_libraries(pip
@@ -22,14 +23,14 @@ target_link_libraries(pip
   ${PCAP_LIBRARY})
 
 # an example controller program
-# add_executable(ctrl controller.cpp)
-# target_link_libraries(ctrl
-#   libpip 
-#   ${CC_LIBRARY} 
-#   ${SEXPR_LIBRARY} 
-#   ${PCAP_LIBRARY})
-# set_target_properties(ctrl
-#   PROPERTIES
-#   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ctrl"
-#   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ctrl"
-#   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/ctrl")
+add_executable(wire wire.cpp)
+target_link_libraries(wire
+  libpip 
+  ${CC_LIBRARY} 
+  ${SEXPR_LIBRARY} 
+  ${PCAP_LIBRARY})
+set_target_properties(wire
+  PROPERTIES
+  ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/wire"
+  LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/wire"
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/wire")
