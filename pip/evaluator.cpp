@@ -6,7 +6,6 @@
 #include "decl.hpp"
 #include "dumper.hpp"
 #include "context.hpp"
-#include "logger.hpp"
 
 #include <climits>
 #include <random>
