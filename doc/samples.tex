@@ -1,7 +1,4 @@
-\documentclass{article}
-\usepackage{parskip}
 
-\begin{document}
 Here we will describe three simple, static, stateless Pip programs: a drop, echo, and static wire program. More complicated (stateful) programs can be created by outputting to the controller port and dynamically adjusting the abstract syntax tree. Doing so removes any proveable properties about a Pip program, and thus will be discussed in a later chapter.
 
 \subsection{Drop}
@@ -73,5 +70,3 @@ The Wire, since it does not have any capability to learn of ports dynamically, w
 )
 \end{verbatim}
 Once again, the \textbf{physical\_port} is set as the table key. There are more interesting matching rules in this program. When the key is equal to 0, the packet will be outputted to port 1, and vice versa for when the key is equal to 1. If the key (physical ingress port) is neither 0 nor 1, then the packet is dropped.
-
-\end{document}

@@ -1,115 +1,113 @@
-\documentclass{article}
-\usepackage{mathpartir}
 
-\begin{document}
 \section{Type System}
-  \subsection{Types}
-  it\newline
-  range\newline
-  location\newline
-  port\newline
-  unit\newline
-  \subsection{Inference Rules}
-  \subsection*{Definitions}
-  Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \newline
-  Function \textbf{type(\textit{term})} will return the type of any typed term, \textit{term}.
-  \subsection*{Expressions}
-  \begin{mathpar}
-    \inferrule* [right=\quad int \qquad (1)]
-               {\\}
-               {\textbf{int it} \ (decimal-literal) : it}
-    \newline \newline
-    \inferrule* [right=\quad range \qquad (2)]
-               {\Gamma \vdash e_1:it \\ \Gamma \vdash e_2:it}
-               {\Gamma \vdash \textbf{range}\  e_1 \  e_2 : it}
-    \newline \newline
-    \inferrule* [right=\quad port \qquad (3)]
-               {\Gamma \vdash \textbf{port} \ e_1 \\ \Gamma \vdash e_1:it}
-               {\Gamma \vdash \textbf{port} \ e_1 : port}
-    \newline \newline
-    \inferrule* [right=\quad offset \qquad (4)]
-               {\Gamma \vdash pos : it \\ \Gamma \vdash len : it}
-               {\Gamma \vdash \textbf{offset} \  (as) \  pos \  len : location}
-    \newline \newline
-    \inferrule* [right=\quad field \qquad (5)]
-               {\Gamma(\textit{identifier}) = (l, \mu) \\ l \rightarrow location}
-               {\Gamma \vdash \textit{identifier} : location}
-    \newline \newline
-    \inferrule* [right=\quad miss \qquad (6)]
-               {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-               {\Gamma \vdash \textbf{miss} : type(key(l))}
-    \newline \newline
-    \inferrule* [right=\quad ref \qquad (7)]
-               {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-               {\Gamma \vdash \textit{identifier} : unit}
-    \newline \newline
 
-  \end{mathpar}
-      \textit{Comments:} \newline
-    (6) The miss expression will have the same type as the key of the table its rule is defined within.
-    \newline
-  \subsection*{Actions}
-  \begin{mathpar}
-    \inferrule* [right=\quad write \qquad (8)]
-                {\\}
-                {\Gamma \vdash \textbf{write} \ (action) : unit}
-    \newline \newline
-    \inferrule* [right=\quad clear \qquad (9)]
-                {\\}
-                {\Gamma \vdash \textbf{clear} : unit}
-    \newline \newline
-    \inferrule* [right=\quad drop \qquad (10)]
-                {\\}
-                {\Gamma \vdash \textbf{drop} : unit}
-    \newline \newline
-    \inferrule* [right=\quad match \qquad (11)]
-                {\\}
-                {\Gamma \vdash \textbf{match} : unit}
-    \newline \newline
-    \inferrule* [right=\quad goto \qquad (12)]
-                {\Gamma \vdash e_1 : it}
-                {\Gamma \vdash \textbf{goto} \ e_1 : unit}
-    \newline \newline
-    \inferrule* [right=\quad output \qquad (13)]
-                {\Gamma \vdash e_1 : port}
-                {\Gamma \vdash \textbf{output} \ e_1 : unit}
-    \newline \newline
-    \inferrule* [right=\quad output \qquad (14)]
-                {\Gamma \vdash e_1 : port}
-                {\Gamma \vdash \textbf{output} \ e_1 : unit}
-    \newline \newline
-    \inferrule* [right=\quad advance \qquad (15)]
-                {\Gamma \vdash e_1 : it}
-                {\Gamma \vdash \textbf{advance} \ e_1 : unit}
-    \newline \newline
-    \inferrule* [right=\quad copy \qquad (16)]
-                {\Gamma \vdash e_1 : location \\ e_2 : location \\ e_3 : it}
-                {\Gamma \vdash \textbf{copy} \ e_1 \ e_2 \ e_3 : unit}
-    \newline \newline
-    \inferrule* [right=\quad set \qquad (16)]
-                {\Gamma \vdash e_1 : location \\ e_2 : it \\ e_3 : it}
-                {\Gamma \vdash \textbf{set} \ e_1 \ e_2 \ e_3 : unit}
-    \newline \newline
-  \end{mathpar}
-  \textit{Comments:} \newline
-  (16) e2 does not need to be type it. It can be any value type. TODO: create a system that represents values which have precision.
+\subsection{Types}
+it\newline
+range\newline
+location\newline
+port\newline
+unit\newline
+\subsection{Inference Rules}
+\subsection*{Definitions}
+Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \newline
+Function \textbf{type(\textit{term})} will return the type of any typed term, \textit{term}.
 
-  \subsection{Literals}  
-  symbol-literal:\newline
-  \indent \textit{character character*}\newline
-  integer-literal:\newline
-  \indent \textbf{int} \textit{width-prefix decimal-literal}\newline
-  width-prefix:\newline
-  \indent \textbf{i} \textit{decimal-literal}\newline
-  binary-literal:\newline
-  \indent \textbf{0b} \textit{binary-digit binary-digit*}\newline
-  decimal-literal:\newline
-  \indent \textit{decimal-digit decimal-digit*}\newline
-  binary-digit:\newline
-  \indent 0 1\newline
-  decimal-digit\newline
-  \indent 0 1 2 3 4 5 6 7 8 9\newline
-  character:\newline
-  \indent a-zA-Z \textit{decimal-digit}\newline
-  
-\end{document}
+\subsection*{Expressions}
+\begin{mathpar}
+  \inferrule* [right=\quad int \qquad (1)]
+             {\\}
+             {\textbf{int it} \ (decimal-literal) : it}
+  \newline \newline
+  \inferrule* [right=\quad range \qquad (2)]
+             {\Gamma \vdash e_1:it \\ \Gamma \vdash e_2:it}
+             {\Gamma \vdash \textbf{range}\  e_1 \  e_2 : it}
+  \newline \newline
+  \inferrule* [right=\quad port \qquad (3)]
+             {\Gamma \vdash \textbf{port} \ e_1 \\ \Gamma \vdash e_1:it}
+             {\Gamma \vdash \textbf{port} \ e_1 : port}
+  \newline \newline
+  \inferrule* [right=\quad offset \qquad (4)]
+             {\Gamma \vdash pos : it \\ \Gamma \vdash len : it}
+             {\Gamma \vdash \textbf{offset} \  (as) \  pos \  len : location}
+  \newline \newline
+  \inferrule* [right=\quad field \qquad (5)]
+             {\Gamma(\textit{identifier}) = (l, \mu) \\ l \rightarrow location}
+             {\Gamma \vdash \textit{identifier} : location}
+  \newline \newline
+  \inferrule* [right=\quad miss \qquad (6)]
+             {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
+             {\Gamma \vdash \textbf{miss} : type(key(l))}
+  \newline \newline
+  \inferrule* [right=\quad ref \qquad (7)]
+             {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
+             {\Gamma \vdash \textit{identifier} : unit}
+  \newline \newline
+
+\end{mathpar}
+    \textit{Comments:} \newline
+  (6) The miss expression will have the same type as the key of the table its rule is defined within.
+  \newline
+\subsection*{Actions}
+\begin{mathpar}
+  \inferrule* [right=\quad write \qquad (8)]
+              {\\}
+              {\Gamma \vdash \textbf{write} \ (action) : unit}
+  \newline \newline
+  \inferrule* [right=\quad clear \qquad (9)]
+              {\\}
+              {\Gamma \vdash \textbf{clear} : unit}
+  \newline \newline
+  \inferrule* [right=\quad drop \qquad (10)]
+              {\\}
+              {\Gamma \vdash \textbf{drop} : unit}
+  \newline \newline
+  \inferrule* [right=\quad match \qquad (11)]
+              {\\}
+              {\Gamma \vdash \textbf{match} : unit}
+  \newline \newline
+  \inferrule* [right=\quad goto \qquad (12)]
+              {\Gamma \vdash e_1 : it}
+              {\Gamma \vdash \textbf{goto} \ e_1 : unit}
+  \newline \newline
+  \inferrule* [right=\quad output \qquad (13)]
+              {\Gamma \vdash e_1 : port}
+              {\Gamma \vdash \textbf{output} \ e_1 : unit}
+  \newline \newline
+  \inferrule* [right=\quad output \qquad (14)]
+              {\Gamma \vdash e_1 : port}
+              {\Gamma \vdash \textbf{output} \ e_1 : unit}
+  \newline \newline
+  \inferrule* [right=\quad advance \qquad (15)]
+              {\Gamma \vdash e_1 : it}
+              {\Gamma \vdash \textbf{advance} \ e_1 : unit}
+  \newline \newline
+  \inferrule* [right=\quad copy \qquad (16)]
+              {\Gamma \vdash e_1 : location \\ e_2 : location \\ e_3 : it}
+              {\Gamma \vdash \textbf{copy} \ e_1 \ e_2 \ e_3 : unit}
+  \newline \newline
+  \inferrule* [right=\quad set \qquad (16)]
+              {\Gamma \vdash e_1 : location \\ e_2 : it \\ e_3 : it}
+              {\Gamma \vdash \textbf{set} \ e_1 \ e_2 \ e_3 : unit}
+  \newline \newline
+\end{mathpar}
+\textit{Comments:} \newline
+(16) e2 does not need to be type it. It can be any value type. 
+TODO: create a system that represents values which have precision.
+
+\subsection{Literals}  
+symbol-literal:\newline
+\indent \textit{character character*}\newline
+integer-literal:\newline
+\indent \textbf{int} \textit{width-prefix decimal-literal}\newline
+width-prefix:\newline
+\indent \textbf{i} \textit{decimal-literal}\newline
+binary-literal:\newline
+\indent \textbf{0b} \textit{binary-digit binary-digit*}\newline
+decimal-literal:\newline
+\indent \textit{decimal-digit decimal-digit*}\newline
+binary-digit:\newline
+\indent 0 1\newline
+decimal-digit\newline
+\indent 0 1 2 3 4 5 6 7 8 9\newline
+character:\newline
+\indent a-zA-Z \textit{decimal-digit}\newline
