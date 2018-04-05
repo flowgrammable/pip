@@ -1,0 +1,104 @@
+\documentclass{article}
+\usepackage{parskip}
+
+\begin{document}
+In this chapter, we will examine some undefined behaviors and their mitigations if any.
+
+\subsection{Goto}
+The most glaring case of undefined behavior is the ``infinite jump'', caused by a two tables jumping back and forth.
+\begin{verbatim}
+(pip
+  (table error1 exact
+    (actions
+      (set (bitfield key (int i64 0) (int i64 64)))
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (goto (error2)))
+      )
+    )
+  )
+  (table error2 exact
+    (actions
+      (set (bitfield key (int i64 0) (int i64 64)))
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (goto (error1)))
+      )
+    )
+  )
+)
+\end{verbatim}
+This is an invalid program in Pip. All tables have sequential integer identifiers, and in order for a \textbf{goto} action to be valid, the table being jumped to must have a higher identifier than the current table. In other words, the table being jumped to must come later in the program.
+
+\section{Terminators}
+The actions \textbf{drop}, \textbf{output}, and \textbf{match} are \textit{terminator} actions, meaning they can only come as the last action in an action list. All action lists end in a terminator. Thus the following undefined-behavior-invoking program is ill-formed.
+\begin{verbatim}
+(pip
+  (table error exact
+    (actions
+      (set (bitfield key (int i64 0) (int i64 64)))
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (output (reserved_port controller)) 
+                 (output (reserved_port in_port)))
+      )
+    )
+  )
+)
+\end{verbatim}
+
+The \textbf{match} terminator action is slightly different than the others. All exact-match tables \textit{must} begin their matching phase, even if no rules are defined. The \textbf{match} action \textit{must} appear at the end of the table's prep-list, or action list that sets the key. Thus, the following program is ill-formed.
+\begin{verbatim}
+(pip
+  (table error exact
+    (actions
+      (set (bitfield key (int i64 0) (int i64 64)))
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (output (reserved_port controller)))
+      )
+    )
+  )
+)
+\end{verbatim}
+As is a program that matches outside of the prep-list.
+\begin{verbatim}
+(pip
+  (table error exact
+    (actions
+      (set (bitfield key (int i64 0) (int i64 64)))
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (clear) (match))
+      )
+    )
+  )
+)
+\end{verbatim}
+
+\subsection{Keyless Programs}
+An exact match table \textit{must} set its key register in the prep-list. The following program is ill-formed.
+\begin{verbatim}
+(pip
+  (table error exact
+    (actions
+      (match)
+    ) ; actions
+    (rules
+      (rule (miss)
+        (actions (drop))
+      )
+    )
+  )
+)
+\end{verbatim}
+\end{document}
