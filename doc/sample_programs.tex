@@ -5,6 +5,7 @@
 Here we will describe three simple, static, stateless Pip programs: a drop, echo, and static wire program. More complicated (stateful) programs can be created by outputting to the controller port and dynamically adjusting the abstract syntax tree. Doing so removes any proveable properties about a Pip program, and thus will be discussed in a later chapter.
 
 \subsection{Drop}
+The drop program receives a program and outputs it to all physical ports.
 \begin{verbatim}
 (pip
   (table drop exact
@@ -23,8 +24,11 @@ Here we will describe three simple, static, stateless Pip programs: a drop, echo
   )
 )
 \end{verbatim}
+This program creates an exact-match table called \textit{drop} and copies the the 32-bit physical port into the 64-bit key register, completely overwriting it if anything was there. 32 0s are padded onto the physical port in this case.
 
+Matching begins, wherein there is one rule. The sole rule being a \textit{miss} means its action list will always execute, thus all packets received will be outputted to the \textbf{all} port.
 \subsection{Echo}
+Echo simply returns a packet to sender. One can see it is almost identical to the Drop program, except that it outputs to the packet's \textbf{in\_port}, or physical ingress port.
 \begin{verbatim}
 (pip
   (table echo exact
@@ -45,6 +49,7 @@ Here we will describe three simple, static, stateless Pip programs: a drop, echo
 \end{verbatim}
 
 \subsection{Wire}
+The Wire, since it does not have any capability to learn of ports dynamically, will simply send a packet to the other of two known ports, port 0 and port 1.
 \begin{verbatim}
 (pip
   (table wire exact
@@ -56,12 +61,17 @@ Here we will describe three simple, static, stateless Pip programs: a drop, echo
       (match)
     ) ; actions
     (rules
+      (rule (port 0)
+        (actions (output (port 1)))
+      (rule (port 1)
+        (actions (output (port 0)))
       (rule (miss)
-        (actions (output (reserved_port controller)))
+        (actions (drop))
       )
     )
   )
 )
 \end{verbatim}
+Once again, the \textbf{physical\_port} is set as the table key. There are more interesting matching rules in this program. When the key is equal to 0, the packet will be outputted to port 1, and vice versa for when the key is equal to 1. If the key (physical ingress port) is neither 0 nor 1, then the packet is dropped.
 
 \end{document}
