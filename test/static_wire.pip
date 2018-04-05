@@ -1,0 +1,20 @@
+(pip
+  (table wire exact
+    (actions
+      (copy
+	(bitfield physical_port (int i32 0) (int i32 64))
+	(bitfield key (int i32 0) (int i32 64))
+	(int i32 64))
+      (match)
+    ) ; actions
+    (rules
+      (rule (port 0)
+        (actions (output (port 1)))
+      (rule (port 1)
+        (actions (output (port 0)))
+      (rule (miss)
+        (actions (drop))
+      )
+    )
+  )
+)
