@@ -46,15 +46,21 @@ OF = $FC \rightarrow \textrm{serialization}$
 \end{split}
 \end{equation}
 
+Advance the header offset by \textit{n} bits.
+
 \begin{equation}
   (\textrm{\textbf{clear}}) \textrm{,} \ \langle \pi, \ (\textbf{\textrm{clear}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \ \textrm{\textbf{context}} \rangle
   \Rightarrow \langle \pi, \ \bar \alpha, \ \emptyset, \  \textrm{\textbf{context}} \rangle
 \end{equation}
 
+Remove all actions from stored action list, $\Lambda$.
+
 \begin{equation}  
   (\textrm{\textbf{drop})} \textrm{,} \ \langle \pi, \ (\textrm{\textbf{drop}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textbf{\textrm{context}} \rangle
   \Rightarrow \langle \emptyset \rangle
 \end{equation}
+
+Remove all actions from the action list, $\alpha$, thus discontinuing packet processing.
 
 \begin{equation}
   (\textrm{\textbf{write}} \ action), \ \langle \pi, \ (\textrm{\textbf{write}} \ \oplus \ \bar \alpha), \ \bar \Lambda,
@@ -62,10 +68,14 @@ OF = $FC \rightarrow \textrm{serialization}$
   \langle \pi, \ \bar \alpha, \ \bar \Lambda \cdot action, \textrm{\textbf{context}} \rangle
 \end{equation}
 
+Append \textit{action} to stored action list, $\Lambda$.
+
 \begin{equation}
   (\textrm{\textbf{goto}} \ \tau) \textrm{,} \ \langle \pi, \ (\textrm{\textbf{goto}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textrm{\textbf{context}}[table] \rangle
   \Rightarrow \langle \pi, \ \bar \alpha, \ \bar \Lambda, \textrm{\textbf{context}}[\tau] \rangle
 \end{equation}
+
+Change the \textbf{current\_table} variable in the context to $\tau$.
 
 \begin{equation}
 \begin{split}
@@ -76,6 +86,8 @@ OF = $FC \rightarrow \textrm{serialization}$
 \end{split}
 \end{equation}
 
+Set the bitfield, \textit{field}, to the literal value, \textit{value}.
+
 \begin{equation}
 \begin{split}
   (\textrm{\textbf{output}} \ port) \textrm{,} \ \langle \pi, (\textrm{\textbf{output}} \ \oplus \ \bar \alpha), \bar \Lambda,
@@ -85,6 +97,8 @@ OF = $FC \rightarrow \textrm{serialization}$
   \textbf{\textrm{context}}[egress\_port] = port \rangle
 \end{split}
 \end{equation}
+
+Change the \textbf{egress\_port} variable in the context to \textit{port}, thus outputting the packet to \textit{port}.
 
 \begin{equation}
 \begin{split}
