@@ -1,4 +1,4 @@
-
+\section{discussion}
 In this chapter, we will examine some undefined behaviors and their mitigations if any.
 
 \subsection{Goto}
@@ -31,7 +31,7 @@ The most glaring case of undefined behavior is the ``infinite jump'', caused by 
 \end{verbatim}
 This is an invalid program in Pip. All tables have sequential integer identifiers, and in order for a \textbf{goto} action to be valid, the table being jumped to must have a higher identifier than the current table. In other words, the table being jumped to must come later in the program.
 
-\section{Terminators}
+\subsection{Terminators}
 The actions \textbf{drop}, \textbf{output}, and \textbf{match} are \textit{terminator} actions, meaning they can only come as the last action in an action list. All action lists end in a terminator. Thus the following undefined-behavior-invoking program is ill-formed.
 \begin{verbatim}
 (pip
