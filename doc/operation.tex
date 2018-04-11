@@ -103,120 +103,58 @@ Change the \textbf{egress\_port} variable in the context to \textit{port}, thus 
 \begin{equation}
 \begin{split}
   (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[dst], (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}}[dst] \rangle \\ \Rightarrow
-  \langle \pi[dst] = [meta, meta + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
-    \textrm{\textbf{packet}}
+  \textrm{,} \ \langle \pi, (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\ \Rightarrow
+  \langle \pi', \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}' \rangle
 \end{split}
 \end{equation}
 
-\begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[dst + header\_offset], (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow
-  \langle \pi[dst + header\_offset] = [meta, meta + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
-    \textrm{\textbf{header}}
-\end{split}
-\end{equation}
+Copy n bits from bitfield \textit{src} of \textbf{address space} $as_1$ into bitfield \textit{dst} of \textbf{address space} $as_2$.
 
+Definition of copy function: (move to displaymath)
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi, (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}[key]} \rangle \\
-  \Rightarrow
-  \langle \pi, \bar \alpha, \bar \Lambda, \textrm{\textbf{context}[key]} = [meta, meta + n) \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
-    \textrm{\textbf{key}}
-\end{split}
+(\textrm{\textbf{copy}} \ meta \ src \ packet \ dst \ n) \Rightarrow
+  \langle \pi[dst] = \textrm{\textbf{context.meta}[dst, dst + n)} \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[dst + header\_offset], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow
-  \langle \pi[dst + header\_offset] = [meta, meta + n), (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{meta} and } as_2 =
-    \textrm{\textbf{header}}
-\end{split}
+  (\textrm{\textbf{copy}} \ meta \ src \ header \ dst \ n) \Rightarrow
+  \langle \pi[dst + header\_offset] =
+          \textrm{\textbf{context.meta}[dst, dst + n)} \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[dst], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow 
-  \langle \pi[dst] = [src, src + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
-    \textrm{\textbf{packet}}
-\end{split}
+  (\textrm{\textbf{copy}} \ meta \ src \ key \ dst \ n) \Rightarrow
+  \langle \textbf{\textrm{context.key}}[dst] =
+          \textrm{\textbf{context.meta}[dst, dst + n]} \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[dst + header\_offset], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow
-  \langle \pi[dst + header\_offset] = [src, src + n), \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
-    \textrm{\textbf{header}}
-\end{split}
+  (\textrm{\textbf{copy}} \ meta \ src \ key \ dst \ n) \Rightarrow
+  \langle \textbf{\textrm{context}}[key] =
+          [meta, meta + n] \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[src], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}}[key] \rangle \\
-  \Rightarrow
-  \langle \pi[src], \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}[key] = \pi[src] \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{packet} and } as_2 =
-    \textrm{\textbf{key}}
-\end{split}
+  (\textrm{\textbf{copy}} \ packet \ src \ packet \ dst \ n) \Rightarrow
+  \langle \pi[dst] = \pi[src, src + n) \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi[dst + header\_offset], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow
-  \langle \pi[dst + header\_offset] = \\ \pi[src + header\_offset, src + header\_offset + n),
-  \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
-    \textrm{\textbf{header}}
-\end{split}
+  (\textrm{\textbf{copy}} \ packet \ src \ header \ dst \ n) \Rightarrow
+  \langle \pi[dst + header\_offset] = \pi[src, src + n) \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \\ \langle \pi[src + header\_offset] \wedge \pi[dst], (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\  
-  \Rightarrow
-  \langle \pi[dst] = \pi[[src + header\_offset, src + header\_offset + n], \bar \alpha, \bar \Lambda, \textrm{\textbf{context}} \rangle \\  
-    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
-    \textrm{\textbf{packet}}
-\end{split}
+  (\textrm{\textbf{copy}} \ packet \ src \ key \ dst \ n) \Rightarrow
+  \langle \textrm{\textbf{context.key}[dst]} = \pi[src, src + n) \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi, (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow
-  \langle \pi, \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}[key] = \\\pi[[src + header\_offset, src + header\_offset + n)] \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
-    \textrm{\textbf{key}}
-\end{split}
+  (\textrm{\textbf{copy}} \ header \ src \ header \ dst \ n) \Rightarrow
+  \langle \pi[dst + header\_offset] = \pi[src + header\_offset, src + header\_offset + n) \rangle
 \end{equation}
-
 \begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi, (\textrm{\textbf{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\
-  \Rightarrow
-  \langle \pi, \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}[meta] = \\ \pi[[src + header\_offset, src + header\_offset + n)] \rangle \\
-    \textrm{where} \ as_1 = \textrm{\textbf{header} and } as_2 =
-    \textrm{\textbf{meta}}
-\end{split}
+  (\textrm{\textbf{copy}} \ header \ src \ packet \ dst \ n) \Rightarrow
+  \langle \pi[dst] = \pi[src + header\_offset, src + header\_offset + n) \rangle
+\end{equation}
+\begin{equation}
+  (\textrm{\textbf{copy}} \ header \ src \ key \ dst \ n) \Rightarrow
+  \langle \textrm{\textbf{context.key}[dst]} = \pi[src + header\_offset, src + header\_offset + n) \rangle
+\end{equation}
+\begin{equation}
+  (\textrm{\textbf{copy}} \ header \ src \ meta \ dst \ n) \Rightarrow
+  \langle \textrm{\textbf{context.meta}[dst]} = \pi[src + header\_offset, src + header\_offset + n) \rangle
 \end{equation}
