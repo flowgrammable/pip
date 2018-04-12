@@ -2,6 +2,7 @@
 \section{Operational Semantics}
 
 \subsection{Notation}
+
 The state of the evaluator, $\sigma$, is the tuple consisting of \\
 packet, $\pi$\\
 action\_list, $\alpha$ \\
@@ -28,30 +29,49 @@ Comments:
 \item The value of register $\mathbb{r}$ is copied into \textit{field}.
 \item The value of some bitfield, \textit{bitfield} is copied into \textit{field}.
 \end{enumerate}
+
+
 \subsection{Operational Semantics 5-Tuple}
-$ pip = \langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle $\\
-IF = $program \times \pi \rightarrow CF$ \\
-CF = $\alpha \times \xi \times \pi$ \\
-$\Rightarrow$ = Defined in section ``Reduction Relation''. \\
-FC = $(\Lambda = \emptyset) \times \pi \times \textbf{\textrm{context}}\langle egress\_port \neq 0 \rangle $ \\
-OF = $FC \rightarrow \textrm{serialization}$
+% $ pip = \langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle $\\
+% IF = $program \times \pi \rightarrow CF$ \\
+% CF = $\alpha \times \xi \times \pi$ \\
+% $\Rightarrow$ = Defined in section ``Reduction Relation''. \\
+% FC = $(\Lambda = \emptyset) \times \pi \times \textbf{\textrm{context}}\langle egress\_port \neq 0 \rangle $ \\
+% OF = $FC \rightarrow \textrm{serialization}$
 
 \subsection{Reduction Relation}
 \setlength{\mathindent}{0pt}
-\begin{equation}
-\begin{split}
-  (\textbf{\textrm{advance}} \ n)\textrm{,} \ \langle \pi, \ (\textrm{\textbf{advance}} \ \oplus \ \bar \alpha), \ \Lambda,
-  \ \textrm{\textbf{context}}[header\_offset] \rangle \\ \Rightarrow \langle \pi, \ \bar \alpha, \ \Lambda,
-  \ \textrm{\textbf{context}}[header\_offset + n] \rangle
-\end{split}
-\end{equation}
 
-Advance the header offset by \textit{n} bits.
+\begin{gather*}
+  (\mathct{advance}~n \cdot \bar\alpha), \langle \pi, \Lambda, \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi, \Lambda, \Gamma[\mathct{header} \leftarrow \mathct{header} + n] \rangle
+\\
+  (\mathct{clear} \cdot \bar\alpha), \langle \pi, \Lambda, \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi, \varnothing, \Gamma \rangle
+\\
+  (\mathct{drop} \cdot \bar\alpha), \langle \pi, \Lambda, \Gamma \rangle
+  \Rightarrow
+  \varnothing, \langle \pi, \varnothing, \Gamma [\mathct{out} \leftarrow 0] \rangle
+\end{gather*}
 
-\begin{equation}
-  (\textrm{\textbf{clear}}) \textrm{,} \ \langle \pi, \ (\textbf{\textrm{clear}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \ \textrm{\textbf{context}} \rangle
-  \Rightarrow \langle \pi, \ \bar \alpha, \ \emptyset, \  \textrm{\textbf{context}} \rangle
-\end{equation}
+The $\mathct{advance}$ command advances the header offset by \textit{n} bits.
+This can be used by a programmer to adjust the decoding offset relative to a
+packet header.
+The $\mathct{clear}$ command clears the stored action list. This can be used
+by a program reset any accumulated actions if certain conditions are detected
+during packet analysis (e.g., filtering flows based on UDP packet content).
+The $\mathct{drop}$ command truncates both the action list and stored action list,
+and sets the output port to 0 (the null port). 
+The effect of this to cause the program to terminate such that the execution 
+environment will not forward the packet.
+ 
+
+% \begin{equation}
+%   (\textrm{\textbf{clear}}) \textrm{,} \ \langle \pi, \ (\textbf{\textrm{clear}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \ \textrm{\textbf{context}} \rangle
+%   \Rightarrow \langle \pi, \ \bar \alpha, \ \emptyset, \  \textrm{\textbf{context}} \rangle
+% \end{equation}
 
 Remove all actions from stored action list, $\Lambda$.
 
@@ -60,7 +80,6 @@ Remove all actions from stored action list, $\Lambda$.
   \Rightarrow \langle \emptyset \rangle
 \end{equation}
 
-Remove all actions from the action list, $\alpha$, thus discontinuing packet processing.
 
 \begin{equation}
   (\textrm{\textbf{write}} \ action), \ \langle \pi, \ (\textrm{\textbf{write}} \ \oplus \ \bar \alpha), \ \bar \Lambda,
