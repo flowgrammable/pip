@@ -1,5 +1,56 @@
 
-\section{introduction}
-Conventional switches, or layer 2 devices in the OSI model, are configured using vendor-specific interfaces that lack scaleability and flexibility. In addition, manual switch configuration is heavily prone to error and compromise. Software-defined networking (SDN) is a paradigm that helps to mitigate user error in packet switching and increase network scaleability by allowing switches to be programmed through a high-level programming language. However, there is no standard language for SDN, some programmers have tried to use C or Python, others have developed domain-specific languages to achieve these purposes.
+\section{Introduction}
 
-The problem with typical programming languages is that the semantics of these programming languages are informally designed, often rife with side effects, and perhaps most pertinent for packet switching: prone to buffer overflows. We have presented a new domain specific programming language and virtual machine to model an OpenFlow-style network, with a formally-defined type system and structural operational semantics, thus allowing properties to be proven about software-defined networking programs.
+Answer the following questions:
+\begin{itemize}
+\item What is the problem we are solving?
+\item How are we going to solve the problem?
+\item What did we do?
+\item What are the results?
+\item What are our contributions?
+\end{itemize}
+
+Conventional switches are configured using vendor-specific interfaces that lack scalability and flexibility. In addition, manual switch configuration is heavily prone to error and compromise. Software-defined networking (SDN) is a paradigm that helps to mitigate user error in packet switching and increase network scalability by allowing switches to be programmed through a high-level programming language. However, there is no standard language for SDN, some programmers have tried to use C or Python, others have developed domain-specific languages to achieve these purposes.
+
+Problem: We want either to build a programming language for SDN, or to identify existing languages that might extended to safely and efficiently support SDN.
+To do this, we need to find a ``sweet spot'' between the two extremes of fully general vs. highly specific languages.
+
+There are problems using both general purpose languages and domain-specific
+languages. 
+The semantics of general purpose allow program constructs that
+allow for invocation of undefined behaviors (buffer overflow, pointer errors, 
+data races, etc.) 
+On the other hand, domain-specific languages, may not be sufficient to express the kinds of computations necessary for higher-level SDN applications.
+
+\textbf{How did we approach the problem}.
+Our approach is to a minimal abstract machine to represent the kinds of computational facility present in a typical OpenFlow-like data plane.
+The description of our abstract machine includes basic notions of state and the smallest possible set of operations needed to define SDN programs.
+Basically, tried to construct an assembly language for OpenFlow-style packet processing.
+
+\textbf{How does the abstract machine help us study language design?}
+Now that we have model, we hope to start reasoning about higher level language constructs that support safe and efficient switch configurations. 
+
+\textbf{What did we do?}
+We defined the operational semantics for this abstract machine. In order better experiment with it, we also implemented a virtual machine capable of executing SDN programs.
+
+Talk about the clean separation of the data plane machine from the controller.
+The controller has to be a GP language, the DP does not.
+
+Built experimental controllers to experiment with mutable program state.
+
+\textbf{What did we find out?}
+Our abstract machine provides a lot of opportunities for executing undefined behaviors. In particular, it easy to build programs that read across packet boundaries, fail to validate input, etc.
+
+Separating the language of controller from the DP is good thing.
+
+\textbf{Contributions}
+\begin{enumerate}
+\item Operational semantics for Pip
+\item Identify opportunities for undefined behavior
+\item Implementation of Pip
+\item Experimental controller programs?s
+\end{enumerate}
+
+% The problem with typical programming languages is that the semantics of these programming languages are informally designed, often rife with side effects, and perhaps most pertinent for packet switching: prone to buffer overflows. We have presented a new domain specific programming language and virtual machine to model an OpenFlow-style network, with a formally-defined type system and structural operational semantics, thus allowing properties to be proven about software-defined networking programs.
+
+This paper is organized as follows: blah blah blah.

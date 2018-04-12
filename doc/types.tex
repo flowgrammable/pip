@@ -2,11 +2,18 @@
 \section{Type System}
 
 \subsection{Types}
-it\newline
-range\newline
-location\newline
-port\newline
-unit\newline
+
+
+\begin{align*}
+\tau ::=~& \mathct{int}(n)        & \text{integer types} \\
+         & \mathct{bits}(a, o, l) & \text{bitfields} \\
+         & \mathct{port}          & \text{ports} \\
+         & \mathct{table}         & \text{tables} \\
+\end{align*}
+
+\textbf{TODO} Describe these. And the lack of a concrete object model. We
+operate on pure storage, we don't have a system for defining objects.
+
 \subsection{Inference Rules}
 \subsection*{Definitions}
 Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \newline
