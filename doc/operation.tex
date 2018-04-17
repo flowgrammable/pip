@@ -42,10 +42,12 @@ Comments:
 \subsection{Reduction Relation}
 \setlength{\mathindent}{0pt}
 
+\begin{mdframed}
 \begin{gather*}
   (\mathct{advance}~n \cdot \bar\alpha), \langle \pi, \Lambda, \Gamma \rangle
   \Rightarrow
-  (\bar\alpha), \langle \pi, \Lambda, \Gamma[\mathct{header} \leftarrow \mathct{header} + n] \rangle
+  (\bar\alpha), \langle \pi, \Lambda, \Gamma[\mathct{header}
+  \leftarrow \mathct{header} + n] \rangle
 \\
   (\mathct{clear} \cdot \bar\alpha), \langle \pi, \Lambda, \Gamma \rangle
   \Rightarrow
@@ -54,7 +56,35 @@ Comments:
   (\mathct{drop} \cdot \bar\alpha), \langle \pi, \Lambda, \Gamma \rangle
   \Rightarrow
   \varnothing, \langle \pi, \varnothing, \Gamma [\mathct{out} \leftarrow 0] \rangle
+\\
+  (\mathct{write} \ \textit{action} \cdot \bar\alpha), \langle \pi, \Lambda,
+  \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi, \Lambda \cdot \textit{action}, \Gamma \rangle
+\\
+  (\mathct{goto} \ T \cdot \bar\alpha),
+  \langle \pi, \Lambda, \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi, \Lambda,
+  \Gamma[\mathct{current\_table} \leftarrow T] \rangle
+\\
+  (\mathct{set} \ \textit{field} \ \textit{value} \cdot \bar\alpha), \langle \pi,
+  \Lambda, \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi', \Lambda, \Gamma' \rangle
+\\
+  (\mathct{output} \ \mathct{port} \ n \cdot \bar \alpha), \langle \pi, \Lambda,
+  \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi, \Lambda, \Gamma[\mathct{egress\_port}
+  \leftarrow \mathct{port} \ n] \rangle
+\\
+  (\mathct{copy} \ as_1 \ src \ as_2 \ dst \cdot \bar\alpha), \langle \pi,
+  \Lambda, \Gamma \rangle
+  \Rightarrow
+  (\bar\alpha), \langle \pi', \Lambda, \Gamma' \rangle
 \end{gather*}
+\end{mdframed}
 
 The $\mathct{advance}$ command advances the header offset by \textit{n} bits.
 This can be used by a programmer to adjust the decoding offset relative to a
@@ -73,61 +103,56 @@ environment will not forward the packet.
 %   \Rightarrow \langle \pi, \ \bar \alpha, \ \emptyset, \  \textrm{\textbf{context}} \rangle
 % \end{equation}
 
-Remove all actions from stored action list, $\Lambda$.
-
-\begin{equation}  
-  (\textrm{\textbf{drop})} \textrm{,} \ \langle \pi, \ (\textrm{\textbf{drop}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textbf{\textrm{context}} \rangle
-  \Rightarrow \langle \emptyset \rangle
-\end{equation}
+%% Remove all actions from stored action list, $\Lambda$.
 
 
-\begin{equation}
-  (\textrm{\textbf{write}} \ action), \ \langle \pi, \ (\textrm{\textbf{write}} \ \oplus \ \bar \alpha), \ \bar \Lambda,
-  \textrm{\textbf{context}} \rangle \Rightarrow
-  \langle \pi, \ \bar \alpha, \ \bar \Lambda \cdot action, \textrm{\textbf{context}} \rangle
-\end{equation}
+%% \begin{equation}
+%%   (\textrm{\textbf{write}} \ action), \ \langle \pi, \ (\textrm{\textbf{write}} \ \oplus \ \bar \alpha), \ \bar \Lambda,
+%%   \textrm{\textbf{context}} \rangle \Rightarrow
+%%   \langle \pi, \ \bar \alpha, \ \bar \Lambda \cdot action, \textrm{\textbf{context}} \rangle
+%% \end{equation}
 
-Append \textit{action} to stored action list, $\Lambda$.
+%% Append \textit{action} to stored action list, $\Lambda$.
 
-\begin{equation}
-  (\textrm{\textbf{goto}} \ \tau) \textrm{,} \ \langle \pi, \ (\textrm{\textbf{goto}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textrm{\textbf{context}}[table] \rangle
-  \Rightarrow \langle \pi, \ \bar \alpha, \ \bar \Lambda, \textrm{\textbf{context}}[\tau] \rangle
-\end{equation}
+%% \begin{equation}
+%%   (\textrm{\textbf{goto}} \ \tau) \textrm{,} \ \langle \pi, \ (\textrm{\textbf{goto}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textrm{\textbf{context}}[table] \rangle
+%%   \Rightarrow \langle \pi, \ \bar \alpha, \ \bar \Lambda, \textrm{\textbf{context}}[\tau] \rangle
+%% \end{equation}
 
-Change the \textbf{current\_table} variable in the context to $\tau$.
+%% Change the \textbf{current\_table} variable in the context to $\tau$.
 
-\begin{equation}
-\begin{split}
-  (\textrm{\textbf{set}} \ field \ value) \textrm{,} \ \langle \pi, (\textrm{\textbf{set}} \ \oplus \ \bar \alpha), \bar \Lambda,
-  \textbf{\textrm{context}}[field] \rangle \\
-  \Rightarrow \langle \pi, \bar \alpha, \bar \Lambda,
-  \textbf{\textrm{context}}[field] = value \rangle
-\end{split}
-\end{equation}
+%% \begin{equation}
+%% \begin{split}
+%%   (\textrm{\textbf{set}} \ field \ value) \textrm{,} \ \langle \pi, (\textrm{\textbf{set}} \ \oplus \ \bar \alpha), \bar \Lambda,
+%%   \textbf{\textrm{context}}[field] \rangle \\
+%%   \Rightarrow \langle \pi, \bar \alpha, \bar \Lambda,
+%%   \textbf{\textrm{context}}[field] = value \rangle
+%% \end{split}
+%% \end{equation}
 
-Set the bitfield, \textit{field}, to the literal value, \textit{value}.
+%% Set the bitfield, \textit{field}, to the literal value, \textit{value}.
 
-\begin{equation}
-\begin{split}
-  (\textrm{\textbf{output}} \ port) \textrm{,} \ \langle \pi, (\textrm{\textbf{output}} \ \oplus \ \bar \alpha), \bar \Lambda,
-  \textbf{\textrm{context}}[egress\_port] \rangle \\
-  \Rightarrow 
-  \langle \pi, \bar \alpha, \bar \Lambda,
-  \textbf{\textrm{context}}[egress\_port] = port \rangle
-\end{split}
-\end{equation}
+%% \begin{equation}
+%% \begin{split}
+%%   (\textrm{\textbf{output}} \ port) \textrm{,} \ \langle \pi, (\textrm{\textbf{output}} \ \oplus \ \bar \alpha), \bar \Lambda,
+%%   \textbf{\textrm{context}}[egress\_port] \rangle \\
+%%   \Rightarrow 
+%%   \langle \pi, \bar \alpha, \bar \Lambda,
+%%   \textbf{\textrm{context}}[egress\_port] = port \rangle
+%% \end{split}
+%% \end{equation}
 
-Change the \textbf{egress\_port} variable in the context to \textit{port}, thus outputting the packet to \textit{port}.
+%% Change the \textbf{egress\_port} variable in the context to \textit{port}, thus outputting the packet to \textit{port}.
 
-\begin{equation}
-\begin{split}
-  (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-  \textrm{,} \ \langle \pi, (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\ \Rightarrow
-  \langle \pi', \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}' \rangle
-\end{split}
-\end{equation}
+%% \begin{equation}
+%% \begin{split}
+%%   (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
+%%   \textrm{,} \ \langle \pi, (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\ \Rightarrow
+%%   \langle \pi', \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}' \rangle
+%% \end{split}
+%% \end{equation}
 
-Copy n bits from bitfield \textit{src} of \textbf{address space} $as_1$ into bitfield \textit{dst} of \textbf{address space} $as_2$.
+%% Copy n bits from bitfield \textit{src} of \textbf{address space} $as_1$ into bitfield \textit{dst} of \textbf{address space} $as_2$.
 
 Definition of copy function: (move to displaymath)
 \begin{equation}
