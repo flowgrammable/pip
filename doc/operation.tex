@@ -7,20 +7,29 @@ The state of the evaluator, $\sigma$, is the tuple consisting of \\
 packet, $\pi$\\
 action\_list, $\alpha$ \\
 stored\_action\_list, $\Lambda$ \\
-\textbf{context}, which is the tuple: \\
+context, $\Gamma$, which is the tuple: \\
 $\langle ingress\_port, \ egress\_port, \ physical\_port, \ key, \ meta, \ header\_offset, \ table \rangle$ \\ \\
-Compactly, $\sigma = \langle \pi, \alpha, \Lambda, \textbf{\textrm{context}} \rangle$
+Compactly, $\sigma = \langle \pi, \alpha, \Lambda, \Gamma \rangle$
 \\ \\
-We can examine or change the status of $\pi$ or \textbf{context} by using the index operator, []. The index itself is context-sensitive: $\pi$ is indexed by some \textit{field}, \textbf{context} is indexed by one of its substructures.
+We can examine the status of $\pi$ or $\Gamma$ by using the index operator, []. The index itself is context-sensitive: $\pi$ is indexed by some \textit{field}, $\Gamma$ is indexed by one of its substructures. We will use the assignment operator, $\leftarrow$, within the index operator to assign a bitfield to a value or the value of another bitfield.
 A field in $\pi$ can be set to a literal value or copied from a bitfield or register. For example:
 \begin{equation}
-  \pi[\textit{field}] \leftarrow \textit{value}
+  \pi[\textit{field} \leftarrow \textit{value}]
 \end{equation}
 \begin{equation}
-  \pi[\textit{field}] \leftarrow \mathbb{r}
+  \pi[\textit{field} \leftarrow \mathbb{r}]
 \end{equation}
 \begin{equation}
-  \pi[\textit{field}] \leftarrow \textit{bitfield}
+  \pi[\textit{field} \leftarrow \textit{bitfield}]
+\end{equation}
+A variable in $\Gamma$ is accessed similarly, but uses the dot operator, ., to access its substructures within the index operator. Example:
+\begin{equation}
+  \Gamma[\Gamma.\mathct{key} \leftarrow \textit{bitfield}]
+\end{equation}
+One should not confuse the range operator, [), with the index operator. To avoid ambiguity, the range operator \textit{always} appears inside
+of the index operator, []. Example:
+\begin{equation}
+  \pi[field_1 \leftarrow field_2[0, 10)]
 \end{equation}
 
 Comments:
@@ -28,6 +37,8 @@ Comments:
 \item Field \textit{field} with a packet, $\pi$, is set to some literal value, \textit{value}.
 \item The value of register $\mathbb{r}$ is copied into \textit{field}.
 \item The value of some bitfield, \textit{bitfield} is copied into \textit{field}.
+\item The value of the $\mathct{key}$ register in $\Gamma$ is set to the value of \textit{bitfield}
+\item The bits of $field_1$ in $\pi$ are set to the bits 0, up to but not including 10, in $field_2$.
 \end{enumerate}
 
 
@@ -111,50 +122,60 @@ A bitfield can be copied from any address space to any other address space, exce
 which cannot be used as a source.
 
 Definition of copy function: (move to displaymath)
-\begin{equation}
-(\textrm{\textbf{copy}} \ meta \ src \ packet \ dst \ n) \Rightarrow
-  \langle \pi[dst] = \textrm{\textbf{context.meta}[dst, dst + n)} \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ meta \ src \ header \ dst \ n) \Rightarrow
-  \langle \pi[dst + header\_offset] =
-          \textrm{\textbf{context.meta}[dst, dst + n)} \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ meta \ src \ key \ dst \ n) \Rightarrow
-  \langle \textbf{\textrm{context.key}}[dst] =
-          \textrm{\textbf{context.meta}[dst, dst + n]} \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ meta \ src \ key \ dst \ n) \Rightarrow
-  \langle \textbf{\textrm{context}}[key] =
-          [meta, meta + n] \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ packet \ src \ packet \ dst \ n) \Rightarrow
-  \langle \pi[dst] = \pi[src, src + n) \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ packet \ src \ header \ dst \ n) \Rightarrow
-  \langle \pi[dst + header\_offset] = \pi[src, src + n) \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ packet \ src \ key \ dst \ n) \Rightarrow
-  \langle \textrm{\textbf{context.key}[dst]} = \pi[src, src + n) \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ header \ src \ header \ dst \ n) \Rightarrow
-  \langle \pi[dst + header\_offset] = \pi[src + header\_offset, src + header\_offset + n) \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ header \ src \ packet \ dst \ n) \Rightarrow
-  \langle \pi[dst] = \pi[src + header\_offset, src + header\_offset + n) \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ header \ src \ key \ dst \ n) \Rightarrow
-  \langle \textrm{\textbf{context.key}[dst]} = \pi[src + header\_offset, src + header\_offset + n) \rangle
-\end{equation}
-\begin{equation}
-  (\textrm{\textbf{copy}} \ header \ src \ meta \ dst \ n) \Rightarrow
-  \langle \textrm{\textbf{context.meta}[dst]} = \pi[src + header\_offset, src + header\_offset + n) \rangle
-\end{equation}
+\begin{mdframed}
+\begin{gather*}
+  (\mathct{copy}  \ meta \ src \ packet \ dst \ n)
+  \rightarrow
+  \langle \pi[dst \leftarrow \Gamma.\mathct{meta}[dst, dst + n)],
+  \Lambda, \Gamma \rangle
+\\
+  (\mathct{copy} \ meta \ src \ header \ dst \ n)
+  \rightarrow \\
+  \langle \pi[dst + \mathct{header\_offset} \leftarrow \Gamma.meta[dst, dst + n)],
+  \Lambda, \Gamma \rangle
+\\
+  (\mathct{copy} \ meta \ src \ key \ dst \ n)
+  \rightarrow
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{key} \leftarrow
+  \Gamma.\mathct{meta}[meta, meta + n)] \rangle
+\\
+  (\mathct{copy} \ packet \ src \ packet \ dst \ n)
+  \rightarrow
+  \langle \pi[dst \leftarrow \pi[src, src + n)], \Lambda, \Gamma \rangle
+\\ 
+  (\mathct{copy} \ packet \ src \ header \ dst \ n)
+  \rightarrow
+  \langle \pi[dst + \mathct{header\_offset} \leftarrow \\
+  \pi[src, src + n)],
+  \Lambda, \Gamma \rangle
+\\ 
+  (\mathct{copy} \ packet \ src \ key \ dst \ n)
+  \rightarrow
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{key} \leftarrow \pi[src, src + n)]
+  \rangle
+\\
+  (\mathct{copy} \ header \ src \ header \ dst \ n)
+  \rightarrow \\
+  \langle \pi[dst + \mathct{header\_offset} \leftarrow \\
+  \pi[src + \mathct{header\_offset}, src + \mathct{header\_offset} + n)],
+  \Lambda, \Gamma \rangle
+\\
+  (\mathct{copy} \ header \ src \ packet \ dst \ n)
+  \rightarrow \\
+  \langle \pi[dst \leftarrow \\
+  \pi[src + \mathct{header\_offset}, src +
+  \mathct{header\_offset} + n)], \Lambda, \Gamma \rangle
+\\
+  (\mathct{copy} \ header \ src \ key \ dst \ n)
+  \rightarrow \\
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{key}[dst] \leftarrow \\
+  \pi[src + 
+  \mathct{header\_offset}, src + \mathct{header\_offset} + n)] \rangle
+\\
+  (\mathct{copy} \ header \ src \ meta \ dst \ n)
+  \rightarrow \\
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{meta}[dst] \leftarrow \\
+  \pi[src + 
+  \mathct{header\_offset}, src + \mathct{header\_offset} + n)] \rangle
+\end{gather*}
+\end{mdframed}
