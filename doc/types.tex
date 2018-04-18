@@ -3,6 +3,25 @@
 
 \subsection{Types}
 
+Pip has a type system that ensures instructions can be written correctly, but does not guarantee that they produce meaningful results. For example, the programmer can copy from anywhere in the buffer to anywhere else in the buffer. Using named bitfields gives the programmer an alternative to bit manipulation, but the programmer is not restricted to them. Pip's storage-based model means that it lacks an object model or declaration system. A declaration system would mitigate, and possibly eliminate memory access violations at the expense of freedom. The similar dataplane programming language, Steve, attempted to create a declaration system for packet switching.
+
+Steve has a user-defined type known as a \textit{layout} that allows programmers to dynamically define named bitfields within the packet. An example Steve layout follows:
+\begin{verbatim}
+layout ethernet {
+  dst : uint(48);
+  src : uint(48);
+  type : uint(16);
+}
+\end{verbatim}
+Once a layout has been defined, the programmer can \textit{extract} the individual headers and use them like variables.
+\begin{verbatim}
+extract ethernet.type;
+
+if(eth.type == 0x600) {
+ // ...
+}
+\end{verbatim}
+Until the programmer has explicitly \textit{extracted} a named field, it is not usable. Thus, the only part of the buffer accessible to the programmer are the fields they have explicitly defined and stated they wish to access. Barring poor definition, there is no possible way for the programmer to overwrite their working buffer or access beyond its boundary. Defining a similar declaration system in Pip would be a step toward fixing this issue.
 
 \begin{align*}
 \tau ::=~& \mathct{int}(n)        & \text{integer types} \\
@@ -10,6 +29,13 @@
          & \mathct{port}          & \text{ports} \\
          & \mathct{table}         & \text{tables} \\
 \end{align*}
+
+\begin{enumerate}
+\item $\mathct{int}$(n) types are unsigned integers with a bit-width of size \textit{n}.
+\item $\mathct{bits}$ types are bitfields within the storage space of the virtual machine. Bitfields are defined as having an \textit{address space} that denote which area of storage they reside: packet, header, key, meta, ingress\_port, and physical\_port. A bitfield must also specify its length in bits as well as its offset from bit 0 of the address space, again in bits.
+\item $\mathct{port}$ types represent numbered ports. Some reserved ports are named, and occupy a static number. For example, the $\mathct{drop}$ port is assigned to 0.
+\item $\mathct{table}$ types are data structures that contain all other Pip constructs. A table has a \textit{key register} to be matched against. The programmer defines the value of the key register, which is computed at runtime. Tables have \textit{rules} which, if equal to the key register, will execute a block of actions.
+\end{enumerate}
 
 \textbf{TODO} Describe these. And the lack of a concrete object model. We
 operate on pure storage, we don't have a system for defining objects.
@@ -100,21 +126,3 @@ Function \textbf{type(\textit{term})} will return the type of any typed term, \t
 \textit{Comments:} \newline
 (16) e2 does not need to be type it. It can be any value type. 
 TODO: create a system that represents values which have precision.
-
-\subsection{Literals}  
-symbol-literal:\newline
-\indent \textit{character character*}\newline
-integer-literal:\newline
-\indent \textbf{int} \textit{width-prefix decimal-literal}\newline
-width-prefix:\newline
-\indent \textbf{i} \textit{decimal-literal}\newline
-binary-literal:\newline
-\indent \textbf{0b} \textit{binary-digit binary-digit*}\newline
-decimal-literal:\newline
-\indent \textit{decimal-digit decimal-digit*}\newline
-binary-digit:\newline
-\indent 0 1\newline
-decimal-digit\newline
-\indent 0 1 2 3 4 5 6 7 8 9\newline
-character:\newline
-\indent a-zA-Z \textit{decimal-digit}\newline
