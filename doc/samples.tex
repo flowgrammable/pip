@@ -3,67 +3,67 @@
 
 Here we will describe three simple, static, stateless Pip programs: a drop, echo, and static wire program. More complicated (stateful) programs can be created by outputting to the controller port and dynamically adjusting the abstract syntax tree. Doing so removes any proveable properties about a Pip program, and thus will be discussed in a later chapter.
 
-\subsection{Drop}
-The drop program receives a program and outputs it to all physical ports.
-\begin{verbatim}
-(pip
-  (table drop exact
-    (actions
-      (copy
-	(bitfield physical_port (int i32 0) (int i32 64))
-	(bitfield key (int i32 0) (int i32 64))
-	(int i32 64))
-      (match)
-    ) ; actions
-    (rules
-      (rule (miss)
-        (actions (output (reserved_port all)))
-      )
-    )
-  )
-)
-\end{verbatim}
-This program creates an exact-match table called \textit{drop} and copies the the 32-bit physical port into the 64-bit key register, completely overwriting it if anything was there. 32 0s are padded onto the physical port in this case.
+%% \subsection{Drop}
+%% The drop program receives a program and outputs it to all physical ports.
+%% \begin{verbatim}
+%% (pip
+%%   (table drop exact
+%%     (actions
+%%       (copy
+%% 	(bitfield physical_port (int i32 0) (int i32 64))
+%% 	(bitfield key (int i32 0) (int i32 64))
+%% 	(int i32 64))
+%%       (match)
+%%     ) ; actions
+%%     (rules
+%%       (rule (miss)
+%%         (actions (output (reserved_port all)))
+%%       )
+%%     )
+%%   )
+%% )
+%% \end{verbatim}
+%% This program creates an exact-match table called \textit{drop} and copies the the 32-bit physical port into the 64-bit key register, completely overwriting it if anything was there. 32 0s are padded onto the physical port in this case.
 
-Matching begins, wherein there is one rule. The sole rule being a \textit{miss} means its action list will always execute, thus all packets received will be outputted to the \textbf{all} port.
-\subsection{Echo}
-Echo simply returns a packet to sender. One can see it is almost identical to the Drop program, except that it outputs to the packet's \textbf{in\_port}, or physical ingress port.
-\begin{verbatim}
-(pip
-  (table echo exact
-    (actions
-      (copy
-	(bitfield physical_port (int i32 0) (int i32 64))
-	(bitfield key (int i32 0) (int i32 64))
-	(int i32 64))
-      (match)
-    ) ; actions
-    (rules
-      (rule (miss)
-        (actions (output (reserved_port in_port)))
-      )
-    )
-  )
-)
-\end{verbatim}
+%% Matching begins, wherein there is one rule. The sole rule being a \textit{miss} means its action list will always execute, thus all packets received will be outputted to the \textbf{all} port.
+%% \subsection{Echo}
+%% Echo simply returns a packet to sender. One can see it is almost identical to the Drop program, except that it outputs to the packet's \textbf{in\_port}, or physical ingress port.
+%% \begin{verbatim}
+%% (pip
+%%   (table echo exact
+%%     (actions
+%%       (copy
+%% 	(bitfield physical_port (int i32 0) (int i32 64))
+%% 	(bitfield key (int i32 0) (int i32 64))
+%% 	(int i32 64))
+%%       (match)
+%%     ) ; actions
+%%     (rules
+%%       (rule (miss)
+%%         (actions (output (reserved_port in_port)))
+%%       )
+%%     )
+%%   )
+%% )
+%% \end{verbatim}
 
-\subsection{Wire}
-The Wire, since it does not have any capability to learn of ports dynamically, will simply send a packet to the other of two known ports, port 0 and port 1.
+\subsection{Static Wire}
+\indent A wire is a common network function involving two ports: when one of the ports receives a packet, it outputs on the other port. In general, the wire is not aware of either port and must learn of their existence dynamically (cite hoang). Pip does not allow for dynamic state changes, thus since the wire does not have any capability to learn of ports dynamically, will simply send a packet to the other of two known ports, port 1 and port 2.
 \begin{verbatim}
 (pip
   (table wire exact
     (actions
       (copy
-	(bitfield physical_port (int i32 0) (int i32 64))
-	(bitfield key (int i32 0) (int i32 64))
-	(int i32 64))
+	(bits physical_port 0 32)
+	(bits key 0 32)
+	32)
       (match)
     ) ; actions
     (rules
-      (rule (port 0)
-        (actions (output (port 1)))
       (rule (port 1)
-        (actions (output (port 0)))
+        (actions (output (port 2)))
+      (rule (port 2)
+        (actions (output (port 1)))
       (rule (miss)
         (actions (drop))
       )
@@ -71,4 +71,58 @@ The Wire, since it does not have any capability to learn of ports dynamically, w
   )
 )
 \end{verbatim}
-Once again, the \textbf{physical\_port} is set as the table key. There are more interesting matching rules in this program. When the key is equal to 0, the packet will be outputted to port 1, and vice versa for when the key is equal to 1. If the key (physical ingress port) is neither 0 nor 1, then the packet is dropped.
+
+We begin by defining an \textit{exact match} table called $\mathct{wire}$. An exact match table matches on integers. When the table begins execution, 32 bits are copies from the $\mathct{physical\_port}$ of the packet (a context variable representing the physical ingress port of the packet) into the table's $\mathct{key}$ register. When the $\mathct{match}$ action is reached, table prep ends and matching can begin. Three \textit{match rules} are defined: port 1, port 2, and $\mathct{miss}$. If the value of the \mathct{key} register is equal to one of these rules, the rule's \textit{action list} begins execution. For example, if the $\mathct{key}$ register was equal to 1, then the packet would $\mathct{output}$ to port 2. If the $\mathct{key}$ was not equal to 1 or 2, the $\mathct{miss}$ rule would begin execution, dropping the packet.
+
+\subsection{Stateless Firewall}
+Here we define a simple TCP/IPv4 firewall that disables some types of packets from accessing the Internet. If the packet is of type IPv4 with protocol TCP, we will drop any packets to port 80 (HTTP) or port 443 (HTTPS). If the packet is a TCP/IPv4 packet but is not attempting to access ports 80 or 443, we will allow the controller to handle egress processing, as the output port of the packet will still need to be determined.
+\begin{verbatim}
+(pip
+  (table ipv4_check exact
+    (actions
+      (copy 
+        (named_field eth.type 0 16)
+        (bits key 0 16))
+      (match)
+    )
+    (rules
+      (rule (int i16 06 0x0800)
+        (actions (goto tcp_check)))
+      (rule (miss)
+        (actions (drop)))
+    )
+  )
+
+  (table tcp_check exact
+    (actions
+      (copy 
+        (named_field ipv4.type 0 8)
+        (bits key 0 8))
+      (match)
+    )
+    (rules
+      (rule (int i8 0x06)
+        (actions (goto firewall)))
+      (rule (miss)
+        (actions (drop)))
+    )
+  )
+
+  (table firewall exact
+    (actions
+      (copy
+        (named_field tcp.src 0 16)
+        (bits key 0 16))
+      (match)
+    )
+    (rules
+      (rule (int i16 80)
+        (actions (drop)))
+      (rule (int i16 443)
+        (actions (drop)))
+      (rule (miss)
+        (output (port controller)))
+    )
+  )
+)
+\end{verbatim}
