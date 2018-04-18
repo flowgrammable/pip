@@ -31,7 +31,7 @@ Until the programmer has explicitly \textit{extracted} a named field, it is not 
 \end{align*}
 
 \begin{enumerate}
-\item $\mathct{int}$(n) types are unsigned integers with a bit-width of size \textit{n}.
+\item $\mathct{int}(n)$ types are unsigned integers with a bit-width of size \textit{n}.
 \item $\mathct{bits}$ types are bitfields within the storage space of the virtual machine. Bitfields are defined as having an \textit{address space} that denote which area of storage they reside: packet, header, key, meta, ingress\_port, and physical\_port. A bitfield must also specify its length in bits as well as its offset from bit 0 of the address space, again in bits.
 \item $\mathct{port}$ types represent numbered ports. Some reserved ports are named, and occupy a static number. For example, the $\mathct{drop}$ port is assigned to 0.
 \item $\mathct{table}$ types are data structures that contain all other Pip constructs. A table has a \textit{key register} to be matched against. The programmer defines the value of the key register, which is computed at runtime. Tables have \textit{rules} which, if equal to the key register, will execute a block of actions.
@@ -81,48 +81,19 @@ Function \textbf{type(\textit{term})} will return the type of any typed term, \t
   (6) The miss expression will have the same type as the key of the table its rule is defined within.
   \newline
 \subsection*{Actions}
-\begin{mathpar}
-  \inferrule* [right=\quad write \qquad (8)]
-              {\\}
-              {\Gamma \vdash \textbf{write} \ (action) : unit}
-  \newline \newline
-  \inferrule* [right=\quad clear \qquad (9)]
-              {\\}
-              {\Gamma \vdash \textbf{clear} : unit}
-  \newline \newline
-  \inferrule* [right=\quad drop \qquad (10)]
-              {\\}
-              {\Gamma \vdash \textbf{drop} : unit}
-  \newline \newline
-  \inferrule* [right=\quad match \qquad (11)]
-              {\\}
-              {\Gamma \vdash \textbf{match} : unit}
-  \newline \newline
-  \inferrule* [right=\quad goto \qquad (12)]
-              {\Gamma \vdash e_1 : it}
-              {\Gamma \vdash \textbf{goto} \ e_1 : unit}
-  \newline \newline
-  \inferrule* [right=\quad output \qquad (13)]
-              {\Gamma \vdash e_1 : port}
-              {\Gamma \vdash \textbf{output} \ e_1 : unit}
-  \newline \newline
-  \inferrule* [right=\quad output \qquad (14)]
-              {\Gamma \vdash e_1 : port}
-              {\Gamma \vdash \textbf{output} \ e_1 : unit}
-  \newline \newline
-  \inferrule* [right=\quad advance \qquad (15)]
-              {\Gamma \vdash e_1 : it}
-              {\Gamma \vdash \textbf{advance} \ e_1 : unit}
-  \newline \newline
-  \inferrule* [right=\quad copy \qquad (16)]
-              {\Gamma \vdash e_1 : location \\ e_2 : location \\ e_3 : it}
-              {\Gamma \vdash \textbf{copy} \ e_1 \ e_2 \ e_3 : unit}
-  \newline \newline
-  \inferrule* [right=\quad set \qquad (16)]
-              {\Gamma \vdash e_1 : location \\ e_2 : it \\ e_3 : it}
-              {\Gamma \vdash \textbf{set} \ e_1 \ e_2 \ e_3 : unit}
-  \newline \newline
-\end{mathpar}
-\textit{Comments:} \newline
-(16) e2 does not need to be type it. It can be any value type. 
+
+Actions are instructions that either have no parameters, a typed expression as a parameter, or another actions as a parameter.. Actions do not have a type.
+\begin{enumerate}
+  \item $\mathct{write} \ action$ - $action$ must be an action.
+  \item $\mathct{clear}$ takes no parameters.
+  \item $\mathct{drop}$ takes no parameters.
+  \item $\mathct{match}$ takes no parameters.
+  \item $\mathct{match}$ takes no parameters.
+  \item $\mathct{goto}$ takes a parameter of type $\mathct{table}$.
+  \item $\mathct{output}$ takes a parameter of type $\mathct{port}$.
+  \item $\mathct{advance}$ takes a parameter of type $\mathct{int}(n)$.
+  \item $\mathct{copy}$ takes two parameters of type $\mathct{bits}$ and a parameter of type $\mathct{int}(n)$.
+  \item $\mathct{set}$ takes a parameter of type $\mathct{bits}$ and a parameter of type $\mathct{int}(n)$.
+\end{enumerate}
+
 TODO: create a system that represents values which have precision.
