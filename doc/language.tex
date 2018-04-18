@@ -1,0 +1,115 @@
+\section{The Pip Language}
+This chapter (appendix?) will serve as a reference for the grammar and syntax of the Pip programming language.
+
+Pip is an S-expression-based language. There are 6 basic S-expressions used in the Pip language:
+\begin{enumerate}
+  \item Pip
+  \item Table
+  \item Action List
+  \item Action
+  \item Rule List
+  \item Rule
+\end{enumerate}
+
+\subsection{Pip S-Expression}
+Pip S-Expressions are the expressions that contain the program itself, comparable to the main function in C. Pip expressions can contain any amount of table expressions as parameters. Example:
+\begin{verbatim}
+(pip (table ...) (table...))
+\end{verbatim}
+
+\subsection{Table S-Expression}
+Table S-Expressions define a match table. They contain, in order, a name, a table type (exact match tables are currently the only supported table type), a preparation action list (an action list that sets the key register of the table) ending with a $\mathct{match}$ action, and a rule list that defines the matching rules of the table. For example:
+\begin{verbatim}
+(table table_name exact
+  (actions
+    (set (bits key 0 32) (int i32 0))
+    (match)
+  )
+  (rules
+    (rule ...)
+  )
+)
+\end{verbatim}
+In this table, an exact-match table called \textit{table\_name} is declared. Its key register is $\mathct{set}$ to the 32-bit integer 0 and matching begins. The rules in the rule list will then be examined and possibly executed. Rules and key registers will be explained later in the chapter.
+
+\subsection{Action Lists and Actions}
+Actions are the basic instructions in Pip. Actions Lists are simply sequences of one or more actions. Pip has 9 actions, described as follows: 
+\begin{enumerate}
+  \item $\mathct{write}$ writes an action the stored action list of the virtual machine. 
+  \item $\mathct{clear}$ clears all actions in the stored action list.
+  \item $\mathct{drop}$ drops the packet and discontinues processing.
+  \item $\mathct{match}$ ends the prep list of a table and begins matching.
+  \item $\mathct{goto}$ jumps to another table. Only tables that appear later in the program may be jumped to.
+  \item $\mathct{output}$ sends the packet out a specific port.
+  \item $\mathct{advance}$ increments the context variable $\mathct{header\_offset}$ by the specified amount. This determines the distance in bits of the $\mathct{header}$ address space from the $\mathct{packet}$ address space.
+  \item $\mathct{copy}$ copies n bits from one bitfield to another. The programmer may not copy past th eend of an address space.
+  \item $\mathct{set}$ sets a bitfield to some literal value.
+\end{enumerate}
+An example action list follows:
+\begin{verbatim}
+(actions
+  (set (named_field tcp.dst) 443) (drop)
+)
+\end{verbatim}
+An action is marked by the $\mathct{action}$ keyword. Individual actions are not marked by a keyword as they only appear within action lists and write action parameters.
+
+\subsection{Rule Lists and Rules}
+Rules are the entries in a table that are matched upon. A rule has a key (not to be confused with a $\mathct{key}$ register) that is equality compared to the $\mathct{key}$ register. In an exact match table, a rule key is of type $\mathct{int}(n)$. Along with a key, a rule contains an action list that will be executed if the rule key matches the key register. A rule list is a sequence of one or more rules. An example rule list follows:
+\begin{verbatim}
+(rules
+  (rule (int i32)
+    (actions ...)
+  )
+)
+\end{verbatim}
+A rule is marked by the $\mathct{rule}$ keyword and a rule list by the $\mathct{rules}$ keyword.
+
+\subsection{Key Register}
+The $\mathct{key}$ register is a 64-bit field that is contained in the table data structure. The $\mathct{key}$ register is equality compared to the table's $\mathct{rule}$ keys. In other words, matching in a table works similarly to switch statements in C.
+
+\subsection{Address Spaces}
+There are 4 address spaces in the Pip language and virtual machine:
+\begin{enumerate}
+  \item $\mathct{packet}$ denotes the 0th bit in the packet.
+  \item $\mathct{header}$ denotes the 0th bit in the packet plus the value of the $\mathct{header\_offset}$ context variable.
+  \item $\mathct{meta}$ is the 64-bit metadata register. It can be used to store values for scratch processing.
+  \item $\mathct{key}$ is the 64-bit key register.
+\end{enumerate}
+
+\subsection{Reserved Ports}
+Pip inherits the following reserved ports from the OpenFlow standard:
+\begin{enumerate}
+  \item $\mathct{drop}$ or port 0. Outputting to this port has the same effect as the $\mathct{drop}$ action.
+  \item $\mathct{all}$ outputs to all ports on the device.
+  \item $\mathct{controller}$ sends the packet to some non-Pip program. Our implementation uses C++ programs.
+  \item $\mathct{in\_port}$ outputs to the physical ingress port of the packet.
+  \item $\mathct{any}$ outputs to a random port.
+  \item $\mathct{unset}$ ????
+\end{enumerate}
+
+\subsection{Named Fields}
+Named fields are bitfields; they have type $\mathct{bits}$. They are equivalent in every way to a bitfield in the $\mathct{packet}$ address space, and only exist as syntactic sugar, but help to prevent memory access violations. A named field should always be preferred to a raw bitfield if available. Named fields exist in Pip for Ethernet frames, IPv4 fields, and TCP fields. IPv6 and UDP will be added in the future. The following named fields are:
+\begin{enumerate}
+  \item $\mathct{eth.dst}$ 
+  \item $\mathct{eth.src}$
+  \item $\mathct{eth.type}$
+  \item $\mathct{ipv4.vhl}$
+  \item $\mathct{ipv4.tos}$
+  \item $\mathct{ipv4.len}$
+  \item $\mathct{ipv4.id}$
+  \item $\mathct{ipv4.frag\_offset}$
+  \item $\mathct{ipv4.ttl}$
+  \item $\mathct{ipv4.protocol}$
+  \item $\mathct{ipv4.checksum}$
+  \item $\mathct{ipv4.src}$
+  \item $\mathct{ipv4.dst}$
+  \item $\mathct{tcp.src}$
+  \item $\mathct{tcp.dst}$
+  \item $\mathct{tcp.seq}$
+  \item $\mathct{tcp.ack}$
+  \item $\mathct{tcp.offset}$
+  \item $\mathct{tcp.flags}$
+  \item $\mathct{tcp.window}$
+  \item $\mathct{tcp.checksum}$
+  \item $\mathct{tcp.urgent\_ptr}$
+\end{enumerate}
