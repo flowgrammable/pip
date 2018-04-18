@@ -126,3 +126,5 @@ Here we define a simple TCP/IPv4 firewall that disables some types of packets fr
   )
 )
 \end{verbatim}
+
+Here we see a program taking advantage of the $\mathct{goto}$ action control structure. The ipv4\_check table will match on the \textit{Ethernet ethertype} of the packet. If the ethertype is 0x800, IPv4, we will jump to the tcp\_check table, dropping the packet in any other case. In \textit{tcp\_check}, we match on the \textit{IPv4 protocol} field. If it is equal to 0x06, or TCP, we will jump the final table, \textit{firewall}. Here, we will match the \textit{TCP source port} on ports 80 and 443. If there is a match, we drop the packet, disallowing Internet access. Otherwise, we output to the controller $\mathct{port}$ to begin manual egress processing.
