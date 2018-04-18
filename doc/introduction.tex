@@ -23,9 +23,9 @@ data races, etc.)
 On the other hand, domain-specific languages, may not be sufficient to express the kinds of computations necessary for higher-level SDN applications.
 
 \textbf{How did we approach the problem}.
-Our approach is to a minimal abstract machine to represent the kinds of computational facility present in a typical OpenFlow-like data plane.
+Our approach is to create a minimal abstract machine to represent the kinds of computational facility present in a typical OpenFlow-like data plane.
 The description of our abstract machine includes basic notions of state and the smallest possible set of operations needed to define SDN programs.
-Basically, tried to construct an assembly language for OpenFlow-style packet processing.
+In essence, we attempted to construct an assembly language for OpenFlow-style packet processing.
 
 \textbf{How does the abstract machine help us study language design?}
 Now that we have model, we hope to start reasoning about higher level language constructs that support safe and efficient switch configurations. 
@@ -33,8 +33,11 @@ Now that we have model, we hope to start reasoning about higher level language c
 \textbf{What did we do?}
 We defined the operational semantics for this abstract machine. In order better experiment with it, we also implemented a virtual machine capable of executing SDN programs.
 
+\begin{verbatim}
 Talk about the clean separation of the data plane machine from the controller.
 The controller has to be a GP language, the DP does not.
+\end{verbatim}
+The Pip language has no object model or declaration system, as well as minimal control structure. By removing much of the freedom present in general-purpose programming languages and restricting the programmer to simple packet-switching actions and buffer modification, Pip programs are able to maintain provable properties and provable termination. The operational semantics of Pip allow for a logical description of the state of the program at any time. In order to maintain these provable properties, we allow the programmer to output a modified packet to a ``controller'', a program written in a general-purpose programming language that has the facilities for mutable state or abstract-syntax tree modification.
 
 Built experimental controllers to experiment with mutable program state.
 
