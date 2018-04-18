@@ -96,63 +96,19 @@ The $\mathct{drop}$ command truncates both the action list and stored action lis
 and sets the output port to 0 (the null port). 
 The effect of this to cause the program to terminate such that the execution 
 environment will not forward the packet.
- 
-
-% \begin{equation}
-%   (\textrm{\textbf{clear}}) \textrm{,} \ \langle \pi, \ (\textbf{\textrm{clear}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \ \textrm{\textbf{context}} \rangle
-%   \Rightarrow \langle \pi, \ \bar \alpha, \ \emptyset, \  \textrm{\textbf{context}} \rangle
-% \end{equation}
-
-%% Remove all actions from stored action list, $\Lambda$.
-
-
-%% \begin{equation}
-%%   (\textrm{\textbf{write}} \ action), \ \langle \pi, \ (\textrm{\textbf{write}} \ \oplus \ \bar \alpha), \ \bar \Lambda,
-%%   \textrm{\textbf{context}} \rangle \Rightarrow
-%%   \langle \pi, \ \bar \alpha, \ \bar \Lambda \cdot action, \textrm{\textbf{context}} \rangle
-%% \end{equation}
-
-%% Append \textit{action} to stored action list, $\Lambda$.
-
-%% \begin{equation}
-%%   (\textrm{\textbf{goto}} \ \tau) \textrm{,} \ \langle \pi, \ (\textrm{\textbf{goto}} \ \oplus \ \bar \alpha), \ \bar \Lambda, \textrm{\textbf{context}}[table] \rangle
-%%   \Rightarrow \langle \pi, \ \bar \alpha, \ \bar \Lambda, \textrm{\textbf{context}}[\tau] \rangle
-%% \end{equation}
-
-%% Change the \textbf{current\_table} variable in the context to $\tau$.
-
-%% \begin{equation}
-%% \begin{split}
-%%   (\textrm{\textbf{set}} \ field \ value) \textrm{,} \ \langle \pi, (\textrm{\textbf{set}} \ \oplus \ \bar \alpha), \bar \Lambda,
-%%   \textbf{\textrm{context}}[field] \rangle \\
-%%   \Rightarrow \langle \pi, \bar \alpha, \bar \Lambda,
-%%   \textbf{\textrm{context}}[field] = value \rangle
-%% \end{split}
-%% \end{equation}
-
-%% Set the bitfield, \textit{field}, to the literal value, \textit{value}.
-
-%% \begin{equation}
-%% \begin{split}
-%%   (\textrm{\textbf{output}} \ port) \textrm{,} \ \langle \pi, (\textrm{\textbf{output}} \ \oplus \ \bar \alpha), \bar \Lambda,
-%%   \textbf{\textrm{context}}[egress\_port] \rangle \\
-%%   \Rightarrow 
-%%   \langle \pi, \bar \alpha, \bar \Lambda,
-%%   \textbf{\textrm{context}}[egress\_port] = port \rangle
-%% \end{split}
-%% \end{equation}
-
-%% Change the \textbf{egress\_port} variable in the context to \textit{port}, thus outputting the packet to \textit{port}.
-
-%% \begin{equation}
-%% \begin{split}
-%%   (\textrm{\textbf{copy}} \ as_1 \ src \ as_2 \ dst \ n)
-%%   \textrm{,} \ \langle \pi, (\textbf{\textrm{copy}} \ \oplus \ \bar \alpha), \bar \Lambda, \textrm{\textbf{context}} \rangle \\ \Rightarrow
-%%   \langle \pi', \bar \alpha, \bar \Lambda, \textrm{\textbf{context}}' \rangle
-%% \end{split}
-%% \end{equation}
-
-%% Copy n bits from bitfield \textit{src} of \textbf{address space} $as_1$ into bitfield \textit{dst} of \textbf{address space} $as_2$.
+The \mathct{write} command appends an action to the stored action list. This is
+the only way to write to the stored action list, allowing for some action to be
+taken upon egress, providing the packet is not dropped.
+The \mathct{goto} command jumps from the current match table to a new table. The
+key register is cleared and rewritten based on the new table's rules. This can
+be used as a rudimentary control structure.
+The \mathct{set} command sets a bitfield, \textit{field} to some value \textit{value}.
+This is used to set fields to a literal value.
+The \mathct{output} action outputs to the specified \mathct{port}, \textit{n}, beginning
+egress processing.
+The \mathct{copy} action copies from one bitfield, \textit{src} to another bitfield, \textit{dst}.
+A bitfield can be copied from any address space to any other address space, except for key registers,
+which cannot be used as a source.
 
 Definition of copy function: (move to displaymath)
 \begin{equation}
