@@ -86,7 +86,7 @@ Here we define a simple TCP/IPv4 firewall that disables some types of packets fr
       (match)
     )
     (rules
-      (rule (int i16 06 0x0800)
+      (rule (int i16 0x0800)
         (actions (goto tcp_check)))
       (rule (miss)
         (actions (drop)))
