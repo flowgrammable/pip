@@ -42,9 +42,9 @@ The Pip language has no object model or declaration system, as well as minimal c
 Built experimental controllers to experiment with mutable program state.
 
 \textbf{What did we find out?}
-Our abstract machine provides a lot of opportunities for executing undefined behaviors. In particular, it easy to build programs that read across packet boundaries, fail to validate input, etc.
+Our abstract machine provides a lot of opportunities for executing undefined behaviors. In particular, it is easy to build programs that read across packet boundaries, fail to validate input, etc. 
 
-Separating the language of controller from the DP is good thing.
+Separating the language of controller from the dataplane allows for network flow to be reasoned about mathematically by separating flow from low-to-hardware computation.
 
 \textbf{Contributions}
 \begin{enumerate}
