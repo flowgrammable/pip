@@ -5,6 +5,9 @@
 \usepackage{bm}
 \usepackage{mathpartir}
 \usepackage[framemethod=default]{mdframed}
+\usepackage[backend=bibtex, style=ieee]{biblatex}
+\bibliography{related}
+
 
 \title{Pip: An abstract dataplane and virtual machine}
 \author{Samuel Goodrick}
@@ -25,6 +28,7 @@
 \input{related}
 \input{survey}
 
-% \bibligoraphy{paper.bib}
+\printbibliography
+
 
 \end{document}
