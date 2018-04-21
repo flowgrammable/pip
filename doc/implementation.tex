@@ -1,1 +1,38 @@
 \section{Implementation}
+
+Pip was implemented in C++ using Andrew Sutton's Sexpr and CC libraries. Interpretation of a Pip program happens in five stages: input, parsing, translation, name resolution and evaluation. Input and parsing are handled by libsexpr and libCC and will be ignored in this paper. The implementation of translation, resolution, and evaluation will be outlined in this chapter.
+
+\subsection{Translation}
+The translator takes, as a parameter, a libsexpr expression and returns a declaration. It works as a recursive-descent, syntax-directed translator built around the \texttt{match\_list} framework of libsexpr. The \texttt{match\_list} framework allows for pattern-matching of user-defined s-expressions, with each unique type being parsed by a callback function.
+
+\begin{align*} %% decl
+  \text{d} \in \text{decl} ::=~& \mathct{(table} \ \text{table\_id table\_kind action\_seq rule\_seq}\mathct{)}
+\end{align*}
+\begin{align*} %% decl_seq
+  \text{decl\_seq} ::=~& \text{decl*}
+\end{align*}
+\begin{align*} %% action
+  \text{a} \in \text{action} ::=~& \mathct{(}\text{action\_name}\mathct{)} \\
+  & | \ \mathct{(}\text{action\_name expr*}\mathct{)} \\ 
+  & | \ \mathct{(}\text{action\_name action*}\mathct{)}
+\end{align*}
+\begin{align*} %% action_seq
+  \text{action\_seq} ::=~& \text{action*}
+\end{align*}
+\begin{align*} %% rule
+  \text{r} \in \text{rule} ::=~& \mathct{(}\text{expr action\_seq}\mathct{)}
+\end{align*}
+\begin{align*} %% rule_seq
+  \text{rule\_seq} ::=~& \text{rule*}
+\end{align*}
+\begin{align*} %% expr
+  \text{e} \in \text{expr} ::=~& \text{int\_expr} \\
+  & | \ \text{port\_expr} \\
+  & | \ \text{miss\_expr} \\
+  & | \ \text{ref\_expr} \\
+  & | \ \text{bits\_expr} \\
+  & | \ \text{named\_field\_expr}
+\end{align*}
+           
+\subsection{Resolution}
+\subsection{Evaluation}
