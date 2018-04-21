@@ -1,10 +1,12 @@
 \section{Implementation}
 
-Pip was implemented in C++ using Andrew Sutton's Sexpr and CC libraries. Interpretation of a Pip program happens in five stages: input, parsing, translation, name resolution and evaluation. Input and parsing are handled by libsexpr and libCC and will be ignored in this paper. The implementation of translation, resolution, and evaluation will be outlined in this chapter.
+Pip was implemented in C++ using Andrew Sutton's Sexpr and CC libraries. Interpretation of a Pip program happens in five stages: input, sexpr-parsing, translation, name resolution and evaluation. Input and sexpr-parsing are handled by libsexpr and libCC and will be ignored in this paper. The implementation of translation, resolution, and evaluation will be outlined in this chapter.
 
 \subsection{Translation}
 The translator takes, as a parameter, a libsexpr expression and returns a declaration. It works as a recursive-descent, syntax-directed translator built around the \texttt{match\_list} framework of libsexpr. The \texttt{match\_list} framework allows for pattern-matching of user-defined s-expressions, with each unique type being parsed by a callback function.
 
+The types that the translator parses are defined below. Keywords and syntax appear in $\mathct{san serif}$ font.
+\begin{mdframed}
 \begin{align*} %% decl
   \text{d} \in \text{decl} ::=~& \mathct{(table} \ \text{table\_id table\_kind action\_seq rule\_seq}\mathct{)}
 \end{align*}
@@ -33,6 +35,79 @@ The translator takes, as a parameter, a libsexpr expression and returns a declar
   & | \ \text{bits\_expr} \\
   & | \ \text{named\_field\_expr}
 \end{align*}
+\end{mdframed}
+Here $\mathct{action\_name}$ refers to the syntactic name of an action as defined in section \textbf{???}.
+
+We can see a faithful implementation of this backus-naur form definition is incredibly simple in C++ and \texttt{match\_list}. Below is the implementation of \texttt{decl\_seq} and \texttt{decl}:
+\begin{mdframed}
+\begin{verbatim}
+decl_seq
+translator::trans_decls(const sexpr::expr* e)
+{
+  decl_seq decls; //decl_seq = std::vector<decl*>
+  for(auto el : e) {
+    decl* d = trans_decl(e);
+    decls.push_back(d);
+  }
+   
+  return decls;
+}
+  
+/// decl ::= table-decl
+decl*
+translator::trans_decl(const sexpr::expr* e)
+{
+  symbol* sym; // symbol = std::string*
+  match_list(e, &sym);
+  if (*sym == "table")
+    return trans_table(e);
+}Resolution
+\end{verbatim}
+\end{mdframed}
+Translation of all types works similarly: a sequence is translated by iterating through each s-expression within a list of s-expressions. The parser gets recursively translates each element of the s-expression into a Pip AST, storing the completed ASTs in a vector. We see in this example, an overloading of \texttt{match\_list} to handle symbols, or string pointers, although the function can take any amount of arguments. Defining overloads of \texttt{match\_list} functions is beyond the scope of this paper.
            
 \subsection{Resolution}
+Name resolution is responsible for performing name lookup after the first translation phase. It is responsible for assigning meanings to $\mathct{ref\_expr}$, or references to table names.
+
+Resolution itself has two phases: first, a table linking locations in memory to identifiers is created; second, those identifiers are replaced with their pointers to their location.
 \subsection{Evaluation}
+The final stage of interpretation is evaluation. The evaluator framework is an entire virtual machine, containing the entire Pip state: a context, packet, action list, and stored action list. An evaluator operates upon a single packet; a Pip program that uses $n$ packets will have $n$ evaluators.
+
+Upon construction of an evaluator, all table declarations are initialized with their static rule lists. The first table in the program is set as the $\mathct{current\_table}$ and its prep-action-list is queued into the evaluator. The evaluator will execute each action in its queue until the queue is empty. An abridged pseudocode version of evaluator construction is defined below:
+\begin{algorithm*}
+\caption{Evaluator Construction}
+$\mathct{let}$ tables = vector of declarations \\
+$\mathct{foreach}$ table $\in$ program \\
+\tab $\mathct{insert}$ table into tables \\
+\tab $\mathct{foreach}$ rule $\in$ table \\
+\tab\tab $\mathct{insert}$ rule.key into hashtable \\
+\end{algorithm*}
+
+The main algorithm of the evaluator is the \texttt{step} algorithm, which switches on the next action in the queue, and recursively executes them in turn.
+\begin{algorithm}
+\caption{step}
+\begin{algorithmic}
+  \While{!empty(eval)}
+  \State action a $\leftarrow$ front(eval)
+  \If{get\_kind(a) = advance\_action}
+    \Return eval\_advance(a)
+  \ElsIf{get\_kind(a) = copy\_action}
+    \Return eval\_copy(a)
+  \EndIf
+  \State ...
+  \EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+The most complex algorithms are found in the evaluation of actions. The evaluation of the copy action, for example, involves copying bits in place from integer values into byte arrays, odd numbers of bites from one byte array to another, and from byte arrays back into integers. These become incredibly dense very fast and will not be examined. In the name of brevity, we will only study the most important action, $\mathct{match}$. The \texttt{eval\_match} algorithm looks up the key register's value in a hashtable of the table's rule keys. If there is a match, the current rule's action list will be added to the evaluator queue. The hashtable find function returns the integer identifier of the rule, so that the matched rule can be kept track of. If there is no match, then the miss rule's action list will be enqueued. If a miss rule is not defined and the packet is not matched, the packet will be dropped implicitly.
+\begin{algorithm}
+\caption{eval\_match}
+$\mathct{for}$ rule $\in$ current\_table.rules\\
+\tab key $\leftarrow$ rule.key\\
+\tab id $\leftarrow$ find(hashtable, key)\\
+\tab $\mathct{if}$(id $\neq$ 0)\\
+\tab\tab insert(eval, $\textrm{current\_table.rules}_{id}$.action\_list)\\
+insert(eval, $\textrm{current\_table.rules}_{miss}$.action\_list
+\end{algorithm}
+
+Eventually no more actions will be left to evaluate. When this happens, the stored action list will get its chance to execute. The process is exactly the same.
