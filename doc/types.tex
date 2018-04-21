@@ -1,5 +1,6 @@
 
 \section{Type System}
+Pip uses a type system to ensure semi-semantically correct instructions. Instructions, known as actions, can take well-formed expressions as parameters, 
 
 \subsection{Types}
 
@@ -17,46 +18,20 @@
 \item $\mathct{table}$ types are data structures that contain all other Pip constructs. A table has a \textit{key register} to be matched against. The programmer defines the value of the key register, which is computed at runtime. Tables have \textit{rules} which, if equal to the key register, will execute a block of actions.
 \end{enumerate}
 
-\textbf{TODO} Describe these. And the lack of a concrete object model. We
-operate on pure storage, we don't have a system for defining objects.
-
 \subsection{Inference Rules}
-\subsection*{Definitions}
+\subsection{Definitions}
 Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \\
 Function \textbf{type(\textit{term})} will return the type of any typed term, \textit{term}.
 
-\subsection*{Expressions}
-\begin{mathpar}
-  \inferrule* [right=\quad int \qquad (1)]
-             {\\}
-             {\mathct{int}(n) \ (decimal-literal) : int(n)}
-  \\ \\
-  \inferrule* [right=\quad port \qquad (3)]
-             {\Gamma \vdash \mathct{port} \ e_1 \\ \Gamma \vdash e_1:int(n)}
-             {\Gamma \vdash \mathct{port} \ e_1 : port}
-  \\ \\
-  \inferrule* [right=\quad offset \qquad (4)]
-             {\Gamma \vdash pos : int(n) \\ \Gamma \vdash len : int(n)}
-             {\Gamma \vdash \mathct{offset} \  (as) \  pos \  len : location}
-  \\ \\
-  \inferrule* [right=\quad field \qquad (5)]
-             {\Gamma(\textit{identifier}) = (l, \mu) \\ l \rightarrow location}
-             {\Gamma \vdash \textit{identifier} : location}
-  \\ \\
-  \inferrule* [right=\quad miss \qquad (6)]
-             {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-             {\Gamma \vdash \mathct{miss} : type(key(l))}
-  \\ \\
-  \inferrule* [right=\quad ref \qquad (7)]
-             {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-             {\Gamma \vdash \textit{identifier} : unit}
-  \\ \\
-
-\end{mathpar}
-    \textit{Comments:} \\
-  (6) The miss expression will have the same type as the key of the table its rule is defined within.
-  \\
-\subsection*{Actions}
+\subsection{Expressions}
+\begin{align*}
+  \text{expressions} ::=~& \mathct{int}(w) n    & \text{where} \ w \ \text{and} \ n \ \text{are integer literals.}\\
+  & | \ \mathct{port} \ n   & \text{where } n \text{ is an integer literal.}\\
+  & \ \ \mathct{bits} \ as \ pos \ len &\text{where } pos \text{ and } len \text{ are integer literals.} \\ & &\text{and } as \text{ is an address space.}\\
+  & | \ \mathct{miss}\\
+  & | \ \mathct{ref} \ id    &\text{where } id \text{ is the name of a table.}
+\end{align*}
+\subsection{Actions}
 
 Actions are instructions that either have no parameters, a typed expression as a parameter, or another actions as a parameter. Actions do not have a type.
 \begin{enumerate}
