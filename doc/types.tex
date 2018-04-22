@@ -3,26 +3,6 @@
 
 \subsection{Types}
 
-Pip has a type system that ensures instructions can be written correctly, but does not guarantee that they produce meaningful results. For example, the programmer can copy from anywhere in the buffer to anywhere else in the buffer. Using named bitfields gives the programmer an alternative to bit manipulation, but the programmer is not restricted to them. Pip's storage-based model means that it lacks an object model or declaration system. A declaration system would mitigate, and possibly eliminate memory access violations at the expense of freedom. The similar dataplane programming language, Steve, attempted to create a declaration system for packet switching.
-
-Steve has a user-defined type known as a \textit{layout} that allows programmers to dynamically define named bitfields within the packet. An example Steve layout follows:
-\begin{verbatim}
-layout ethernet {
-  dst : uint(48);
-  src : uint(48);
-  type : uint(16);
-}
-\end{verbatim}
-Once a layout has been defined, the programmer can \textit{extract} the individual headers and use them like variables.
-\begin{verbatim}
-extract ethernet.type;
-
-if(eth.type == 0x600) {
- // ...
-}
-\end{verbatim}
-Until the programmer has explicitly \textit{extracted} a named field, it is not usable. Thus, the only part of the buffer accessible to the programmer are the fields they have explicitly defined and stated they wish to access. Barring poor definition, there is no possible way for the programmer to overwrite their working buffer or access beyond its boundary. Defining a similar declaration system in Pip would be a step toward fixing this issue.
-
 \begin{align*}
 \tau ::=~& \mathct{int}(n)        & \text{integer types} \\
          & \mathct{bits}(a, o, l) & \text{bitfields} \\
@@ -42,52 +22,47 @@ operate on pure storage, we don't have a system for defining objects.
 
 \subsection{Inference Rules}
 \subsection*{Definitions}
-Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \newline
+Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \\
 Function \textbf{type(\textit{term})} will return the type of any typed term, \textit{term}.
 
 \subsection*{Expressions}
 \begin{mathpar}
   \inferrule* [right=\quad int \qquad (1)]
              {\\}
-             {\textbf{int it} \ (decimal-literal) : it}
-  \newline \newline
-  \inferrule* [right=\quad range \qquad (2)]
-             {\Gamma \vdash e_1:it \\ \Gamma \vdash e_2:it}
-             {\Gamma \vdash \textbf{range}\  e_1 \  e_2 : it}
-  \newline \newline
+             {\mathct{int}(n) \ (decimal-literal) : int(n)}
+  \\ \\
   \inferrule* [right=\quad port \qquad (3)]
-             {\Gamma \vdash \textbf{port} \ e_1 \\ \Gamma \vdash e_1:it}
-             {\Gamma \vdash \textbf{port} \ e_1 : port}
-  \newline \newline
+             {\Gamma \vdash \mathct{port} \ e_1 \\ \Gamma \vdash e_1:int(n)}
+             {\Gamma \vdash \mathct{port} \ e_1 : port}
+  \\ \\
   \inferrule* [right=\quad offset \qquad (4)]
-             {\Gamma \vdash pos : it \\ \Gamma \vdash len : it}
-             {\Gamma \vdash \textbf{offset} \  (as) \  pos \  len : location}
-  \newline \newline
+             {\Gamma \vdash pos : int(n) \\ \Gamma \vdash len : int(n)}
+             {\Gamma \vdash \mathct{offset} \  (as) \  pos \  len : location}
+  \\ \\
   \inferrule* [right=\quad field \qquad (5)]
              {\Gamma(\textit{identifier}) = (l, \mu) \\ l \rightarrow location}
              {\Gamma \vdash \textit{identifier} : location}
-  \newline \newline
+  \\ \\
   \inferrule* [right=\quad miss \qquad (6)]
              {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-             {\Gamma \vdash \textbf{miss} : type(key(l))}
-  \newline \newline
+             {\Gamma \vdash \mathct{miss} : type(key(l))}
+  \\ \\
   \inferrule* [right=\quad ref \qquad (7)]
              {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
              {\Gamma \vdash \textit{identifier} : unit}
-  \newline \newline
+  \\ \\
 
 \end{mathpar}
-    \textit{Comments:} \newline
+    \textit{Comments:} \\
   (6) The miss expression will have the same type as the key of the table its rule is defined within.
-  \newline
+  \\
 \subsection*{Actions}
 
-Actions are instructions that either have no parameters, a typed expression as a parameter, or another actions as a parameter.. Actions do not have a type.
+Actions are instructions that either have no parameters, a typed expression as a parameter, or another actions as a parameter. Actions do not have a type.
 \begin{enumerate}
   \item $\mathct{write} \ action$ - $action$ must be an action.
   \item $\mathct{clear}$ takes no parameters.
   \item $\mathct{drop}$ takes no parameters.
-  \item $\mathct{match}$ takes no parameters.
   \item $\mathct{match}$ takes no parameters.
   \item $\mathct{goto}$ takes a parameter of type $\mathct{table}$.
   \item $\mathct{output}$ takes a parameter of type $\mathct{port}$.
@@ -97,3 +72,24 @@ Actions are instructions that either have no parameters, a typed expression as a
 \end{enumerate}
 
 TODO: create a system that represents values which have precision.
+
+\subsubsection{Type System Issues}
+Pip has a type system that ensures instructions can be written correctly, but does not guarantee that they produce meaningful results. For example, the programmer can copy from anywhere in the buffer to anywhere else in the buffer. Using named bitfields gives the programmer an alternative to bit manipulation, but the programmer is not restricted to them. Pip's storage-based model means that it lacks an object model or declaration system. A declaration system would mitigate, and possibly eliminate memory access violations at the expense of freedom. The similar dataplane programming language, Steve, attempted to create a declaration system for packet switching.
+
+Steve has a user-defined type known as a \textit{layout} that allows programmers to dynamically define named bitfields within the packet. An example Steve layout follows:
+\begin{verbatim}
+layout ethernet {
+  dst : uint(48);
+  src : uint(48);
+  type : uint(16);
+}
+\end{verbatim}
+Once a layout has been defined, the programmer can \textit{extract} the individual headers and use them like variables.
+\begin{verbatim}
+extract ethernet.type;
+
+if(eth.type == 0x600) {
+ // ...
+}
+\end{verbatim}
+Until the programmer has explicitly \textit{extracted} a named field, it is not usable. Thus, the only part of the buffer accessible to the programmer are the fields they have explicitly defined and stated they wish to access. Barring poor definition, there is no possible way for the programmer to overwrite their working buffer or access beyond its boundary. Defining a similar declaration system in Pip would be a step toward fixing this issue.
