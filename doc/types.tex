@@ -24,7 +24,7 @@ Pip uses a type system to ensure semi-semantically correct instructions. Instruc
 \begin{align*}
   \text{expressions} ::=~& \mathct{int}(w) n    & \text{where} \ w \ \text{and} \ n \ \text{are integer literals.}\\
   & | \ \mathct{port} \ n   & \text{where } n \text{ is an integer literal.}\\
-  & \ \ \mathct{bits} \ as \ pos \ len &\text{where } pos \text{ and } len \text{ are integer literals.} \\ & &\text{and } as \text{ is an address space.}\\
+  & | \ \mathct{bits} \ as \ pos \ len &\text{where } pos \text{ and } len \text{ are integer literals.} \\ & &\text{and } as \text{ is an address space.}\\
   & | \ \mathct{miss}\\
   & | \ \mathct{ref} \ id    &\text{where } id \text{ is the name of a table.}
 \end{align*}
