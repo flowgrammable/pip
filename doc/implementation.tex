@@ -1,6 +1,6 @@
 \section{Implementation}
 
-Pip was implemented in C++ using Andrew Sutton's Sexpr and CC libraries. Interpretation of a Pip program happens in five stages: input, sexpr-parsing, translation, name resolution and evaluation. Input and sexpr-parsing are handled by libsexpr and libCC and will be ignored in this paper. The implementation of translation, resolution, and evaluation will be outlined in this chapter.
+Pip was implemented in C++ using Dr. Andrew Sutton's Sexpr and CC libraries. Interpretation of a Pip program happens in five stages: input, sexpr-parsing, translation, name resolution and evaluation. Input and sexpr-parsing are handled by libsexpr and libCC and will be ignored in this paper. The implementation of translation, resolution, and evaluation will be outlined in this chapter. The implementation is hosted on \href{https://github.com/asutton/pip/}{GitHub}.
 
 \subsection{Translation}
 The translator takes, as a parameter, a libsexpr expression and returns a declaration. It works as a recursive-descent, syntax-directed translator built around the \texttt{match\_list} framework of libsexpr. The \texttt{match\_list} framework allows for pattern-matching of user-defined s-expressions, with each unique type being parsed by a callback function.
