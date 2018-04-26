@@ -28,7 +28,7 @@ The description of our abstract machine includes basic notions of state and the 
 In essence, we attempted to construct an assembly language for OpenFlow-style packet processing.
 
 \textbf{How does the abstract machine help us study language design?}
-Now that we have model, we hope to start reasoning about higher level language constructs that support safe and efficient switch configurations. 
+Now that we have a model, we hope to start reasoning about higher level language constructs that support safe and efficient switch configurations. We hope to use our findings to construct minimal abstract machines out of subsets of other dataplane domain-specific languages. Operational semantics of a language give a good basis for proof through logic and dynamic logic. In the future, we would like to examine techniques for dynamic logical analysis of dataplane programs.
 
 \textbf{What did we do?}
 We defined the operational semantics for this abstract machine. In order better experiment with it, we also implemented a virtual machine capable of executing SDN programs.
@@ -44,7 +44,7 @@ Built experimental controllers to experiment with mutable program state.
 \textbf{What did we find out?}
 Our abstract machine provides a lot of opportunities for executing undefined behaviors. In particular, it is easy to build programs that read across packet boundaries, fail to validate input, etc. 
 
-Separating the language of controller from the dataplane allows for network flow to be reasoned about mathematically by separating flow from low-to-hardware computation.
+Separating the controller from the dataplane allows for packet switching to be reasoned about mathematically without introducing undecidable outcomes.
 
 \textbf{Contributions}
 \begin{enumerate}

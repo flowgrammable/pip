@@ -1,4 +1,28 @@
 
-\section{Related work}
+\section{Future Work}
+Pip has a type system that ensures instructions can be written correctly, but does not guarantee that they produce meaningful results. For example, the programmer can copy from anywhere in the buffer to anywhere else in the buffer. Using named bitfields gives the programmer a safe alternative to bit manipulation, but the programmer is not restricted to them. Pip's storage-based model means that it lacks an object model or declaration system (beyond declaring tables). A declaration system would mitigate, and possibly eliminate memory access violations at the expense of freedom. The similar dataplane programming language, Steve, attempted to create a declaration system for packet switching.
 
-DO NOT WRITE THIS.
+Steve's declaration system was described in a paper by H. Nguyen. Steve has a user-defined type known as a \textit{layout} that allows programmers to dynamically define named bitfields within the packet. An example Steve layout follows:
+\begin{mdframed}
+\begin{verbatim}
+layout ethernet {
+  dst : uint(48);
+  src : uint(48);
+  type : uint(16);
+}
+\end{verbatim}
+\end{mdframed}
+Once a layout has been defined, the programmer can \textit{extract} the individual headers and use them like variables.
+\begin{mdframed}
+\begin{verbatim}
+extract ethernet.type;
+
+if(eth.type == 0x600) {
+ // ...
+}
+\end{verbatim}
+\end{mdframed}
+Until the programmer has explicitly \textit{extracted} a named field, it is not usable. Thus, the only part of the buffer accessible to the programmer are the fields they have explicitly defined and stated they wish to access. Barring poor definition, there is no possible way for the programmer to overwrite their working buffer or access beyond its boundary. Defining a similar declaration system in Pip would be a step toward fixing this issue.
+
+As stated before, outputting to a controller program removes any provability of a Pip program. To help programmers reason about dynamic programs, we wish to create a debugger.
+

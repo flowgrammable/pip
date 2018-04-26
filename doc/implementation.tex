@@ -61,7 +61,7 @@ translator::trans_decl(const sexpr::expr* e)
   match_list(e, &sym);
   if (*sym == "table")
     return trans_table(e);
-}Resolution
+}
 \end{verbatim}
 \end{mdframed}
 Translation of all types works similarly: a sequence is translated by iterating through each s-expression within a list of s-expressions. The parser gets recursively translates each element of the s-expression into a Pip AST, storing the completed ASTs in a vector. We see in this example, an overloading of \texttt{match\_list} to handle symbols, or string pointers, although the function can take any amount of arguments. Defining overloads of \texttt{match\_list} functions is beyond the scope of this paper.

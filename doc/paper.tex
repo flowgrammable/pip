@@ -5,12 +5,17 @@
 \usepackage{bm}
 \usepackage{mathpartir}
 \usepackage[framemethod=default]{mdframed}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage[margin=1in]{geometry}
+\usepackage{parskip}
 
 \title{Pip: An abstract dataplane and virtual machine}
 \author{Samuel Goodrick}
 % \author{Andrew Sutton}
 
 \newcommand{\mathct}[1]{\bm{\mathsf{{#1}}}}
+\newcommand\tab[1][0.5cm]{\hspace*{#1}}
 
 \begin{document}
 
@@ -25,8 +30,6 @@
 \input{implementation}
 \input{discussion}
 \input{related}
-\input{survey}
-
-% \bibligoraphy{paper.bib}
-
 \end{document}
+%% \input{survey}
+\printbibligoraphy{paper.bib}
