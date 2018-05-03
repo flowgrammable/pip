@@ -8,8 +8,12 @@
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{hyperref}
+\usepackage{pdfpages}
 \usepackage[margin=1in]{geometry}
 \usepackage{parskip}
+\usepackage[backend=bibtex, style=ieee]{biblatex}
+\usepackage[none]{hyphenat}
+\bibliography{paper}
 
 \title{Pip: An Abstract Dataplane and Virtual Machine}
 \author{Samuel Goodrick}
@@ -31,6 +35,6 @@
 \input{implementation}
 \input{discussion}
 \input{related}
+\input{bibliography}
 \end{document}
 %% \input{survey}
-\printbibligoraphy{paper.bib}

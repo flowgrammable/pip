@@ -43,7 +43,7 @@ Comments:
 
 
 \subsection{Operational Semantics 5-Tuple}
-Turbak and Gifford define operational semantics for a language as the 5-Tuple, $\langle CF, \Rightarrow, FC, IF, OF \rangle$. CF is the set of all possible configurations that an abstract machine may be in. $\Rightarrow$ is the transition relation, a function that transitions from one configuration to another. FC is the set of all final configurations, the possible ending configurations of the machine. IF is the input function, a function that translates an input into the beginning state of the machine. Finally, OF is the output function, or the transition of the final state into some useful value or domain.
+Turbak and Gifford define operational semantics for a language as the 5-Tuple, $\langle CF, \Rightarrow, FC, IF, OF \rangle$. CF is the set of all possible configurations that an abstract machine may be in. $\Rightarrow$ is the transition relation, a function that transitions from one configuration to another. FC is the set of all final configurations, the possible ending configurations of the machine. IF is the input function, a function that translates an input into the beginning state of the machine. Finally, OF is the output function, or the transition of the final state into some useful value or domain \cite{Turbak2008}. In Pip, we define the 5-tuple as follows:\\
 pip = $\langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle$\\
 IF = $\textrm{program} \times \pi \rightarrow CF$ \\
 CF = $\alpha \times \Gamma \times \pi \times Lambda$ \\
