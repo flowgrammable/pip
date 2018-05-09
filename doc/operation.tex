@@ -43,14 +43,16 @@ Comments:
 
 
 \subsection{Operational Semantics 5-Tuple}
-% $ pip = \langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle $\\
-% IF = $program \times \pi \rightarrow CF$ \\
-% CF = $\alpha \times \xi \times \pi$ \\
-% $\Rightarrow$ = Defined in section ``Reduction Relation''. \\
-% FC = $(\Lambda = \emptyset) \times \pi \times \textbf{\textrm{context}}\langle egress\_port \neq 0 \rangle $ \\
-% OF = $FC \rightarrow \textrm{serialization}$
+Turbak and Gifford define operational semantics for a language as the 5-Tuple, $\langle CF, \Rightarrow, FC, IF, OF \rangle$. CF is the set of all possible configurations that an abstract machine may be in. $\Rightarrow$ is the transition relation, a function that transitions from one configuration to another. FC is the set of all final configurations, the possible ending configurations of the machine. IF is the input function, a function that translates an input into the beginning state of the machine. Finally, OF is the output function, or the transition of the final state into some useful value or domain \cite{Turbak2008}. In Pip, we define the 5-tuple as follows:\\
+pip = $\langle IF, \ CF, \ \Rightarrow, \ FC, \ OF \rangle$\\
+IF = $\textrm{program} \times \pi \rightarrow CF$ \\
+CF = $\alpha \times \Gamma \times \pi \times Lambda$ \\
+$\Rightarrow$ = Defined in section ``Transition Relation''. \\
+FC = $(\Lambda = \varnothing) \times (\alpha = \varnothing) \times \pi \times \Gamma[egress\_port \neq 0]$ \\
+OF = $FC \rightarrow$ \texttt{serialization}
 
-\subsection{Reduction Relation}
+\texttt{serialization} is the output state of Pip: a textual logging of all states that the machine entered.
+\subsection{Transition Relation}
 \setlength{\mathindent}{0pt}
 
 \begin{mdframed}
@@ -121,7 +123,7 @@ The \mathct{copy} action copies from one bitfield, \textit{src} to another bitfi
 A bitfield can be copied from any address space to any other address space, except for key registers,
 which cannot be used as a source.
 
-Definition of copy function: (move to displaymath)
+Definition of copy function:
 \begin{mdframed}
 \begin{gather*}
   (\mathct{copy}  \ meta \ src \ packet \ dst \ n)
@@ -130,8 +132,8 @@ Definition of copy function: (move to displaymath)
   \Lambda, \Gamma \rangle
 \\
   (\mathct{copy} \ meta \ src \ header \ dst \ n)
-  \rightarrow \\
-  \langle \pi[dst + \mathct{header\_offset} \leftarrow \Gamma.meta[dst, dst + n)],
+  \rightarrow
+  \langle \pi[dst + \mathct{hoff} \leftarrow \Gamma.meta[dst, dst + n)],
   \Lambda, \Gamma \rangle
 \\
   (\mathct{copy} \ meta \ src \ key \ dst \ n)
@@ -145,7 +147,7 @@ Definition of copy function: (move to displaymath)
 \\ 
   (\mathct{copy} \ packet \ src \ header \ dst \ n)
   \rightarrow
-  \langle \pi[dst + \mathct{header\_offset} \leftarrow \\
+  \langle \pi[dst + \mathct{hoff} \leftarrow
   \pi[src, src + n)],
   \Lambda, \Gamma \rangle
 \\ 
@@ -155,31 +157,32 @@ Definition of copy function: (move to displaymath)
   \rangle
 \\
   (\mathct{copy} \ header \ src \ header \ dst \ n)
-  \rightarrow \\
-  \langle \pi[dst + \mathct{header\_offset} \leftarrow \\
-  \pi[src + \mathct{header\_offset}, src + \mathct{header\_offset} + n)],
+  \rightarrow
+  \langle \pi[dst + \mathct{hoff} \leftarrow
+  \pi[src + \mathct{hoff}, src + \mathct{hoff} + n)],
   \Lambda, \Gamma \rangle
 \\
   (\mathct{copy} \ header \ src \ packet \ dst \ n)
-  \rightarrow \\
-  \langle \pi[dst \leftarrow \\
-  \pi[src + \mathct{header\_offset}, src +
-  \mathct{header\_offset} + n)], \Lambda, \Gamma \rangle
+  \rightarrow
+  \langle \pi[dst \leftarrow
+  \pi[src + \mathct{hoff}, src +
+  \mathct{hoff} + n)], \Lambda, \Gamma \rangle
 \\
   (\mathct{copy} \ header \ src \ key \ dst \ n)
-  \rightarrow \\
-  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{key}[dst] \leftarrow \\
+  \rightarrow
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{key}[dst] \leftarrow
   \pi[src + 
-  \mathct{header\_offset}, src + \mathct{header\_offset} + n)] \rangle
+  \mathct{hoff}, src + \mathct{hoff} + n)] \rangle
 \\
   (\mathct{copy} \ header \ src \ meta \ dst \ n)
-  \rightarrow \\
-  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{meta}[dst] \leftarrow \\
+  \rightarrow
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{meta}[dst] \leftarrow
   \pi[src + 
-  \mathct{header\_offset}, src + \mathct{header\_offset} + n)] \rangle
+  \mathct{hoff}, src + \mathct{hoff} + n)] \rangle
 \end{gather*}
 \end{mdframed}
 
+Defintion of set function:
 \begin{mdframed}
 \begin{gather*}
   (\mathct{set} \ (meta \ field \ n) \ value)
@@ -195,9 +198,10 @@ Definition of copy function: (move to displaymath)
   \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{packet}[field, field + n) \leftarrow value] \rangle
   \\
   (\mathct{set} \ (header \ field \ n) \ value)
-  \rightarrow \\
-  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{packet}[field + \mathct{header},
-      field + \mathct{header\_offset} + n) \leftarrow value] \rangle
+  \rightarrow
+  \langle \pi, \Lambda, \Gamma[\Gamma.\mathct{packet}[field + \mathct{hoff},
+      field + \mathct{hoff} + n) \leftarrow value] \rangle
   \\
 \end{gather*}
 \end{mdframed}
+\textit{Note:} the context variable $\mathct{header\_offset}$ is abbreviated to $\mathct{hoff}$ for brevity.

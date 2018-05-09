@@ -1,5 +1,8 @@
 
-\section{Type System}
+\section{Abstract syntax}
+In this section, we explain the abstract syntax of the Pip programming
+language. 
+Pip uses a type system to ensure semi-semantically correct instructions. Instructions, known as actions, can take well-formed expressions or actions as parameters. See Section 4.3 for specification of action parameters. This section defines abstract syntax in Backus-Naur Form, an interested reader can learn more about this notation in \Cite{Aho2007} and \Cite{Pierce2000}.
 
 \subsection{Types}
 
@@ -17,79 +20,27 @@
 \item $\mathct{table}$ types are data structures that contain all other Pip constructs. A table has a \textit{key register} to be matched against. The programmer defines the value of the key register, which is computed at runtime. Tables have \textit{rules} which, if equal to the key register, will execute a block of actions.
 \end{enumerate}
 
-\textbf{TODO} Describe these. And the lack of a concrete object model. We
-operate on pure storage, we don't have a system for defining objects.
+\subsection{Expressions}
+\begin{align*}
+  \text{expressions} ::=~& \mathct{int}(w) n    & \text{where} \ w \ \text{and} \ n \ \text{are integer literals.}\\
+  & | \ \mathct{port} \ n   & \text{where } n \text{ is an integer literal.}\\
+  & | \ \mathct{bits} \ as \ pos \ len &\text{where } pos \text{ and } len \text{ are integer literals.} \\ & &\text{and } as \text{ is an address space.}\\
+  & | \ \mathct{miss}\\
+  & | \ \mathct{ref} \ id    &\text{where } id \text{ is the name of a table.}
+\end{align*}
+\subsection{Actions}
 
-\subsection{Inference Rules}
-\subsection*{Definitions}
-Function \textbf{key(\textit{term})} will return the \textit{key} of \textit{term} if and only if \textit{term} is a table. \\
-Function \textbf{type(\textit{term})} will return the type of any typed term, \textit{term}.
-
-\subsection*{Expressions}
-\begin{mathpar}
-  \inferrule* [right=\quad int \qquad (1)]
-             {\\}
-             {\mathct{int}(n) \ (decimal-literal) : int(n)}
-  \\ \\
-  \inferrule* [right=\quad port \qquad (3)]
-             {\Gamma \vdash \mathct{port} \ e_1 \\ \Gamma \vdash e_1:int(n)}
-             {\Gamma \vdash \mathct{port} \ e_1 : port}
-  \\ \\
-  \inferrule* [right=\quad offset \qquad (4)]
-             {\Gamma \vdash pos : int(n) \\ \Gamma \vdash len : int(n)}
-             {\Gamma \vdash \mathct{offset} \  (as) \  pos \  len : location}
-  \\ \\
-  \inferrule* [right=\quad field \qquad (5)]
-             {\Gamma(\textit{identifier}) = (l, \mu) \\ l \rightarrow location}
-             {\Gamma \vdash \textit{identifier} : location}
-  \\ \\
-  \inferrule* [right=\quad miss \qquad (6)]
-             {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-             {\Gamma \vdash \mathct{miss} : type(key(l))}
-  \\ \\
-  \inferrule* [right=\quad ref \qquad (7)]
-             {\Gamma (\textit{identifier}) = (l, \mu) \\ l \rightarrow table}
-             {\Gamma \vdash \textit{identifier} : unit}
-  \\ \\
-
-\end{mathpar}
-    \textit{Comments:} \\
-  (6) The miss expression will have the same type as the key of the table its rule is defined within.
-  \\
-\subsection*{Actions}
-
-Actions are instructions that either have no parameters, a typed expression as a parameter, or another actions as a parameter. Actions do not have a type.
-\begin{enumerate}
-  \item $\mathct{write} \ action$ - $action$ must be an action.
-  \item $\mathct{clear}$ takes no parameters.
-  \item $\mathct{drop}$ takes no parameters.
-  \item $\mathct{match}$ takes no parameters.
-  \item $\mathct{goto}$ takes a parameter of type $\mathct{table}$.
-  \item $\mathct{output}$ takes a parameter of type $\mathct{port}$.
-  \item $\mathct{advance}$ takes a parameter of type $\mathct{int}(n)$.
-  \item $\mathct{copy}$ takes two parameters of type $\mathct{bits}$ and a parameter of type $\mathct{int}(n)$.
-  \item $\mathct{set}$ takes a parameter of type $\mathct{bits}$ and a parameter of type $\mathct{int}(n)$.
-\end{enumerate}
-
-TODO: create a system that represents values which have precision.
-
-\subsubsection{Type System Issues}
-Pip has a type system that ensures instructions can be written correctly, but does not guarantee that they produce meaningful results. For example, the programmer can copy from anywhere in the buffer to anywhere else in the buffer. Using named bitfields gives the programmer an alternative to bit manipulation, but the programmer is not restricted to them. Pip's storage-based model means that it lacks an object model or declaration system. A declaration system would mitigate, and possibly eliminate memory access violations at the expense of freedom. The similar dataplane programming language, Steve, attempted to create a declaration system for packet switching.
-
-Steve has a user-defined type known as a \textit{layout} that allows programmers to dynamically define named bitfields within the packet. An example Steve layout follows:
-\begin{verbatim}
-layout ethernet {
-  dst : uint(48);
-  src : uint(48);
-  type : uint(16);
-}
-\end{verbatim}
-Once a layout has been defined, the programmer can \textit{extract} the individual headers and use them like variables.
-\begin{verbatim}
-extract ethernet.type;
-
-if(eth.type == 0x600) {
- // ...
-}
-\end{verbatim}
-Until the programmer has explicitly \textit{extracted} a named field, it is not usable. Thus, the only part of the buffer accessible to the programmer are the fields they have explicitly defined and stated they wish to access. Barring poor definition, there is no possible way for the programmer to overwrite their working buffer or access beyond its boundary. Defining a similar declaration system in Pip would be a step toward fixing this issue.
+Actions are instructions that either have no parameters, an expression as a parameter, or another action as a parameter.
+\begin{align*}
+actions::=~&  \mathct{write} \ action     & action \text{ must be an } \mathct{action}.\\
+  & | \ \mathct{clear}\\
+  & | \ \mathct{drop}\\
+  & | \ \mathct{match}\\
+  & | \ \mathct{goto} \ table             & \text{table must be of type } \mathct{table}.\\
+  & | \ \mathct{output} \ port            & \text{port must be of type } \mathct{port}.\\
+  & | \ \mathct{advance} \ n              & \text{n must be an integer literal.}\\
+  & | \ \mathct{copy} src \ dst \ n       & src \text{ and } dst \text{ must be of type } \mathct{bits} \\
+                                         && \text{n must be of type } \mathct{int}(w).\\
+  & | \ \mathct{set} field \ value        & field \text{ must be of type } \mathct{bits} \text{ and }\\
+                                         && value \text{ must be of type } \mathct{int}(w).
+\end{align*}
