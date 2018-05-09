@@ -22,7 +22,7 @@ Pip uses a type system to ensure semi-semantically correct instructions. Instruc
 
 \subsection{Expressions}
 \begin{align*}
-  \text{expressions} ::=~& \mathct{int}(w) n    & \text{where} \ w \ \text{and} \ n \ \text{are integer literals.}\\
+  \text{expressions} ::=~& \mathct{int}(w) \ n    & \text{where} \ w \ \text{and} \ n \ \text{are integer literals.}\\
   & | \ \mathct{port} \ n   & \text{where } n \text{ is an integer literal.}\\
   & | \ \mathct{bits} \ as \ pos \ len &\text{where } pos \text{ and } len \text{ are integer literals.} \\ & &\text{and } as \text{ is an address space.}\\
   & | \ \mathct{miss}\\
@@ -39,8 +39,8 @@ actions::=~&  \mathct{write} \ action     & action \text{ must be an } \mathct{a
   & | \ \mathct{goto} \ table             & \text{table must be of type } \mathct{table}.\\
   & | \ \mathct{output} \ port            & \text{port must be of type } \mathct{port}.\\
   & | \ \mathct{advance} \ n              & \text{n must be an integer literal.}\\
-  & | \ \mathct{copy} src \ dst \ n       & src \text{ and } dst \text{ must be of type } \mathct{bits} \\
+  & | \ \mathct{copy} \ src \ dst \ n       & src \text{ and } dst \text{ must be of type } \mathct{bits} \\
                                          && \text{n must be of type } \mathct{int}(w).\\
-  & | \ \mathct{set} field \ value        & field \text{ must be of type } \mathct{bits} \text{ and }\\
+  & | \ \mathct{set} \ field \ value        & field \text{ must be of type } \mathct{bits} \text{ and }\\
                                          && value \text{ must be of type } \mathct{int}(w).
 \end{align*}
