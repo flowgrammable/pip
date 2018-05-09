@@ -1,69 +1,70 @@
 
-\section{Example programs}
+\section{Sample Programs}
 
-Here we will describe three simple, static, stateless Pip programs: a drop, echo, and static wire program. More complicated (stateful) programs can be created by outputting to the controller port and dynamically adjusting the abstract syntax tree. Doing so removes any proveable properties about a Pip program, and thus will be discussed in a later chapter.
+In this chapter we describe three Pip programs. First, we will see two simple, static Pip programs: a stateless wire and stateless firewall program. More complicated (stateful) programs can be created by outputting to the controller port and dynamically adjusting the abstract syntax tree. Doing so removes any proveable properties about a Pip program. The third and final program, a stateful wire, will use a controller program.
 
-\subsection{Drop}
-The drop program receives a program and outputs it to all physical ports.
-\begin{verbatim}
-(pip
-  (table drop exact
-    (actions
-      (copy
-	(bitfield physical_port (int i32 0) (int i32 64))
-	(bitfield key (int i32 0) (int i32 64))
-	(int i32 64))
-      (match)
-    ) ; actions
-    (rules
-      (rule (miss)
-        (actions (output (reserved_port all)))
-      )
-    )
-  )
-)
-\end{verbatim}
-This program creates an exact-match table called \textit{drop} and copies the the 32-bit physical port into the 64-bit key register, completely overwriting it if anything was there. 32 0s are padded onto the physical port in this case.
+%% \subsection{Drop}
+%% The drop program receives a program and outputs it to all physical ports.
+%% \begin{verbatim}
+%% (pip
+%%   (table drop exact
+%%     (actions
+%%       (copy
+%% 	(bitfield physical_port (int i32 0) (int i32 64))
+%% 	(bitfield key (int i32 0) (int i32 64))
+%% 	(int i32 64))
+%%       (match)
+%%     ) ; actions
+%%     (rules
+%%       (rule (miss)
+%%         (actions (output (reserved_port all)))
+%%       )
+%%     )
+%%   )
+%% )
+%% \end{verbatim}
+%% This program creates an exact-match table called \textit{drop} and copies the the 32-bit physical port into the 64-bit key register, completely overwriting it if anything was there. 32 0s are padded onto the physical port in this case.
 
-Matching begins, wherein there is one rule. The sole rule being a \textit{miss} means its action list will always execute, thus all packets received will be outputted to the \textbf{all} port.
-\subsection{Echo}
-Echo simply returns a packet to sender. One can see it is almost identical to the Drop program, except that it outputs to the packet's \textbf{in\_port}, or physical ingress port.
-\begin{verbatim}
-(pip
-  (table echo exact
-    (actions
-      (copy
-	(bitfield physical_port (int i32 0) (int i32 64))
-	(bitfield key (int i32 0) (int i32 64))
-	(int i32 64))
-      (match)
-    ) ; actions
-    (rules
-      (rule (miss)
-        (actions (output (reserved_port in_port)))
-      )
-    )
-  )
-)
-\end{verbatim}
+%% Matching begins, wherein there is one rule. The sole rule being a \textit{miss} means its action list will always execute, thus all packets received will be outputted to the $\mathct{all}$ port.
+%% \subsection{Echo}
+%% Echo simply returns a packet to sender. One can see it is almost identical to the Drop program, except that it outputs to the packet's $\mathct{in\_port}$, or physical ingress port.
+%% \begin{verbatim}
+%% (pip
+%%   (table echo exact
+%%     (actions
+%%       (copy
+%% 	(bitfield physical_port (int i32 0) (int i32 64))
+%% 	(bitfield key (int i32 0) (int i32 64))
+%% 	(int i32 64))
+%%       (match)
+%%     ) ; actions
+%%     (rules
+%%       (rule (miss)
+%%         (actions (output (reserved_port in_port)))
+%%       )
+%%     )
+%%   )
+%% )
+%% \end{verbatim}
 
-\subsection{Wire}
-The Wire, since it does not have any capability to learn of ports dynamically, will simply send a packet to the other of two known ports, port 0 and port 1.
+\subsection{Stateless Wire}
+\indent A wire is a common network function involving two ports: when one of the ports receives a packet, it outputs on the other port. In general, the wire is not aware of either port and must learn of their existence dynamically (cite hoang). Pip does not allow for dynamic state changes, thus since the wire does not have any capability to learn of ports dynamically, will simply send a packet to the other of two known ports, port 1 and port 2.
+\begin{mdframed}
 \begin{verbatim}
 (pip
   (table wire exact
     (actions
       (copy
-	(bitfield physical_port (int i32 0) (int i32 64))
-	(bitfield key (int i32 0) (int i32 64))
-	(int i32 64))
+        (bits physical_port 0 32)
+        (bits key 0 32)
+        32)
       (match)
     ) ; actions
     (rules
-      (rule (port 0)
-        (actions (output (port 1)))
       (rule (port 1)
-        (actions (output (port 0)))
+        (actions (output (port 2)))
+      (rule (port 2)
+        (actions (output (port 1)))
       (rule (miss)
         (actions (drop))
       )
@@ -71,4 +72,104 @@ The Wire, since it does not have any capability to learn of ports dynamically, w
   )
 )
 \end{verbatim}
-Once again, the \textbf{physical\_port} is set as the table key. There are more interesting matching rules in this program. When the key is equal to 0, the packet will be outputted to port 1, and vice versa for when the key is equal to 1. If the key (physical ingress port) is neither 0 nor 1, then the packet is dropped.
+\end{mdframed}
+
+We begin by defining an \textit{exact match} table called $\mathct{wire}$. An exact match table matches on integers. When the table begins execution, 32 bits are copies from the $\mathct{physical\_port}$ of the packet (a context variable representing the physical ingress port of the packet) into the table's $\mathct{key}$ register. When the $\mathct{match}$ action is reached, table prep ends and matching can begin. Three \textit{match rules} are defined: port 1, port 2, and $\mathct{miss}$. If the value of the \mathct{key} register is equal to one of these rules, the rule's \textit{action list} begins execution. For example, if the $\mathct{key}$ register was equal to 1, then the packet would $\mathct{output}$ to port 2. If the $\mathct{key}$ was not equal to 1 or 2, the $\mathct{miss}$ rule would begin execution, dropping the packet.
+
+\subsection{Stateless Firewall}
+Here we define a simple TCP/IPv4 firewall that disables some types of packets from accessing the Internet. If the packet is of type IPv4 with protocol TCP, we will drop any packets to port 80 (HTTP) or port 443 (HTTPS). If the packet is a TCP/IPv4 packet but is not attempting to access ports 80 or 443, we will allow the controller to handle egress processing, as the output port of the packet will still need to be determined.
+\begin{mdframed}
+\begin{verbatim}
+(pip
+  (table ipv4_check exact
+    (actions
+      (copy 
+        (named_field eth.type)
+        (bits key 0 16)
+        16)
+      (match)
+    )
+    (rules
+      (rule (int i16 0x0800)
+        (actions (goto tcp_check)))
+      (rule (miss)
+        (actions (drop)))
+    )
+  )
+
+  (table tcp_check exact
+    (actions
+      (copy 
+        (named_field ipv4.type)
+        (bits key 0 8)
+        8)
+      (match)
+    )
+    (rules
+      (rule (int i8 0x06)
+        (actions (goto firewall)))
+      (rule (miss)
+        (actions (drop)))
+    )
+  )
+
+  (table firewall exact
+    (actions
+      (copy
+        (named_field tcp.src)
+        (bits key 0 16)
+        16)
+      (match)
+    )
+    (rules
+      (rule (int i16 80)
+        (actions (drop)))
+      (rule (int i16 443)
+        (actions (drop)))
+      (rule (miss)
+        (output (port local)))
+    )
+  )
+)
+\end{verbatim}
+\end{mdframed}
+
+Here we see a program taking advantage of the $\mathct{goto}$ action control structure. The ipv4\_check table will match on the \textit{Ethernet ethertype} of the packet. If the ethertype is 0x800, IPv4, we will jump to the tcp\_check table, dropping the packet in any other case. In \textit{tcp\_check}, we match on the \textit{IPv4 protocol} field. If it is equal to 0x06, or TCP, we will jump the final table, \textit{firewall}. Here, we will match the \textit{TCP source port} on ports 80 and 443. If there is a match, we drop the packet, disallowing Internet access. Otherwise, we output to the reserved \texttt{local} $\mathct{port}$ to continue processing on the local IP stack.
+
+\subsection{The Wire}
+Meaningful computation can rarely be achieved while maintaing an immutable abstract syntax tree. As such, we will examine a Pip program that outputs to the \texttt{controller} port, and see how its abstract syntax tree is modified dynamically to create a useful application.
+
+In the beginning of the chapter, we discussed a stateless wire. There is little value in this program, but we can modify it to create a fully functional wire. Recall that a wire involves two ports, when one port receives a packet, it outputs to the other. In the stateless wire, these two ports were predefined and immutable. Here, we will create a wire that learns of its ports' existence dynamically.
+
+\begin{mdframed}
+\begin{verbatim}
+(pip
+  (table wire exact
+    (actions
+      (copy
+        (bits physical_port 0 32)
+        (bits key 0 32)
+        32)
+      (match)
+    )
+    (rules
+      (rule (miss)
+        (actions (output (port controller)))
+      )
+    )
+  )
+)
+\end{verbatim}
+\end{mdframed}
+We begin with a Pip program that contains only a miss rule. The program examines the physical ingress port of a packet and, upon missing, outputs to the \texttt{controller}. Now, we will create an algorithm to modify the AST and insert a rule where needed. We define this algorithm below. Note: we assume \texttt{eval} is an instance of the evaluator, containing the full evaluation state. We assume basic data structure accessor functions, such as \texttt{front} and \texttt{push} are defined for list structures. Even though we only wish to add 2 rules, the table will have 3 total rules at the end of the program, since the $\mathct{miss}$ rule must be accounted for. Because we push to the back of the rule list, the miss rule will be at the 0th position in the list.
+\begin{algorithm}
+\caption{Wire Controller}
+\textbf{let} table = front(program.tables)\\
+\textbf{let} port = eval.ingress\_port\\
+\textbf{foreach} rule $\in$ table.rules\\
+\tab\textbf{if}(port $\neq$ rule \textbf{and} size(table.rules) $< 3$)\\
+\tab\tab push(table.rules, \textbf{new} rule(key = port))\\
+\tab\textbf{else if}(size(table.rules) $= 3$)\\
+\tab\tab table.$\textrm{rules}_0$.action\_list = \textbf{new} action\_list(\textbf{new} drop\_action)
+\end{algorithm}
+The controller iterates through all rules in the only table in the program. If both new port-matching rules have not been added to the table, the current physical ingress port is added as a rule. Once both rules have been added, the miss rule is transformed to have only a $\mathct{drop}$ action in its action list. After this controller program has run for several packets with different inputs, a reserialized Pip program will look identical to the Stateless Wire above.

@@ -8,13 +8,18 @@
 \usepackage[backend=bibtex, style=ieee]{biblatex}
 \usepackage[none]{hyphenat}
 \bibliography{paper}
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
+\usepackage{hyperref}
+\usepackage{pdfpages}
+\usepackage[margin=1in]{geometry}
 
-
-\title{Pip: An abstract dataplane and virtual machine}
+\title{Pip: An Abstract Dataplane and Virtual Machine}
 \author{Samuel Goodrick}
 % \author{Andrew Sutton}
 
 \newcommand{\mathct}[1]{\bm{\mathsf{{#1}}}}
+\newcommand\tab[1][0.5cm]{\hspace*{#1}}
 
 \begin{document}
 
@@ -23,13 +28,16 @@
 \input{abstract}
 \input{introduction}
 \input{samples}
+\input{language}
 \input{types}
 \input{operation}
+\input{implementation}
 \input{discussion}
 \input{related}
 \input{survey}
 
 \printbibliography
-
+\input{bibliography}
 
 \end{document}
+%% \input{survey}

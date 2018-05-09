@@ -1,0 +1,38 @@
+\section{Controller Programs}
+\subsection{The Wire}
+Meaningful computation can rarely be achieved while maintaing an immutable abstract syntax tree. As such, we will examine a Pip program that outputs to the \texttt{controller} port, and see how its abstract syntax tree is modified dynamically to create a useful application.
+
+In the beginning of the chapter, we discussed a stateless wire. There is little value in this program, but we can modify it to create a fully functional wire. Recall that a wire involves two ports, when one port receives a packet, it outputs to the other. In the stateless wire, these two ports were predefined and immutable. Here, we will create a wire that learns of its ports' existence dynamically.
+
+\begin{mdframed}
+\begin{verbatim}
+(pip
+  (table wire exact
+    (actions
+      (copy
+        (bits physical_port 0 32)
+        (bits key 0 32)
+        32)
+      (match)
+    )
+    (rules
+      (rule (miss)
+        (actions (output (port controller)))
+      )
+    )
+  )
+)
+\end{verbatim}
+\end{mdframed}
+We begin with a Pip program that contains only a miss rule. The program examines the physical ingress port of a packet and, upon missing, outputs to the \texttt{controller}. Now, we will create an algorithm to modify the AST and insert a rule where needed. We define this algorithm below. Note: we assume \texttt{eval} is an instance of the evaluator, containing the full evaluation state. We assume basic data structure accessor functions, such as \texttt{front} and \texttt{push} are defined for list structures. Even though we only wish to add 2 rules, the table will have 3 total rules at the end of the program, since the $\mathct{miss}$ rule must be accounted for. Because we push to the back of the rule list, the miss rule will be at the 0th position in the list.
+\begin{algorithm}
+\caption{Wire Controller}
+\textbf{let} table = front(program.tables)\\
+\textbf{let} port = eval.ingress\_port\\
+\textbf{foreach} rule $\in$ table.rules\\
+\tab\textbf{if}(port $\neq$ rule \textbf{and} size(table.rules) $< 3$)\\
+\tab\tab push(table.rules, \textbf{new} rule(key = port))\\
+\tab\textbf{else if}(size(table.rules) $= 3$)\\
+\tab\tab table.$\textrm{rules}_0$.action\_list = \textbf{new} action\_list(\textbf{new} drop\_action)
+\end{algorithm}
+The controller iterates through all rules in the only table in the program. If both new port-matching rules have not been added to the table, the current physical ingress port is added as a rule. Once both rules have been added, the miss rule is transformed to have only a $\mathct{drop}$ action in its action list. After this controller program has run for several packets with different inputs, a reserialized Pip program will look identical to the Stateless Wire above.
