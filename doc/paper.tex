@@ -5,14 +5,14 @@
 \usepackage{bm}
 \usepackage{mathpartir}
 \usepackage[framemethod=default]{mdframed}
+\usepackage[backend=bibtex, style=ieee]{biblatex}
+\bibliography{paper}
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{hyperref}
 \usepackage{pdfpages}
 \usepackage[margin=1in]{geometry}
-\usepackage[backend=bibtex, style=ieee]{biblatex}
 \usepackage[none]{hyphenat}
-\bibliography{paper}
 
 \title{Pip: An Abstract Dataplane and Virtual Machine}
 \author{Samuel Goodrick}
@@ -34,6 +34,11 @@
 \input{implementation}
 \input{discussion}
 \input{related}
+\input{survey}
+
+% Prints References section
+%\printbibliography
+
 \input{bibliography}
+
 \end{document}
-%% \input{survey}
