@@ -3,8 +3,8 @@ In this chapter, we will examine some undefined behaviors and their mitigations 
 
 \subsection{Goto}
 The most glaring case of undefined behavior is the ``infinite loop'', caused by a two tables jumping back and forth.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (pip
   (table error1 exact
     (actions
@@ -29,21 +29,21 @@ The most glaring case of undefined behavior is the ``infinite loop'', caused by 
     )
   )
 )
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 This is an invalid program in Pip. All tables have sequential integer identifiers, and in order for a $\mathct{goto}$ action to be valid, the table being jumped to must have a higher integer identifier than the current table. In other words, the table being jumped to must come later in the program.
 
 \subsection{Terminators}
 The actions $\mathct{drop}$, $\mathct{output}$, and $\mathct{match}$ are \textit{terminator} actions, meaning they can only come as the last action in an action list. All action lists end in a terminator. Thus the following undefined-behavior-invoking action list is ill-formed.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (actions (output (reserved_port controller)) 
          (output (reserved_port in_port)))
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 The $\mathct{match}$ terminator action is slightly different than the others. All exact-match tables \textit{must} begin their matching phase, even if no rules are defined. The $\mathct{match}$ action \textit{must} appear at the end of the table's prep-list, or action list that sets the key. Thus, the following program is ill-formed.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (pip
   (table error exact
     (actions
@@ -56,26 +56,26 @@ The $\mathct{match}$ terminator action is slightly different than the others. Al
     )
   )
 )
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 As is a program that matches outside of the prep-list.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (rule (miss)
   (actions (clear) (match)))
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 
 \subsection{Overlapping Writes}
 Due to Pip's bitwise, storage-based memory model, there is no mechanism preventing a programmer from writing over only part of a buffer that was already written. Although this could possibly be useful for some advanced bit-manipulation algorithms, more often than not, reading this memory will invoke undefined behavior.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (actions (copy (bits meta 0 48)
                (eth.dst)
                48)
          (copy (bits packet 48 16)
                (bits packet 0 16)
                16))
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 Here, the Ethernet destination mac address (the first 48 bits of \texttt{packet}) is written to in full by the first copy action. The second copy action writes only the first 16 bits of the same header, resulting in an unknown value. Pip does not currently mitigate this error.

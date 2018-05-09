@@ -17,6 +17,28 @@
 \newcommand{\mathct}[1]{\bm{\mathsf{{#1}}}}
 \newcommand\tab[1][0.5cm]{\hspace*{#1}}
 
+\lstdefinelanguage{pip}
+{
+  morecomment=[l][\color{black}\textit]{;}
+}
+\lstset 
+{
+  language=pip,
+  emph={
+    pip, table, rules, rule, actions
+  },
+  emph=[2]{
+    copy, match, drop, miss, goto, output, write, advance, set, clear
+  },
+  emph=[3]{
+    int, port, exact, bits, named\_field, exact
+  },
+  emphstyle={\color{Blue1}\textbf},
+  emphstyle=[2]{\color{Purple}},
+  emphstyle=[3]{\color{ForestGreen}},
+  tabsize=2
+}
+
 \begin{document}
 \title{Pip: An Abstract Dataplane and Virtual Machine}
 
