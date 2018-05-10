@@ -2,36 +2,57 @@
 \section{Literature Survey}
 1) What is the problem they try to solve? \\
 2) How are they solving it? \\
-3) What is the difference between their research and ours?  (What they solve vs. what we solve) \\
+3) What is the difference between their research and ours?  (What they solve vs.
+what we solve) \\
 
 
 \noindent \emph{Languages for Software-Defined Networks}
 
 The Frenetic project aimed to raise the level of abstraction for 
-programming SDNs \cite{Foster2013}. Frenetic provides a suite of declarative abstractions 
+programming SDNs \cite{Foster2013}. Frenetic provides a suite of declarative
+abstractions 
 for querying network state, defining forwarding policies, and updating 
 policies in a consistent way. This allows the project to replace the 
 available low-level imperative interfaces. This was attained by designing 
 the constructs in a modular way and implementing them by compiling
 them down to low-level OpenFlow forwarding rules. \\
 
-\noindent \emph{Eliminating Network Protocol Vulnerabilities Through Abstraction and Systems Language Design}
+\noindent \emph{Eliminating Network Protocol Vulnerabilities Through Abstraction
+	and Systems Language Design}
 
-In a paper written by Casey, a systems programming language with abstractions capturing network
-protocol vulnerability constraints was introduced. \cite{Casey2013}. This programming language
-allows programmers to capture network protocol message structure and constraints. 
-
+In a paper written by Casey, a systems programming language that allows
+programmers to capture network protocol message structure and constraints was
+introduced \cite{Casey2013}. In that paper, safe and efficient implementations
+of standard message handling operations were synthesized by a compiler, and
+whole-program analysis was used to ensure constraints were never violated. It
+was shown that these categories for message constraints are responsible for known
+vulnerabilities, and using their tools they showed that even some live Internet traffic 
+violates these constraints.
+This allows for full program analysis, providing stronger safety guarantees and offering 
+domain 
+specific optimization that is exceedingly difficult to accomplish by hand or impossible
+with a DSL. \\ 
 
 \noindent \emph{Design Principles for Packet Parsers}
-
-
-\cite{Gibb2013} \\
+In a paper written by Gibb, the trade-offs in parser design were described, design
+principles for switch and router designers were identified, and a parser generator that
+outputs synthesizable Verilog that is available for download was described \cite{Gibb2013}. The
+contributions of this paper include introducing the problem of designing streaming packet
+parsers, outlining the similarities and differences to instruction decoding in processors,
+describing a new methodology for designing streaming parsers for several optimizations, a
+and demonstrated that modern parsers occupy approximately 1-2\%. \\
 
 \noindent \emph{Extending Networking into the Virtualization Layer}
 
-A network switch built specifically for virtual environments, Open vSwitch, exports an external interface
-for fine-grained control of configuration state and forwarding behavior. Open vSwitch provides
-connectivity between virtual machines and physical interfaces. It exports interfaces for manipulating
+A network switch built specifically for virtual environments, Open vSwitch,
+exports an external interface
+for fine-grained control of configuration state and forwarding behavior. Open
+vSwitch provides
+connectivity between virtual machines and physical interfaces. It exports
+interfaces for manipulating
 the forwarding state and managing configuration state at runtime  
 \cite{Pfaff2009} \\
+
+
+
 
