@@ -53,6 +53,11 @@ namespace pip
     bitfield_expr* udp_len() const;
     bitfield_expr* udp_checksum() const;
 
+    bitfield_expr* icmp_type() const;
+    bitfield_expr* icmp_code() const;
+    bitfield_expr* icmp_checksum()const;
+    bitfield_expr* icmp_rest_of_hdr() const;
+
   private:
     context& cxt;
 
