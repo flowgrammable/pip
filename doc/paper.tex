@@ -6,7 +6,7 @@
 \usepackage{mathpartir}
 \usepackage[framemethod=default]{mdframed}
 \usepackage[backend=bibtex, style=ieee]{biblatex}
-\bibliography{paper}
+
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
 \usepackage{hyperref}
@@ -82,10 +82,11 @@ Pip allows for easy and safe access and writing to packet fields, as well as a p
 \input{discussion}
 \input{related}
 \input{survey}
-
-% Prints References section
-%\printbibliography
-
 \input{bibliography}
 
+% Prints References section Biblatex
+\printbibliography
+
+% BibTex - keep getting warnings and errors
+%\bibliography{paper}
 \end{document}
