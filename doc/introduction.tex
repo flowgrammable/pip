@@ -15,23 +15,31 @@ Conventional switches are configured using vendor-specific interfaces that lack 
 %% Problem: We want either to build a programming language for SDN, or to identify existing languages that might extended to safely and efficiently support SDN.
 %% To do this, we need to find a ``sweet spot'' between the two extremes of fully general vs. highly specific languages.
 
-%% \textbf{How did we approach the problem}.
-Our approach is to create a minimal abstract machine to represent the kinds of computational facility present in a typical OpenFlow-like data plane.
+\textbf{How did we approach the problem/What did we do?}
+Our approach is to create a minimal abstract machine to represent the kinds of computational facilities present in a typical OpenFlow-like data plane. We defined our abstract machine to be protocol-oblivious. The machine was intended to operate upon an OpenFlow-style dataplane in a fully general manner, and, as such, minimizes the use of external dependencies.
+
 The description of our abstract machine includes basic notions of state and the smallest possible set of operations needed to define SDN programs.
-In essence, we attempted to construct an assembly language for OpenFlow-style packet processing. We defined the abstract syntax of a programming language that operates the machine as well as the operational semantics for the abstract machine. In order better experiment with it, we also implemented a virtual machine capable of executing SDN programs.
+In essence, we attempted to construct an assembly language for OpenFlow-style packet processing. We defined the abstract syntax of a programming language that operates the machine as well as the operational semantics for the abstract machine. In order better experiment with it, we also implemented a virtual machine capable of executing SDN programs. 
 
-%% \textbf{How does the abstract machine help us study language design?}
-Now that we have a model, we hope to start reasoning about higher level language constructs that support safe and efficient switch configurations. We hope to use our findings to construct minimal abstract machines out of subsets of other dataplane domain-specific languages. Defining an abstract machine through operational semantics is especially useful when attempting to prove properties about a program, as operational semantics of a language give a good basis for proof through logic and dynamic logic. In the future, we would like to examine techniques for dynamic logical analysis of dataplane programs.
+\textbf{How does the abstract machine help us study language design (contributions)?}
+Our first contribution was to create a model machine and operational semantics for that machine. Now that we have a model, we hope to start reasoning about higher level language constructs that support safe and efficient switch configurations. We hope to use our findings to construct minimal abstract machines out of subsets of other dataplane domain-specific languages. Defining an abstract machine through operational semantics is especially useful when attempting to prove properties about a program, as operational semantics of a language give a good basis for proof through logic and dynamic logic. In the future, we would like to examine techniques for dynamic logical analysis of dataplane programs.
 
-%% \textbf{What did we do?}
+Our second contribution was implenting a virtual machine and programming language to operate and experiment with our model. The Pip language defines syntax for the various capabilities of the abstract machine, including writing data to packet headers, setting packet fields, overwriting arbitrary content, outputting packets to physical ports, and switching on content within the packet or metadata about the packet. 
+
+The Pip language has no object model or declaration system, as well as minimal control structure. By removing much of the freedom present in general-purpose programming languages and restricting the programmer to simple packet-switching actions and buffer modification, Pip programs are able to maintain provable properties and provable termination. The operational semantics of Pip allow for a logical description of the state of the program at any time. In order to maintain these provable properties, we allow the programmer to output a modified packet to a ``controller'', a program written in a general-purpose programming language that has the facilities for mutable state or abstract-syntax tree modification. Separating the controller from the dataplane allows for packet switching to be reasoned about mathematically without introducing undecidable outcomes.
+
+Our third contribution was creating experimental programs to model common SDN applications in the Pip virtual machine. In this paper, we illustrate two programs without a controller and one program with a controller. TODO: what more can be said here? I can say that our two programs with no controller (immutable state?) show that we can write programs safely with proveable termination and describable configurations, but I don't really illustrate that in the paper. I can talk about how the controller program introduces undecidability and unsafety, but I'm not sure what would be gained by adding that. 
+
+Our fourth and final contribution was identifiying and describing some undefined behaviors that could be described by the abstract machine or executed by the virtual machine. Despite its previously mentioned advantages, the lack of an object model comes with a possible set of undefined behaviors. Our storage-based model does not stop the programmer from performing overlapping writes of a buffer or reading across packet boundaries. In the future, Pip may include a non-intrusive declaration system, allowing the user to declare packet headers and use them like variables, thus limiting the access the programmer has, at any time, to single packet headers. This functionality was previously explored in the Steve language. Our abstract machine provides other opportunities for executing undefined behaviors as well. In particular, it is easy to build programs that fail to validate input, as a consequence of implementation.
+
+%% Finally, we implemented a virtual machine to execute programs described by the abstract machine. 
+
 
 %% \begin{verbatim}
 %% Talk about the clean separation of the data plane machine from the controller.
 %% The controller has to be a GP language, the DP does not.
 %% \end{verbatim}
-The Pip language has no object model or declaration system, as well as minimal control structure. By removing much of the freedom present in general-purpose programming languages and restricting the programmer to simple packet-switching actions and buffer modification, Pip programs are able to maintain provable properties and provable termination. The operational semantics of Pip allow for a logical description of the state of the program at any time. In order to maintain these provable properties, we allow the programmer to output a modified packet to a ``controller'', a program written in a general-purpose programming language that has the facilities for mutable state or abstract-syntax tree modification. Separating the controller from the dataplane allows for packet switching to be reasoned about mathematically without introducing undecidable outcomes.
 
-Despite its previously mentioned advantages, the lack of the object model comes with a possible set of undefined behaviors. Our storage-based model does not stop the programmer from performing overlapping writes of a buffers or reading across packet boundaries. In the future, Pip may include a non-intrusive declaration system, allowing the user to declare packet headers and use them like variables, thus limiting the access the programmer has, at any time, to single packet headers. This functionality was previously explored in the Steve language. Our abstract machine provides other opportunities for executing undefined behaviors as well. In particular, it is easy to build programs that fail to validate input, as a consequence of implementation.
 
 %% Built experimental controllers to experiment with mutable program state.
 
@@ -46,6 +54,8 @@ Despite its previously mentioned advantages, the lack of the object model comes 
 %% \end{enumerate}
 
 % The problem with typical programming languages is that the semantics of these programming languages are informally designed, often rife with side effects, and perhaps most pertinent for packet switching: prone to buffer overflows. We have presented a new domain specific programming language and virtual machine to model an OpenFlow-style network, with a formally-defined type system and structural operational semantics, thus allowing properties to be proven about software-defined networking programs.
+
+\textbf{Organization}
 
 This paper is organized as follows: Section 2 demonstrates the use of the Pip programming language to create simple SDN applications. Section 3 gives a detailed explanation of and serves as a reference to the Pip programming language. It provides proper documentation to the various language constructs of Pip.
 

@@ -49,8 +49,8 @@ In this chapter we describe three Pip programs. First, we will see two simple, s
 
 \subsection{Stateless Wire}
 \indent A wire is a common network function involving two ports: when one of the ports receives a packet, it outputs on the other port. In general, the wire is not aware of either port and must learn of their existence dynamically (cite hoang). Pip does not allow for dynamic state changes, thus since the wire does not have any capability to learn of ports dynamically, will simply send a packet to the other of two known ports, port 1 and port 2.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (pip
   (table wire exact
     (actions
@@ -71,15 +71,15 @@ In this chapter we describe three Pip programs. First, we will see two simple, s
     )
   )
 )
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 
 We begin by defining an \textit{exact match} table called $\mathct{wire}$. An exact match table matches on integers. When the table begins execution, 32 bits are copies from the $\mathct{physical\_port}$ of the packet (a context variable representing the physical ingress port of the packet) into the table's $\mathct{key}$ register. When the $\mathct{match}$ action is reached, table prep ends and matching can begin. Three \textit{match rules} are defined: port 1, port 2, and $\mathct{miss}$. If the value of the \mathct{key} register is equal to one of these rules, the rule's \textit{action list} begins execution. For example, if the $\mathct{key}$ register was equal to 1, then the packet would $\mathct{output}$ to port 2. If the $\mathct{key}$ was not equal to 1 or 2, the $\mathct{miss}$ rule would begin execution, dropping the packet.
 
 \subsection{Stateless Firewall}
 Here we define a simple TCP/IPv4 firewall that disables some types of packets from accessing the Internet. If the packet is of type IPv4 with protocol TCP, we will drop any packets to port 80 (HTTP) or port 443 (HTTPS). If the packet is a TCP/IPv4 packet but is not attempting to access ports 80 or 443, we will allow the controller to handle egress processing, as the output port of the packet will still need to be determined.
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (pip
   (table ipv4_check exact
     (actions
@@ -131,8 +131,8 @@ Here we define a simple TCP/IPv4 firewall that disables some types of packets fr
     )
   )
 )
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 
 Here we see a program taking advantage of the $\mathct{goto}$ action control structure. The ipv4\_check table will match on the \textit{Ethernet ethertype} of the packet. If the ethertype is 0x800, IPv4, we will jump to the tcp\_check table, dropping the packet in any other case. In \textit{tcp\_check}, we match on the \textit{IPv4 protocol} field. If it is equal to 0x06, or TCP, we will jump the final table, \textit{firewall}. Here, we will match the \textit{TCP source port} on ports 80 and 443. If there is a match, we drop the packet, disallowing Internet access. Otherwise, we output to the reserved \texttt{local} $\mathct{port}$ to continue processing on the local IP stack.
 
@@ -141,8 +141,8 @@ Meaningful computation can rarely be achieved while maintaing an immutable abstr
 
 In the beginning of the chapter, we discussed a stateless wire. There is little value in this program, but we can modify it to create a fully functional wire. Recall that a wire involves two ports, when one port receives a packet, it outputs to the other. In the stateless wire, these two ports were predefined and immutable. Here, we will create a wire that learns of its ports' existence dynamically.
 
-\begin{mdframed}
-\begin{verbatim}
+%% \begin{mdframed}
+\begin{lstlisting}
 (pip
   (table wire exact
     (actions
@@ -159,8 +159,8 @@ In the beginning of the chapter, we discussed a stateless wire. There is little 
     )
   )
 )
-\end{verbatim}
-\end{mdframed}
+\end{lstlisting}
+%% \end{mdframed}
 We begin with a Pip program that contains only a miss rule. The program examines the physical ingress port of a packet and, upon missing, outputs to the \texttt{controller}. Now, we will create an algorithm to modify the AST and insert a rule where needed. We define this algorithm below. Note: we assume \texttt{eval} is an instance of the evaluator, containing the full evaluation state. We assume basic data structure accessor functions, such as \texttt{front} and \texttt{push} are defined for list structures. Even though we only wish to add 2 rules, the table will have 3 total rules at the end of the program, since the $\mathct{miss}$ rule must be accounted for. Because we push to the back of the rule list, the miss rule will be at the 0th position in the list.
 \begin{algorithm}
 \caption{Wire Controller}

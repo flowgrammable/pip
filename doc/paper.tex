@@ -1,7 +1,7 @@
-\documentclass{article}
+\documentclass[english,submission]{programming}
 \usepackage[fleqn]{amsmath}
 \usepackage{amssymb}
-\usepackage{bbold}
+%% \usepackage{bbold}
 \usepackage{bm}
 \usepackage{mathpartir}
 \usepackage[framemethod=default]{mdframed}
@@ -14,18 +14,65 @@
 \usepackage[margin=1in]{geometry}
 \usepackage[none]{hyphenat}
 
-\title{Pip: An Abstract Dataplane and Virtual Machine}
-\author{Samuel Goodrick}
-% \author{Andrew Sutton}
-
 \newcommand{\mathct}[1]{\bm{\mathsf{{#1}}}}
 \newcommand\tab[1][0.5cm]{\hspace*{#1}}
 
+\lstdefinelanguage{pip}
+{
+  morecomment=[l][\color{black}\textit]{;}
+}
+\lstset 
+{
+  language=pip,
+  emph={
+    pip, table, rules, rule, actions
+  },
+  emph=[2]{
+    copy, match, drop, miss, goto, output, write, advance, set, clear
+  },
+  emph=[3]{
+    int, port, exact, bits, named\_field, exact
+  },
+  emphstyle={\color{Blue1}\textbf},
+  emphstyle=[2]{\color{Purple}},
+  emphstyle=[3]{\color{ForestGreen}},
+  tabsize=2
+}
+
 \begin{document}
+\title{Pip: An Abstract Dataplane and Virtual Machine}
+
+\author{Samuel Goodrick}
+\author{Andrew Sutton}
+\affiliation{The University of Akron}
+
+\paperdetails{
+  perspective=sciencetheoretical,
+  area={Interpreters, virtual machines, and compilers}
+}
+
+
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10003752.10003766.10003771</concept_id>
+<concept_desc>Theory of computation~Grammars and context-free languages</concept_desc>
+<concept_significance>300</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+
+\ccsdesc[300]{Theory of computation~Grammars and context-free languages}
 
 \maketitle
 
-\input{abstract}
+%% \input{abstract}
+\begin{abstract}
+TODO: rewrite this according to http://programming-journal.org/submission/
+  
+We present an abstract machine and S-expression-based programming language to describe OpenFlow-style software-defined networking. The implemented Pip virtual machine and language provide facilities for packet decoding, safely writing and setting bitfields within packets, and switching based on packet contents. We have outlined an abstract syntax and structural operational semantics for Pip, thus allowing Pip programs to have predictable and provable properties.
+Pip allows for easy and safe access and writing to packet fields, as well as a programmable packet pipeline that will rarely stall.
+\end{abstract}
 \input{introduction}
 \input{samples}
 \input{language}
@@ -39,6 +86,6 @@
 % Prints References section
 %\printbibliography
 
-\input{bibliography}
+%% \input{bibliography}
 
 \end{document}
