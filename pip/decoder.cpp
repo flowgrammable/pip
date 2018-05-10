@@ -161,6 +161,13 @@ decoder::ipv4_dst_addr() const
   return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
 }
 
+bitfield_expr* 
+decoder::ipv6_dst_addr() const
+{
+  expr* pos = cxt.make_int_expr(new int_type(32), (size_ethernet + 16) * 8);
+  expr* len = cxt.make_int_expr(new int_type(32), 32);
+  return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
+}
 
 bitfield_expr*
 decoder::tcp_src_port() const
@@ -230,6 +237,38 @@ bitfield_expr*
 decoder::tcp_urgent_ptr() const
 {
   expr* pos = cxt.make_int_expr(new int_type(32), size_ipv4 + 144);
+  expr* len = cxt.make_int_expr(new int_type(32), 16);
+  return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
+}
+
+bitfield_expr* 
+decoder::udp_src_port() const
+{
+  expr* pos = cxt.make_int_expr(new int_type(32), size_ipv4 * 8);
+  expr* len = cxt.make_int_expr(new int_type(32), 16);
+  return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
+}
+bitfield_expr* 
+decoder::udp_dst_port() const
+{
+  expr* pos = cxt.make_int_expr(new int_type(32), size_ipv4 * 8 + 16);
+  expr* len = cxt.make_int_expr(new int_type(32), 16);
+  return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
+}
+
+bitfield_expr* 
+decoder::udp_len() const
+{
+  expr* pos = cxt.make_int_expr(new int_type(32), size_ipv4 * 8 + 32);
+  expr* len = cxt.make_int_expr(new int_type(32), 16);
+  return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
+
+}
+
+bitfield_expr*
+decoder::udp_checksum() const 
+{
+  expr* pos = cxt.make_int_expr(new int_type(32), size_ipv4 + 48);
   expr* len = cxt.make_int_expr(new int_type(32), 16);
   return static_cast<bitfield_expr*>(cxt.make_bitfield_expr(as_packet, pos, len));
 }

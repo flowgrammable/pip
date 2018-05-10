@@ -32,6 +32,12 @@ namespace pip
     bitfield_expr* ipv4_src_addr() const;
     bitfield_expr* ipv4_dst_addr() const;
 
+    bitfield_expr* ipv6_len() const;
+    bitfield_expr* ipv6_id() const;
+    bitfield_expr* ipv6_protocol() const;
+    bitfield_expr* ipv6_src_addr() const;
+    bitfield_expr* ipv6_dst_addr() const;
+
     bitfield_expr* tcp_src_port() const;
     bitfield_expr* tcp_dst_port() const;
     bitfield_expr* tcp_seq() const;
@@ -41,6 +47,11 @@ namespace pip
     bitfield_expr* tcp_window() const;
     bitfield_expr* tcp_checksum() const;
     bitfield_expr* tcp_urgent_ptr() const;
+
+    bitfield_expr* udp_src_port() const;
+    bitfield_expr* udp_dst_port() const;
+    bitfield_expr* udp_len() const;
+    bitfield_expr* udp_checksum() const;
 
   private:
     context& cxt;
