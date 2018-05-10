@@ -34,6 +34,7 @@ specific optimization that is exceedingly difficult to accomplish by hand or imp
 with a DSL. \\ 
 
 \noindent \emph{Design Principles for Packet Parsers}
+
 In a paper written by Gibb, the trade-offs in parser design were described, design
 principles for switch and router designers were identified, and a parser generator that
 outputs synthesizable Verilog that is available for download was described
@@ -51,13 +52,23 @@ for fine-grained control of configuration state and forwarding behavior \cite{Pf
 Open vSwitch provides
 connectivity between virtual machines and physical interfaces. It exports
 interfaces for manipulating
-the forwarding state and managing configuration state at runtime  
+the forwarding state and managing configuration state at runtime. 
 \\
 
 \noindent \emph{Frenetic: A Network Programming Language} 
-\cite{Foster:2011:FNP:2034773.2034812}\\
 
-\noindent \emph{Leaping multiple headers in a single bound: wire-speed parsing using the Kangaroo system}
+Frenetic is a high-level language for programming distributed collections of network
+switches that provides a declarative query language for classifying and aggregating
+network traffic in addition to a functional reactive contaminator library for describing
+high-level-packet-forwarding-policies \cite{Foster:2011:FNP:2034773.2034812}.
+This paper makes three primary commitments: dissecting the cutting edge in dialects for
+programming systems and recognize the key confinements; Exhibiting a dialect plan that
+tends to these constraints, utilizing a progression of cases to inspire and approve our
+decisions; Portraying a usage of the dialect and assess its execution on a few benchmarks.
+\\
+
+\noindent \emph{Leaping multiple headers in a single bound: wire-speed parsing using the
+	Kangaroo system}
 \cite{Kozanitis:2010:LMH:1833515.1833654}\\
 
 
@@ -67,6 +78,7 @@ the forwarding state and managing configuration state at runtime
 \noindent \emph{PFPSim: A Programmable Forwarding Plane Simulator} 
 
 \cite{Abdi:2016:PPF:2881025.2881029}\\
+
 
 
 
